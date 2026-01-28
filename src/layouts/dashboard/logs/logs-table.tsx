@@ -12,6 +12,7 @@ import { useSnackbar } from "src/provider/snackbar";
 import Loader from "src/components/loader";
 
 import "../../../App.css";
+import "./logs-table.css";
 
 export interface LogData {
   id: number;
@@ -145,7 +146,7 @@ const LogsTable = () => {
   const [columnDefs] = useState<ColDef[]>([
     {
       field: "messageDate",
-      headerName: "Time",
+      headerName: "Date and Time",
       flex: 1.5,
 
       filter: "agTextColumnFilter",
@@ -249,7 +250,7 @@ const LogsTable = () => {
   }
 
   return (
-    <div style={containerStyle} className="ag-theme-quartz">
+    <div style={containerStyle} className="ag-theme-quartz grid-12-font">
       <div style={{ ...gridStyle, minHeight: "500px" }}>
         <AgGridReact
           columnDefs={columnDefs}

@@ -7,6 +7,7 @@ import { useSnackbar } from "src/provider/snackbar";
 import Loader from "src/components/loader";
 import { useLogStatus } from "src/hooks/useLogs";
 import "../../../../App.css";
+import "../../logs/logs-table.css";
 
 import RefreshToken from "../../../../assets/refresh.png";
 import { myTheme } from "../../logs/constant";
@@ -148,7 +149,7 @@ const HistoryTable = ({
   const [columnDefs] = useState<ColDef[]>([
     {
       field: "messageDate",
-      headerName: "Time",
+      headerName: "Date and Time",
       flex: 1.5,
 
       filter: "agTextColumnFilter",
@@ -226,21 +227,8 @@ const HistoryTable = ({
 
   const logsData = data || [];
 
-//   if (isDataLoading) {
-//     return (
-//       <Box
-//         display="flex"
-//         justifyContent="center"
-//         alignItems="center"
-//         minHeight="200px"
-//       >
-//         <CircularProgress />
-//       </Box>
-//     );
-//   }
-
   return (
-    <div style={containerStyle} className="ag-theme-quartz">
+    <div style={containerStyle} className="ag-theme-quartz grid-12-font">
       <div style={{ ...gridStyle, minHeight: "300px" }}>
         <AgGridReact
           enableCellTextSelection={true}
