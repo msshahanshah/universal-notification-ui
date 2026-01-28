@@ -38,9 +38,9 @@
   background: hsla(220, 35%, 3%, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
   font-family: "Inter", sans-serif;
-  margin-top: 25px;
+  margin-top: 10px;
 }
 
 .sms-textarea::placeholder {
