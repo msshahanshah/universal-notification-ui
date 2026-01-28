@@ -1,0 +1,23 @@
+.button-container {
+  display: flex;
+  align-items: center;
+}
+
+.button-disabled {
+  background: #808080;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: not-allowed;
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+}
+
+.label {
+  font-size: 14px;
+  font-family: "Inter", sans-serif;
+}

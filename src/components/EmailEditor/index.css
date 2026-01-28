@@ -1,0 +1,42 @@
+.editor-wrapper {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 12px;
+  min-height: 220px;
+  background: transparent;
+  padding-top: 0;
+}
+
+/* Actual editable area */
+.editor-wrapper .ProseMirror {
+  outline: none;
+  min-height: 180px;
+  color: white;
+  font-size: 14px;
+}
+
+/* Focus state */
+.editor-wrapper:focus-within {
+  border-color: #4fc3f7;
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.25);
+}
+
+.sms-input {
+  width: 100%;
+  height: 42px;
+  margin-bottom: 12px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 14px;
+}
+
+.sms-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sms-input:focus {
+  outline: none;
+  border-color: #93c5fd;
+}
