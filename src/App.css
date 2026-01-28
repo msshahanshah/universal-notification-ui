@@ -1,0 +1,183 @@
+.App {
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.background {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:
+    radial-gradient(circle at 20% 30%, #00d2ff, transparent),
+    radial-gradient(circle at 80% 70%, #9d50bb, transparent), #060c21;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Helvetica Neue",
+    sans-serif;
+}
+
+/* 2. The Glass Card */
+
+.login-card {
+  width: 400px;
+  padding: 40px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle edge highlight */
+  backdrop-filter: blur(15px); /* This creates the glass effect */
+  box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  color: white;
+  margin: 20px;
+}
+
+/* 3. Styled Inputs */
+.input-box {
+  position: relative;
+  margin: 20px 0;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 12px 20px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  color: white;
+  outline: none;
+  font-size: 16px;
+}
+
+.input-box input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 4. Glowing Button */
+.btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+  transition: 0.3s;
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-disabled {
+  width: 100%;
+  padding: 12px;
+  background: #808080;
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-weight: bold;
+  transition: 0.3s;
+  margin-top: 10px;
+  cursor: not-allowed;
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+}
+
+.btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.8);
+}
+
+.forgot {
+  display: block;
+  margin-top: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 13px;
+}
+
+/* UserTable css */
+
+/* Container for the table */
+.table-wrapper {
+  padding: 20px;
+  background: black; /* Aurora bg */
+  min-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Customizing AG Grid for Glassmorphism */
+.glass-grid.ag-theme-alpine-dark {
+  --ag-background-color: rgba(255, 255, 255, 0.05);
+  --ag-header-background-color: hsla(220, 35%, 3%, 0.4);
+  --ag-odd-row-background-color: rgba(255, 255, 255, 0.02);
+  --ag-border-color: rgba(255, 255, 255, 0.2);
+  --ag-row-hover-color: rgba(0, 210, 255, 0.2);
+
+  border-radius: 15px;
+  overflow: hidden;
+  backdrop-filter: blur(12px); /* Matches your login UI */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ag-theme-quartz .ag-popup,
+.ag-theme-quartz .ag-menu,
+.ag-theme-quartz .ag-filter,
+.ag-theme-quartz .ag-filter-body,
+.ag-theme-quartz .ag-menu-list {
+  background-color: #0b1623 !important; /* your dark blue */
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Style the text and headers */
+.glass-grid .ag-header-cell-label {
+  color: #00d2ff;
+  font-weight: bold;
+}
+
+.glass-grid .ag-cell {
+  color: black;
+  display: flex;
+  align-items: center;
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
+  font-size: small;
+}
+.submit-btn {
+  color: black;
+  background-color: hsl(220, 35%, 97%);
+  background-image: linear-gradient(
+    to bottom,
+    hsl(220, 30%, 94%),
+    hsl(220, 35%, 97%)
+  );
+  box-shadow: inset 0 -1px 0 hsl(220, 30%, 80%);
+  border: 1px solid hsl(220, 35%, 97%);
+}
+
+.under-development {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+}

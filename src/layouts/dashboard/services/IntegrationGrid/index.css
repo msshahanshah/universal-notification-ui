@@ -1,0 +1,10 @@
+.integration-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.integration-card {
+  width: 280px;
+  flex-shrink: 0;
+}
