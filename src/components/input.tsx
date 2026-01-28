@@ -19,7 +19,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }}
       >
         {label && (
-          <label style={{ marginBottom: 4 }} htmlFor={id}>
+          <label style={{ marginBottom: 4, fontSize: "12px" }} htmlFor={id}>
             {label}
           </label>
         )}
@@ -33,6 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             height: "2.5rem",
             paddingLeft: "10px",
             border: "hsla(220, 35%, 3%, 0.4)",
+            fontSize: "12px"
           }}
           value={value}
           onChange={onChange}

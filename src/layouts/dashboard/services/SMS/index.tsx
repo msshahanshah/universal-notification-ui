@@ -48,11 +48,13 @@ export default function SMS() {
         New message
       </Typography>
       <div className="sms-wrapper">
+        {/* type="tel"> */}
         <Input
+          label="To"
           type="text"
           id="to"
           className="sms-input"
-          placeholder="To (number)"
+          placeholder="Enter receiver number"
           value={to}
           onChange={(e) => setTo(e.target.value)}
         />
