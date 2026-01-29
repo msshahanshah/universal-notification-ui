@@ -29,6 +29,9 @@ export interface LogData {
 const LogsTable = () => {
   const wValue = "100%";
   const hValue = "100%";
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+
   const containerStyle = useMemo(
     () => ({
       width: wValue,
@@ -64,41 +67,41 @@ const LogsTable = () => {
       }
     }, [latestStatus, data.status, node]);
 
-    useEffect(() => {
-      if (!gridApiRef.current) return;
+  //   useEffect(() => {
+  //     if (!gridApiRef.current) return;
 
-      if (isLoading) {
-        gridApiRef.current.showLoadingOverlay();
-        return;
-      }
+  //     if (isLoading) {
+  //       gridApiRef.current?.setGridOption("loading", true);
+  //       return;
+  //     }
 
-      if (isError) {
-        gridApiRef.current?.setGridOption(
-          "overlayNoRowsTemplate",
-          `<span style="color:#d32f2f;font-size:14px;">
-    ${error?.message || "Something went wrong"}
-  </span>`,
-        );
+  //     if (isError) {
+  //       gridApiRef.current?.setGridOption(
+  //         "overlayNoRowsTemplate",
+  //         `<span style="color:#d32f2f;font-size:14px;">
+  //   ${error?.message || "Something went wrong"}
+  // </span>`,
+  //       );
 
-        gridApiRef.current?.showNoRowsOverlay();
+  //       gridApiRef.current?.setGridOption("loading", false);
 
-        return;
-      }
+  //       return;
+  //     }
 
-      if (!logsData?.data || logsData.data.length === 0) {
-        gridApiRef.current?.setGridOption(
-          "overlayNoRowsTemplate",
-          `<span style="color:#666;font-size:14px;">
-    No logs available
-  </span>`,
-        );
+  //     if (!logsData || logsData.length === 0) {
+  //       gridApiRef.current?.setGridOption(
+  //         "overlayNoRowsTemplate",
+  //         `<span style="color:#666;font-size:14px;">
+  //   No logs available
+  // </span>`,
+  //       );
 
-        gridApiRef.current?.showNoRowsOverlay();
-        return;
-      }
+  //       gridApiRef.current?.setGridOption("loading", false);
+  //       return;
+  //     }
 
-      gridApiRef.current.hideOverlay();
-    }, [isLoading, isError, logsData, error]);
+  //     gridApiRef.current.hideOverlay();
+  //   }, [isLoading, isError, logsData, error]);
 
     const handleRefresh = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -204,7 +207,7 @@ const LogsTable = () => {
       headerName: "Attempts",
       flex: 0.5,
       type: "numericColumn",
-      cellStyle: { textAlign: "left", minWidth: 100 },
+      cellStyle: { textAlign: "left" },
     },
   ]);
 
@@ -232,9 +235,39 @@ const LogsTable = () => {
     [],
   );
 
-  const { data: response, isLoading, isError, error } = useLogs({ limit: 100 });
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useLogs({ limit: pageSize, page });
 
-  const logsData = response || [];
+  const logsData = response?.data ?? [];
+  const totalRows = response?.pagination?.limit ?? 0;
+
+  const onGridReady = (params: GridReadyEvent) => {
+    gridApiRef.current = params.api;
+  };
+
+  const onPaginationChanged = () => {
+    if (!gridApiRef.current) return;
+
+    const newPage = gridApiRef.current.paginationGetCurrentPage() + 1;
+    const newPageSize = gridApiRef.current.paginationGetPageSize();
+
+    if (newPage !== page) setPage(newPage);
+
+    if (newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+      setPage(1); // reset page on page size change
+    }
+  };
+
+  // useEffect(() => {
+  //   if (gridApiRef.current && totalRows) {
+  //     gridApiRef.current.paginationSetRowCount(totalRows, false);
+  //   }
+  // }, [totalRows]);
 
   if (isLoading) {
     return (
@@ -253,18 +286,22 @@ const LogsTable = () => {
     <div style={containerStyle} className="ag-theme-quartz grid-12-font">
       <div style={{ ...gridStyle, minHeight: "500px" }}>
         <AgGridReact
+          theme={myTheme}
+          rowCount={totalRows}
+          onGridReady={onGridReady}
+          onPaginationChanged={onPaginationChanged}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
-          rowData={logsData?.data as LogData[]}
+          rowData={logsData}
           rowHeight={50}
           pagination={true}
+          paginationPageSize={pageSize}
           paginationPageSizeSelector={[10, 25, 50, 100]}
-          theme={myTheme}
+          suppressPaginationPanel={false}
           animateRows
-          suppressCellFocus={false}
           headerHeight={50}
-          enableCellTextSelection={true}
-          ensureDomOrder={true}
+          enableCellTextSelection
+          loading={isLoading}
         />
       </div>
     </div>
