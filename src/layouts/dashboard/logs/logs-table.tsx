@@ -7,8 +7,8 @@ import { useLogs, useLogStatus } from "src/hooks/useLogs";
 
 import { myTheme } from "./constant";
 import RefreshToken from "../../../assets/refresh.png";
-import Snackbar from "src/components/snackbar";
-import { useSnackbar } from "src/provider/snackbar";
+// import Snackbar from "src/components/snackbar";
+// import { useSnackbar } from "src/provider/snackbar";
 import Loader from "src/components/loader";
 
 import "../../../App.css";
@@ -30,7 +30,7 @@ const LogsTable = () => {
   const wValue = "100%";
   const hValue = "100%";
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(30);
 
   const containerStyle = useMemo(
     () => ({
@@ -47,7 +47,7 @@ const LogsTable = () => {
     [],
   );
 
-  const showSnackbar = useSnackbar();
+  // const showSnackbar = useSnackbar();
   const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
   const gridApiRef = useRef<GridApi | null>(null);
@@ -67,42 +67,6 @@ const LogsTable = () => {
       }
     }, [latestStatus, data.status, node]);
 
-  //   useEffect(() => {
-  //     if (!gridApiRef.current) return;
-
-  //     if (isLoading) {
-  //       gridApiRef.current?.setGridOption("loading", true);
-  //       return;
-  //     }
-
-  //     if (isError) {
-  //       gridApiRef.current?.setGridOption(
-  //         "overlayNoRowsTemplate",
-  //         `<span style="color:#d32f2f;font-size:14px;">
-  //   ${error?.message || "Something went wrong"}
-  // </span>`,
-  //       );
-
-  //       gridApiRef.current?.setGridOption("loading", false);
-
-  //       return;
-  //     }
-
-  //     if (!logsData || logsData.length === 0) {
-  //       gridApiRef.current?.setGridOption(
-  //         "overlayNoRowsTemplate",
-  //         `<span style="color:#666;font-size:14px;">
-  //   No logs available
-  // </span>`,
-  //       );
-
-  //       gridApiRef.current?.setGridOption("loading", false);
-  //       return;
-  //     }
-
-  //     gridApiRef.current.hideOverlay();
-  //   }, [isLoading, isError, logsData, error]);
-
     const handleRefresh = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
@@ -110,12 +74,12 @@ const LogsTable = () => {
       refetchLogStatus();
     };
 
-    const showRefreshSnackbar = () => {
-      if (!isFetchingData && statusData?.data?.deliveryStatus) {
-        return showSnackbar("Status refreshed successfully!", "success");
-      }
-      return null;
-    };
+    // const showRefreshSnackbar = () => {
+    //   if (!isFetchingData && statusData?.data?.deliveryStatus) {
+    //     return showSnackbar("Status refreshed successfully!", "success");
+    //   }
+    //   return null;
+    // };
 
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -141,12 +105,24 @@ const LogsTable = () => {
     );
   };
 
-  const valueFormatter = (params: any) => {
-    if (params.value === undefined || params.value === null) return "-";
-    return params.value;
-  };
+  // const valueFormatter = (params: any) => {
+  //   if (params.value === undefined || params.value === null) return "-";
+  //   return params.value;
+  // };
 
   const [columnDefs] = useState<ColDef[]>([
+    {
+      headerName: "S.No",
+      width: 80,
+      pinned: "left",
+      sortable: false,
+      filter: false,
+
+      valueGetter: (params: any) => {
+        if (params.node.rowIndex == null) return "";
+        return params.node.rowIndex + 1;
+      },
+    },
     {
       field: "messageDate",
       headerName: "Date and Time",
@@ -211,16 +187,6 @@ const LogsTable = () => {
     },
   ]);
 
-  const getFilteredRows = () => {
-    const filteredRows: LogData[] = [];
-
-    gridApiRef.current?.forEachNodeAfterFilter((node) => {
-      if (node.data) {
-        filteredRows.push(node.data);
-      }
-    });
-  };
-
   const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
@@ -263,11 +229,13 @@ const LogsTable = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (gridApiRef.current && totalRows) {
-  //     gridApiRef.current.paginationSetRowCount(totalRows, false);
-  //   }
-  // }, [totalRows]);
+  const onFilterChanged = () => {
+    if (!gridApiRef.current) return;
+
+    const model = gridApiRef.current.getFilterModel();
+
+    console.log("🧪 ACTIVE FILTER MODEL", model);
+  };
 
   if (isLoading) {
     return (
@@ -287,7 +255,6 @@ const LogsTable = () => {
       <div style={{ ...gridStyle, minHeight: "500px" }}>
         <AgGridReact
           theme={myTheme}
-          rowCount={totalRows}
           onGridReady={onGridReady}
           onPaginationChanged={onPaginationChanged}
           columnDefs={columnDefs}
@@ -296,12 +263,13 @@ const LogsTable = () => {
           rowHeight={50}
           pagination={true}
           paginationPageSize={pageSize}
-          paginationPageSizeSelector={[10, 25, 50, 100]}
+          paginationPageSizeSelector={[30, 60, 100, 200]}
           suppressPaginationPanel={false}
           animateRows
           headerHeight={50}
           enableCellTextSelection
           loading={isLoading}
+          onFilterChanged={onFilterChanged}
         />
       </div>
     </div>
