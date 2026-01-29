@@ -44,7 +44,7 @@ export default function SMS() {
   const isDisabled = !to || !message;
   return (
     <div className="sms-container">
-      <Typography variant="h6" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: 4 }}>
         New message
       </Typography>
       <div className="sms-wrapper">

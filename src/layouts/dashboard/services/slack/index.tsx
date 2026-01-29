@@ -67,8 +67,8 @@ export default function Slack() {
 
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        New Message
+      <Typography variant="h6" sx={{ mb: 4 }}>
+        New message
       </Typography>
       <div className="sms-wrapper">
         <Input
@@ -98,7 +98,7 @@ export default function Slack() {
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 4 }}>
+      <Typography variant="h6" sx={{ mt: 0 }}>
         History (Last 10 messages)
       </Typography>
       <Suspense fallback={<FallbackLoader />}>
