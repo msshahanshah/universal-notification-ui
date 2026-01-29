@@ -18,7 +18,7 @@ export interface LogData {
   service: string;
   destination: string;
   message: string;
-  status: "pending" | "active" | "failed" | string;
+  status: "pending" | "active" | "failed" | "processing" | string;
   attempts: number;
   created_at?: string;
   updated_at?: string;
@@ -193,6 +193,9 @@ const HistoryTable = ({
         }
         if (status === "pending") {
           return { color: "#FFC107", fontWeight: "500" };
+        }
+        if (status === "processing") {
+          return { color: "#17a2b8", fontWeight: "500" };
         }
         return { color: "#666", fontWeight: "500" };
       },

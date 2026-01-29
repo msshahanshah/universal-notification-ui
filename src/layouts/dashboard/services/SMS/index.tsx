@@ -68,7 +68,6 @@ export default function SMS() {
         />
 
         <div className="sms-footer">
-          <span className="sms-count">{message.length} chars</span>
           <Button
             disabled={!to || !message}
             label="Send"
