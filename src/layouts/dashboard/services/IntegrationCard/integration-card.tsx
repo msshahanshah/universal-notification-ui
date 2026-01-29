@@ -23,6 +23,7 @@ export const IntegrationCard = ({
         <div className="icon">{icon}</div>
         <label className="switch">
           <input
+            data-testid={`services-${name ? name?.toLocaleLowerCase() : ""}`}
             type="checkbox"
             checked={enabled}
             onChange={(e) => onToggle(e.target.checked)}

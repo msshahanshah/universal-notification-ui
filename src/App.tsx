@@ -8,10 +8,8 @@ import PrivateRoute from "./routes/private-route";
 import Dashboard from "./layouts/dashboard";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
-import FallbackLoader from "./components/fallback-loader/fallback-loader";
-
-const EmailComposer = lazy(() => import("./layouts/dashboard/services/email"));
-const SMS = lazy(() => import("./layouts/dashboard/services/SMS"));
+import SMS from "./layouts/dashboard/services/SMS";
+import EmailComposer from "./layouts/dashboard/services/email";
 
 export default function App() {
   ModuleRegistry.registerModules([AllCommunityModule]);
@@ -24,30 +22,9 @@ export default function App() {
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/services" element={<Services />} />
-        <Route
-          path="/services/email-editor"
-          element={
-            <Suspense fallback={<FallbackLoader/>}>
-              <EmailComposer />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/services/sms"
-          element={
-            <Suspense fallback={<FallbackLoader/>}>
-              <SMS />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/services/slack"
-          element={
-            <Suspense fallback={<FallbackLoader/>}>
-              <Slack />
-            </Suspense>
-          }
-        />
+        <Route path="/services/email-editor" element={<EmailComposer />} />
+        <Route path="/services/sms" element={<SMS />} />
+        <Route path="/services/slack" element={<Slack />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
       {/* Fallback */}
