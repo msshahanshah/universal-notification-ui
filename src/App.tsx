@@ -11,6 +11,7 @@ import Services1 from "./layouts/dashboard/services/demo/services";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
 import FallbackLoader from "./components/fallback-loader/fallback-loader";
+import ServiceGuard from "./routes/service-guard";
 
 const EmailComposer = lazy(() => import("./layouts/dashboard/services/email"));
 const SMS = lazy(() => import("./layouts/dashboard/services/SMS"));
@@ -31,7 +32,7 @@ export default function App() {
         <Route
           path="/services/email-editor"
           element={
-            <Suspense fallback={<FallbackLoader/>}>
+            <Suspense fallback={<FallbackLoader />}>
               <EmailComposer />
             </Suspense>
           }
@@ -39,19 +40,14 @@ export default function App() {
         <Route
           path="/services/sms"
           element={
-            <Suspense fallback={<FallbackLoader/>}>
+            <Suspense fallback={<FallbackLoader />}>
               <SMS />
             </Suspense>
           }
         />
-        <Route
-          path="/services/slack"
-          element={
-            <Suspense fallback={<FallbackLoader/>}>
-              <Slack />
-            </Suspense>
-          }
-        />
+        <Route element={<ServiceGuard service="slack" />}>
+          <Route path="/services/slack" element={<Slack />} />
+        </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
       {/* Fallback */}

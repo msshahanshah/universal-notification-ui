@@ -14,17 +14,29 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import { useLocation, useNavigate } from "react-router-dom";
-
-import COLORS from "src/utility/colors";
-// import SlackIcon from "src/assets/icons/SlackIcon";
-// import Mail from "src/assets/icons/Mail";
-// import Sms from "src/assets/icons/Sms";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
 
+import COLORS from "src/utility/colors";
+
 const serviceTabs = [
-  { label: "Slack", path: "/services/slack", icon: SlackIcon },
-  { label: "Email", path: "/services/email", icon: Mail },
-  { label: "SMS", path: "/services/sms", icon: MessageSquare },
+  {
+    label: "Slack",
+    path: "/services/slack",
+    icon: SlackIcon,
+    isDisabled: false,
+  },
+  {
+    label: "Email",
+    path: "/services/email-editor",
+    icon: Mail,
+    isDisabled: false,
+  },
+  {
+    label: "SMS",
+    path: "/services/sms",
+    icon: MessageSquare,
+    isDisabled: true,
+  },
 ];
 
 const Sidebar = ({
@@ -111,10 +123,11 @@ const Sidebar = ({
             <List disablePadding>
               {serviceTabs.map((tab) => {
                 const Icon = tab.icon;
+                const isDisabled = tab.isDisabled;
                 return (
                   <ListItemButton
                     key={tab.path}
-                    onClick={() => navigate(tab.path)}
+                    onClick={() => !isDisabled && navigate(tab.path)}
                     sx={{
                       ml: 4,
                       mr: 1,
@@ -122,20 +135,28 @@ const Sidebar = ({
                       minHeight: 36,
                       borderRadius: 2,
                       color: COLORS.WHITE,
-                      backgroundColor: isActive(tab.path)
-                        ? "hsla(220, 80%, 55%, 0.25)"
-                        : "transparent",
+                      backgroundColor: isDisabled
+                        ? "rgba(255, 0, 0, 0.06)" // 👈 ultra-light red
+                        : isActive(tab.path)
+                          ? "hsla(220, 80%, 55%, 0.25)"
+                          : "transparent",
+
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+
                       "&:hover": {
-                        backgroundColor: "hsla(220, 80%, 55%, 0.35)",
+                        backgroundColor: isDisabled
+                          ? "rgba(255, 0, 0, 0.08)" // tiny hover change
+                          : "hsla(220, 80%, 55%, 0.35)",
                       },
                     }}
                   >
-                    <Icon size={20} className="service-icon" />
+                    <Icon size={18} className="service-icon" />
                     <ListItemText
                       primary={tab.label}
                       primaryTypographyProps={{
                         fontSize: 13,
                       }}
+                      style={{ marginLeft: 10 }}
                     />
                   </ListItemButton>
                 );
