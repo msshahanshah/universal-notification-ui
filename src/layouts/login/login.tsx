@@ -11,7 +11,7 @@ import PasswordInput from "src/components/password-input";
 import AppTheme from "src/theme/app-theme";
 
 import "src/App.css";
-import './login.css'
+import "./login.css";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -65,7 +65,6 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
 
   const isDisabled =
     username === "" || password === "" || isPending || hasApiError;
-    console.log("username",username,'password',password)
 
   const onSubmit = async ({ username, password }: any) => {
     if (!usernameRegex.test(username) || !passwordRegex.test(password)) {
@@ -123,7 +122,6 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
             autoComplete="off"
           >
             <Input
-              // autoFocus={true}
               label="Username"
               value={username}
               onChange={handleUsernameChange}
@@ -131,7 +129,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               id="username"
               autoComplete="new-username"
               className="input-field"
-              // style={{ border: "hsla(220, 35%, 3%, 0.4)" }}
+              dataTestId="username-input"
             />
             <PasswordInput
               label="Password"
@@ -140,7 +138,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               onChange={handlePasswordChange}
               autoComplete="new-username"
               className="input-field"
-              // style={{ border: "hsla(220, 35%, 3%, 0.4)" }}
+              dataTestId="password-input"
             />
 
             <div style={{ height: 20 }}>

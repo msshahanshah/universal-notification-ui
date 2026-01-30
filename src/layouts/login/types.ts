@@ -21,7 +21,7 @@ export interface EmailPayload {
 
 export interface SMSPayload {
   service: string;
-  destination: number | null;
+  destination: string | null;
   message: string;
 }
 

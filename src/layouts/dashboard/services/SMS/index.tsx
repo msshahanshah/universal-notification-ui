@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -9,10 +9,14 @@ import { useSnackbar } from "src/provider/snackbar";
 import { logsKeys } from "src/api/queryKeys";
 
 import "./sms-composer.css";
+import { CountryCodeSelect } from "./country-code-select";
 
 export default function SMS() {
+  const [countryCode, setCountryCode] = useState("+91");
   const [to, setTo] = useState<any>("");
   const [message, setMessage] = useState("");
+
+  const destination = `${countryCode}${to}`;
 
   const { mutate } = useSmsService();
   const showSnackbar = useSnackbar();
@@ -22,7 +26,7 @@ export default function SMS() {
     mutate(
       {
         service: "sms",
-        destination: to,
+        destination,
         message,
       },
       {
@@ -68,7 +72,6 @@ export default function SMS() {
         />
 
         <div className="sms-footer">
-          <span className="sms-count">{message.length} chars</span>
           <Button
             disabled={!to || !message}
             label="Send"

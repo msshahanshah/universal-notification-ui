@@ -6,16 +6,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: string;
+  dataTestId?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, value, id, onChange, autoComplete, ...props }, ref) => {
+  ({ label, value, id, onChange, autoComplete, dataTestId, ...props }, ref) => {
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
+          width: "100%"
         }}
       >
         {label && (
@@ -38,6 +40,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           value={value}
           onChange={onChange}
           autoComplete={autoComplete}
+          data-testid={dataTestId}
           {...props}
         />
       </div>
