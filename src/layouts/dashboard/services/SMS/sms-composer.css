@@ -111,3 +111,66 @@
   padding: 8px 20px;
   border-radius: 8px;
 }
+
+.sms-to-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.country-select {
+  position: relative;
+}
+
+.country-select-btn {
+  height: 2.5rem;
+  padding: 0 12px;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+}
+
+.country-select-list {
+  position: absolute;
+  left: 0;
+  width: 180px;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  z-index: 20;
+  top: 40px;
+  padding: 10px;
+  font-size: 12px;
+  height: 200px;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+}
+
+.country-select-list li {
+  padding: 10px;
+}
+
+.country-select-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+.country-code-option {
+  font-size: 12px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.country-code-selected {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.caret {
+  font-size: 10px;
+}
