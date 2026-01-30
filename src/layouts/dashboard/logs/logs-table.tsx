@@ -124,23 +124,38 @@ const LogsTable = () => {
       },
     },
     {
+      headerName: "Created At",
       field: "messageDate",
-      headerName: "Date and Time",
-      flex: 1.5,
-
-      filter: "agTextColumnFilter",
+      filter: "agDateColumnFilter",
 
       valueFormatter: (params) =>
-        params.value ? new Date(params.value).toLocaleString("en-GB") : "-",
-
-      filterValueGetter: (params) =>
-        params.data?.messageDate
-          ? new Date(params.data.messageDate).toLocaleString("en-GB")
-          : "",
+        params.value
+          ? new Date(params.value).toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true, // 👈 AM/PM
+            })
+          : "-",
 
       filterParams: {
-        debounceMs: 200,
+        comparator: (filterDate: Date, cellValue: string) => {
+          if (!cellValue) return -1;
+
+          const cellDate = new Date(cellValue);
+
+          // Normalize for exact matching
+          const cellTime = cellDate.setMilliseconds(0);
+          const filterTime = filterDate.setMilliseconds(0);
+
+          if (cellTime === filterTime) return 0;
+          return cellTime < filterTime ? -1 : 1;
+        },
       },
+      flex: 1.5,
     },
     {
       field: "service",
