@@ -17,6 +17,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
+          width: "100%"
         }}
       >
         {label && (
