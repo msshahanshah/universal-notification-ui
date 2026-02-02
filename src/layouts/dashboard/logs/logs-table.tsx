@@ -286,7 +286,7 @@ const LogsTable = () => {
 
   return (
     <div style={containerStyle} className="ag-theme-quartz grid-12-font">
-      <div style={{ ...gridStyle, minHeight: "500px" }}>
+      <div style={{ ...gridStyle, minHeight: 0 }}>
         <AgGridReact
           theme={myTheme}
           onGridReady={onGridReady}

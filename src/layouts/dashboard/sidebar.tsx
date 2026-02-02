@@ -39,7 +39,7 @@ const sidebarItems = [
     label: "SMS",
     path: "/services/sms",
     icon: MessageSquare,
-    isDisabled: true,
+    isDisabled: false,
   },
 ];
 
@@ -81,6 +81,7 @@ const Sidebar = ({
     item.label.toLowerCase().includes(search.toLowerCase()),
   );
 
+  console.log("open",open)
   const drawerContent = (
     <div
       style={{
@@ -106,9 +107,7 @@ const Sidebar = ({
             backgroundColor: "rgba(255,255,255,0.06)",
           }}
         >
-          <SearchIcon
-            sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }}
-          />
+          <SearchIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }} />
           <InputBase
             placeholder="Search…"
             value={search}
@@ -276,7 +275,10 @@ const Sidebar = ({
             Universal Notifier
           </Typography>
         )}
-        <IconButton onClick={onToggle} sx={{ color: COLORS.WHITE }}>
+        <IconButton
+          onClick={onToggle}
+          sx={{ color: COLORS.WHITE, border: "none" }}
+        >
           <MenuIcon />
         </IconButton>
       </div>

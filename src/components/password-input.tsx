@@ -11,6 +11,7 @@ interface PasswordInputProps {
   autoComplete?: string;
   className?: string;
   dataTestId?: string;
+  name?: string;
 }
 
 const PasswordInput = ({
@@ -20,7 +21,8 @@ const PasswordInput = ({
   onChange,
   autoComplete,
   className,
-  dataTestId
+  dataTestId,
+  name
 }: PasswordInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -40,6 +42,7 @@ const PasswordInput = ({
         autoComplete={autoComplete}
         className={className}
         dataTestId={dataTestId}
+        name={name}
       />
 
       <button

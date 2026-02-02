@@ -1,12 +1,11 @@
 import { PropsWithChildren } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-
-import MuiCard from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
-import AppTheme from "src/theme/app-theme";
 import { styled } from "@mui/material";
 
-const SignUpContainer = styled(Stack)(({ theme }) => ({
+import AppTheme from "src/theme/app-theme";
+
+const AppLayoutContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
   padding: theme.spacing(2),
@@ -34,12 +33,9 @@ const AppLayout = ({ children }: PropsWithChildren) => {
     <AppTheme>
       <CssBaseline enableColorScheme />
 
-      <SignUpContainer
-        direction="column"
-        justifyContent="space-between"
-      >
+      <AppLayoutContainer direction="column" justifyContent="space-between">
         {children}
-      </SignUpContainer>
+      </AppLayoutContainer>
     </AppTheme>
   );
 };
