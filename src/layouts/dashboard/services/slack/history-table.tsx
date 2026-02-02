@@ -62,7 +62,18 @@ const HistoryTable = ({
       data: statusData,
       refetch: refetchLogStatus,
       isLoading: isFetchingData,
+      isError: isStatusError,
+      error: isStatusErrorMessage,
     } = useLogStatus(data.messageId);
+
+    useEffect(() => {
+      if (isStatusError) {
+        showSnackbar(
+          isStatusErrorMessage?.message || "Failed to fetch status",
+          "error",
+        );
+      }
+    }, [isStatusError]);
 
     const latestStatus = statusData?.data?.deliveryStatus ?? data.status;
 
