@@ -124,7 +124,7 @@ const LogsTable = () => {
       },
     },
     {
-      headerName: "Created At",
+      headerName: "Date and Time",
       field: "messageDate",
       filter: "agDateColumnFilter",
 
@@ -142,6 +142,8 @@ const LogsTable = () => {
           : "-",
 
       filterParams: {
+        filterOptions: ["equals", "inRange"],
+        suppressAndOrCondition: true,
         comparator: (filterDate: Date, cellValue: string) => {
           if (!cellValue) return -1;
 
