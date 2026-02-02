@@ -127,16 +127,19 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               onChange={handleUsernameChange}
               type="text"
               id="username"
-              autoComplete="new-username"
+              autoComplete="off"
               className="input-field"
               dataTestId="username-input"
+              name="user_field"
+              autoFocus
             />
             <PasswordInput
               label="Password"
+              name="pass_field"
               id="password"
               value={password}
               onChange={handlePasswordChange}
-              autoComplete="new-username"
+              autoComplete="new-password"
               className="input-field"
               dataTestId="password-input"
             />
