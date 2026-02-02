@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Drawer,
   List,
@@ -7,18 +8,21 @@ import {
   IconButton,
   useMediaQuery,
   Typography,
+  InputBase,
+  Box,
   Collapse,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
+import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
 
 import COLORS from "src/utility/colors";
 
-const serviceTabs = [
+const sidebarItems = [
   {
     label: "Slack",
     path: "/services/slack",
@@ -51,6 +55,7 @@ const Sidebar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
+  const [search, setSearch] = useState("");
 
   const isActive = (path: string) => location.pathname.includes(path);
   const isServicesActive = isActive("/services");
@@ -72,6 +77,10 @@ const Sidebar = ({
     },
   });
 
+  const filteredItems = sidebarItems.filter((item) =>
+    item.label.toLowerCase().includes(search.toLowerCase()),
+  );
+
   const drawerContent = (
     <div
       style={{
@@ -81,6 +90,38 @@ const Sidebar = ({
         backgroundColor: "hsla(220, 35%, 3%, 0.4)",
       }}
     >
+      {/* SEARCH BAR */}
+      {open && (
+        <Box
+          sx={{
+            mx: 1.5,
+            mt: 1.5,
+            mb: 0.5,
+            px: 1.5,
+            height: 38,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            borderRadius: 2,
+            backgroundColor: "rgba(255,255,255,0.06)",
+          }}
+        >
+          <SearchIcon
+            sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }}
+          />
+          <InputBase
+            placeholder="Search…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{
+              color: COLORS.WHITE,
+              fontSize: 14,
+              width: "100%",
+            }}
+          />
+        </Box>
+      )}
+
       {/* TOP */}
       <List>
         {/* Dashboard */}
@@ -121,13 +162,13 @@ const Sidebar = ({
         {open && (
           <Collapse in={isServicesActive} timeout="auto" unmountOnExit>
             <List disablePadding>
-              {serviceTabs.map((tab) => {
-                const Icon = tab.icon;
-                const isDisabled = tab.isDisabled;
+              {filteredItems.map((item) => {
+                const Icon = item.icon;
+                const isDisabled = item.isDisabled;
                 return (
                   <ListItemButton
-                    key={tab.path}
-                    onClick={() => !isDisabled && navigate(tab.path)}
+                    key={item.path}
+                    onClick={() => !isDisabled && navigate(item.path)}
                     sx={{
                       ml: 4,
                       mr: 1,
@@ -137,7 +178,7 @@ const Sidebar = ({
                       color: COLORS.WHITE,
                       backgroundColor: isDisabled
                         ? "rgba(255, 0, 0, 0.06)" // 👈 ultra-light red
-                        : isActive(tab.path)
+                        : isActive(item.path)
                           ? "hsla(220, 80%, 55%, 0.25)"
                           : "transparent",
 
@@ -152,7 +193,7 @@ const Sidebar = ({
                   >
                     <Icon size={18} className="service-icon" />
                     <ListItemText
-                      primary={tab.label}
+                      primary={item.label}
                       primaryTypographyProps={{
                         fontSize: 13,
                       }}
@@ -220,6 +261,7 @@ const Sidebar = ({
         },
       }}
     >
+      {/* HEADER */}
       <div
         style={{
           display: "flex",

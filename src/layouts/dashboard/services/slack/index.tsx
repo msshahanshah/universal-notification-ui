@@ -53,17 +53,7 @@ export default function Slack() {
     isLoading,
     isError,
     error,
-    isFetching,
   } = useLogs(slackLogsParams);
-
-  console.log(
-    "isFetching",
-    isFetching,
-    "isLoading",
-    isLoading,
-    "response",
-    response,
-  );
 
   return (
     <div className="slack-container">
