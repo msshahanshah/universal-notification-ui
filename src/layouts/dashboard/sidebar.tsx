@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Drawer,
   List,
@@ -7,14 +8,30 @@ import {
   IconButton,
   useMediaQuery,
   Typography,
+  InputBase,
+  Box,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
+import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import COLORS from "src/utility/colors";
+
+const sidebarItems = [
+  {
+    label: "Dashboard",
+    path: "/dashboard",
+    icon: HomeRoundedIcon,
+  },
+  {
+    label: "Services",
+    path: "/services",
+    icon: MiscellaneousServicesIcon,
+  },
+];
 
 const Sidebar = ({
   open,
@@ -28,8 +45,9 @@ const Sidebar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
+  const [search, setSearch] = useState("");
 
-  const isActive = (path: string) => location.pathname?.includes(path);
+  const isActive = (path: string) => location.pathname.includes(path);
 
   const getItemStyles = (path: string) => ({
     gap: 1.5,
@@ -38,17 +56,19 @@ const Sidebar = ({
     mt: 1,
     px: 1.5,
     color: COLORS.WHITE,
-
+    minHeight: 44,
+    justifyContent: "center",
     backgroundColor: isActive(path)
       ? "hsla(220, 80%, 55%, 0.25)"
       : "transparent",
-
     "&:hover": {
       backgroundColor: "hsla(220, 80%, 55%, 0.35)",
     },
-    justifyContent: "center",
-    minHeight: 44,
   });
+
+  const filteredItems = sidebarItems.filter((item) =>
+    item.label.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const drawerContent = (
     <div
@@ -56,47 +76,68 @@ const Sidebar = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        backgroundColor: "hsla(220, 35%, 3%, 0.4) !important",
+        backgroundColor: "hsla(220, 35%, 3%, 0.4)",
       }}
     >
-      {/* TOP SECTION */}
+      {/* SEARCH BAR */}
+      {open && (
+        <Box
+          sx={{
+            mx: 1.5,
+            mt: 1.5,
+            mb: 0.5,
+            px: 1.5,
+            height: 38,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            borderRadius: 2,
+            backgroundColor: "rgba(255,255,255,0.06)",
+          }}
+        >
+          <SearchIcon
+            sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }}
+          />
+          <InputBase
+            placeholder="Search…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{
+              color: COLORS.WHITE,
+              fontSize: 14,
+              width: "100%",
+            }}
+          />
+        </Box>
+      )}
+
+      {/* TOP NAV ITEMS */}
       <List>
-        <ListItemButton
-          onClick={() => navigate("/dashboard")}
-          sx={getItemStyles("/dashboard")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0, // 🔥 remove MUI default spacing
-              justifyContent: "center",
-              color: isActive("/dashboard")
-                ? "#4fc3f7" // active icon pop
-                : COLORS.WHITE,
-            }}
-          >
-            <HomeRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          {open && <ListItemText primary="Dashboard" />}
-        </ListItemButton>
-        <ListItemButton
-          onClick={() => navigate("/services")}
-          sx={getItemStyles("/services")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0,
-              justifyContent: "center",
-              color: isActive("/services") ? "#4fc3f7" : COLORS.WHITE,
-            }}
-          >
-            <MiscellaneousServicesIcon fontSize="small" />
-          </ListItemIcon>
-          {open && <ListItemText primary="Services" />}
-        </ListItemButton>
+        {filteredItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <ListItemButton
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              sx={getItemStyles(item.path)}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  justifyContent: "center",
+                  color: isActive(item.path) ? "#4fc3f7" : COLORS.WHITE,
+                }}
+              >
+                <Icon fontSize="small" />
+              </ListItemIcon>
+              {open && <ListItemText primary={item.label} />}
+            </ListItemButton>
+          );
+        })}
       </List>
 
-      {/* BOTTOM SECTION */}
-      <List sx={{ marginTop: "auto" }}>
+      {/* BOTTOM */}
+      <List sx={{ mt: "auto" }}>
         <ListItemButton
           onClick={() => {
             localStorage.clear();
@@ -113,7 +154,7 @@ const Sidebar = ({
     </div>
   );
 
-  // Mobile Drawer
+  /* Mobile */
   if (isMobile) {
     return (
       <Drawer
@@ -122,9 +163,7 @@ const Sidebar = ({
         onClose={onToggle}
         ModalProps={{
           BackdropProps: {
-            sx: {
-              backgroundColor: "rgba(0,0,0,0.15)",
-            },
+            sx: { backgroundColor: "rgba(0,0,0,0.15)" },
           },
         }}
       >
@@ -133,7 +172,7 @@ const Sidebar = ({
     );
   }
 
-  // Desktop Drawer
+  /* Desktop */
   return (
     <Drawer
       variant="permanent"
@@ -141,32 +180,32 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
+          backgroundColor: COLORS.SIDEBAR_BG_COLOR,
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.standard,
             }),
-          backgroundColor: COLORS.SIDEBAR_BG_COLOR,
           width: "auto",
         },
       }}
     >
+      {/* HEADER */}
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
           alignItems: "center",
+          justifyContent: "center",
           margin: 16,
-          marginLeft: open ? 16 : 16,
-          gap: 5,
+          gap: 6,
         }}
       >
         {open && (
-          <Typography variant="h6" sx={{ color: COLORS.WHITE, fontSize: 18 }}>
+          <Typography sx={{ color: COLORS.WHITE, fontSize: 18 }}>
             Universal Notifier
           </Typography>
         )}
-        <IconButton onClick={onToggle} sx={{ color: COLORS.WHITE, border: 'none' }}>
+        <IconButton onClick={onToggle} sx={{ color: COLORS.WHITE }}>
           <MenuIcon />
         </IconButton>
       </div>
