@@ -13,6 +13,7 @@ import Loader from "src/components/loader";
 
 import "../../../App.css";
 import "./logs-table.css";
+import { useSnackbar } from "src/provider/snackbar";
 
 export interface LogData {
   id: number;
@@ -32,6 +33,21 @@ const LogsTable = () => {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(30);
 
+  const showSnackbar = useSnackbar();
+
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useLogs({ limit: pageSize, page });
+
+  useEffect(() => {
+    if (isError) {
+      showSnackbar(error?.message || "Failed to fetch logs", "error");
+    }
+  }, [isError]);
+
   const containerStyle = useMemo(
     () => ({
       width: wValue,
@@ -47,7 +63,6 @@ const LogsTable = () => {
     [],
   );
 
-  // const showSnackbar = useSnackbar();
   const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
   const gridApiRef = useRef<GridApi | null>(null);
@@ -57,6 +72,8 @@ const LogsTable = () => {
       data: statusData,
       refetch: refetchLogStatus,
       isLoading: isFetchingData,
+      isError: isStatusError,
+      error: isStatusErrorMessage,
     } = useLogStatus(data.messageId);
 
     const latestStatus = statusData?.data?.deliveryStatus ?? data.status;
@@ -66,6 +83,15 @@ const LogsTable = () => {
         node.setDataValue("status", latestStatus);
       }
     }, [latestStatus, data.status, node]);
+
+    useEffect(() => {
+      if (isStatusError) {
+        showSnackbar(
+          isStatusErrorMessage?.message || "Failed to fetch status",
+          "error",
+        );
+      }
+    }, [isStatusError]);
 
     const handleRefresh = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -104,11 +130,6 @@ const LogsTable = () => {
       </div>
     );
   };
-
-  // const valueFormatter = (params: any) => {
-  //   if (params.value === undefined || params.value === null) return "-";
-  //   return params.value;
-  // };
 
   const [columnDefs] = useState<ColDef[]>([
     {
@@ -203,13 +224,6 @@ const LogsTable = () => {
     }),
     [],
   );
-
-  const {
-    data: response,
-    isLoading,
-    isError,
-    error,
-  } = useLogs({ limit: pageSize, page });
 
   const logsData = response?.data ?? [];
   const totalRows = response?.pagination?.limit ?? 0;

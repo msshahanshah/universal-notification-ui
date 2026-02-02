@@ -52,16 +52,21 @@ export default function SMS() {
         New message
       </Typography>
       <div className="sms-wrapper">
-        {/* type="tel"> */}
         <div className="sms-to-row">
           <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
           <Input
-            type="number"
+            type="tel"
             id="to"
             className="sms-input"
             placeholder="Enter receiver number"
             value={to}
-            onChange={(e) => setTo(e.target.value)}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={10}
+            onChange={(e) => {
+              const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
+              setTo(onlyNums);
+            }}
           />
         </div>
 
