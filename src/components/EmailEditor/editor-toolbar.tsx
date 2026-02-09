@@ -1,4 +1,4 @@
-import { Editor } from "@tiptap/react";
+import { Editor, useEditorState } from "@tiptap/react";
 
 type Props = { editor: Editor | null };
 
@@ -18,34 +18,45 @@ export function EmailToolbar({ editor }: Props) {
     borderRadius: 8,
   });
 
+  const editorState = useEditorState({
+    editor,
+    selector: ({ editor }) => ({
+      isBold: editor.isActive("bold"),
+      isItalic: editor.isActive("italic"),
+      isUnderline: editor.isActive("underline"),
+      isBullet: editor.isActive("bulletList"),
+      isOrderedList: editor.isActive("orderedList"),
+    }),
+  });
+
   return (
     <div style={toolbarStyle}>
       <button
-        style={getButtonStyle(editor.isActive("bold"))}
+        style={getButtonStyle(editorState.isBold)}
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
         B
       </button>
       <button
-        style={getButtonStyle(editor.isActive("italic"))}
+        style={getButtonStyle(editorState.isItalic)}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
         I
       </button>
       <button
-        style={getButtonStyle(editor.isActive("underline"))}
+        style={getButtonStyle(editorState.isUnderline)}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
         U
       </button>
       <button
-        style={getButtonStyle(editor.isActive("bulletList"))}
+        style={getButtonStyle(editorState.isBullet)}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
         • List
       </button>
       <button
-        style={getButtonStyle(editor.isActive("orderedList"))}
+        style={getButtonStyle(editorState.isOrderedList)}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
         1. List

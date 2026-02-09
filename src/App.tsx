@@ -6,10 +6,15 @@ import Login from "./layouts/login/login";
 import PublicRoute from "./routes/public-route";
 import PrivateRoute from "./routes/private-route";
 import Dashboard from "./layouts/dashboard";
+import ServicesAccordion from "./layouts/dashboard/services/demo/ServicesAccordion";
+import Services1 from "./layouts/dashboard/services/demo/services";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
-import SMS from "./layouts/dashboard/services/SMS";
-import EmailComposer from "./layouts/dashboard/services/email";
+import FallbackLoader from "./components/fallback-loader/fallback-loader";
+import ServiceGuard from "./routes/service-guard";
+
+const EmailComposer = lazy(() => import("./layouts/dashboard/services/email"));
+const SMS = lazy(() => import("./layouts/dashboard/services/SMS"));
 
 export default function App() {
   ModuleRegistry.registerModules([AllCommunityModule]);
@@ -22,9 +27,27 @@ export default function App() {
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/services" element={<Services />} />
-        <Route path="/services/email-editor" element={<EmailComposer />} />
-        <Route path="/services/sms" element={<SMS />} />
-        <Route path="/services/slack" element={<Slack />} />
+        <Route path="/services/demo1" element={<Services1 />} />
+        <Route path="/services/demo2" element={<ServicesAccordion />} />
+        <Route
+          path="/services/email-editor"
+          element={
+            <Suspense fallback={<FallbackLoader />}>
+              <EmailComposer />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/services/sms"
+          element={
+            <Suspense fallback={<FallbackLoader />}>
+              <SMS />
+            </Suspense>
+          }
+        />
+        <Route element={<ServiceGuard service="slack" />}>
+          <Route path="/services/slack" element={<Slack />} />
+        </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Route>
       {/* Fallback */}

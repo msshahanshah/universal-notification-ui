@@ -146,6 +146,14 @@
   -webkit-backdrop-filter: none !important;
 }
 
+@media screen and (max-width: 768px) {
+  .ag-paging-panel {
+    padding: 5px;
+    gap: 0;
+    text-align: center;
+  }
+}
+
 /* Style the text and headers */
 .glass-grid .ag-header-cell-label {
   color: #00d2ff;

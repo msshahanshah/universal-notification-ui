@@ -11,20 +11,35 @@ import { useLogs } from "src/hooks/useLogs";
 import { logsKeys } from "src/api/queryKeys";
 
 import "./slack.css";
+import ErrorText from "src/components/error-text";
+import { slackRegex } from "src/utility/constants";
 
 const HistoryTable = lazy(() => import("./history-table"));
 
 export default function Slack() {
   const [channelID, setChannelID] = useState<any>("");
   const [message, setMessage] = useState("");
-
+  const [invalidChannelId, setInvalidChannelId] = useState("");
   const { mutate } = useSlackService();
   const showSnackbar = useSnackbar();
   const queryClient = useQueryClient();
 
   const slackLogsParams = { service: "slack", limit: 10 };
 
-  const handleSend = () => {
+  const resetStates = () => {
+    setMessage("");
+    setChannelID("");
+    setInvalidChannelId("");
+  };
+
+  const handleSend = (channelID: string) => {
+    if (!slackRegex.test(channelID)) {
+      setInvalidChannelId("Invalid channel ID");
+      return;
+    }
+
+    resetStates();
+
     mutate(
       {
         service: "slack",
@@ -47,7 +62,7 @@ export default function Slack() {
     );
   };
 
-  const isDisabled = !channelID || !message;
+  const isDisabled = !channelID || !message || !!invalidChannelId;
   const {
     data: response,
     isLoading,
@@ -57,8 +72,8 @@ export default function Slack() {
 
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        New Message
+      <Typography variant="h6" sx={{ mb: 4 }}>
+        New message
       </Typography>
       <div className="sms-wrapper">
         <Input
@@ -68,7 +83,12 @@ export default function Slack() {
           className="sms-input"
           placeholder="Eg. C0991E9E10R"
           value={channelID}
-          onChange={(e) => setChannelID(e.target.value)}
+          onChange={(e) => {
+            if (!!invalidChannelId) {
+              setInvalidChannelId("");
+            }
+            setChannelID(e.target.value);
+          }}
         />
 
         <textarea
@@ -78,17 +98,17 @@ export default function Slack() {
           onChange={(e) => setMessage(e.target.value)}
           rows={6}
         />
-
+        <ErrorText>{invalidChannelId}</ErrorText>
         <div className="sms-footer">
           <Button
             disabled={!channelID || !message}
             label="Send"
             className={isDisabled ? "button-disabled" : "sms-send-btn"}
-            onClick={handleSend}
+            onClick={() => handleSend(channelID)}
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 4 }}>
+      <Typography variant="h6" sx={{ mt: 0 }}>
         History (Last 10 messages)
       </Typography>
       <Suspense fallback={<FallbackLoader />}>

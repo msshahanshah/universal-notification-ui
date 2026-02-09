@@ -10,6 +10,7 @@ import {
   Typography,
   InputBase,
   Box,
+  Collapse,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -17,19 +18,28 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
+import { Mail, MessageSquare, SlackIcon } from "lucide-react";
 
 import COLORS from "src/utility/colors";
 
 const sidebarItems = [
   {
-    label: "Dashboard",
-    path: "/dashboard",
-    icon: HomeRoundedIcon,
+    label: "Slack",
+    path: "/services/slack",
+    icon: SlackIcon,
+    isDisabled: false,
   },
   {
-    label: "Services",
-    path: "/services",
-    icon: MiscellaneousServicesIcon,
+    label: "Email",
+    path: "/services/email-editor",
+    icon: Mail,
+    isDisabled: false,
+  },
+  {
+    label: "SMS",
+    path: "/services/sms",
+    icon: MessageSquare,
+    isDisabled: false,
   },
 ];
 
@@ -45,9 +55,11 @@ const Sidebar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
+
   const [search, setSearch] = useState("");
 
   const isActive = (path: string) => location.pathname.includes(path);
+  const isServicesActive = isActive("/services");
 
   const getItemStyles = (path: string) => ({
     gap: 1.5,
@@ -69,6 +81,15 @@ const Sidebar = ({
   const filteredItems = sidebarItems.filter((item) =>
     item.label.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const q = search.trim().toLowerCase();
+
+  const isSearchingDashboard = q.length > 0 && "dashboard".includes(q);
+
+  const isSearchingServices =
+    q.length > 0 &&
+    (sidebarItems.some((item) => item.label.toLowerCase().includes(q)) ||
+      "services".includes(q));
 
   const drawerContent = (
     <div
@@ -95,9 +116,7 @@ const Sidebar = ({
             backgroundColor: "rgba(255,255,255,0.06)",
           }}
         >
-          <SearchIcon
-            sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }}
-          />
+          <SearchIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }} />
           <InputBase
             placeholder="Search…"
             value={search}
@@ -111,29 +130,93 @@ const Sidebar = ({
         </Box>
       )}
 
-      {/* TOP NAV ITEMS */}
+      {/* TOP */}
       <List>
-        {filteredItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <ListItemButton
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              sx={getItemStyles(item.path)}
+        {/* Dashboard */}
+        {!isSearchingServices && (
+          <ListItemButton
+            onClick={() => navigate("/dashboard")}
+            sx={getItemStyles("/dashboard")}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                justifyContent: "center",
+                color: isActive("/dashboard") ? "#4fc3f7" : COLORS.WHITE,
+              }}
             >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  justifyContent: "center",
-                  color: isActive(item.path) ? "#4fc3f7" : COLORS.WHITE,
-                }}
-              >
-                <Icon fontSize="small" />
-              </ListItemIcon>
-              {open && <ListItemText primary={item.label} />}
-            </ListItemButton>
-          );
-        })}
+              <HomeRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            {open && <ListItemText primary="Dashboard" />}
+          </ListItemButton>
+        )}
+
+        {/* Services Parent */}
+        {!isSearchingDashboard && (
+          <ListItemButton
+            onClick={() => navigate("/services/slack")}
+            sx={getItemStyles("/services")}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                justifyContent: "center",
+                color: isServicesActive ? "#4fc3f7" : COLORS.WHITE,
+              }}
+            >
+              <MiscellaneousServicesIcon fontSize="small" />
+            </ListItemIcon>
+            {open && <ListItemText primary="Services" />}
+          </ListItemButton>
+        )}
+
+        {/* Services Sub Tabs */}
+        {open && (
+          <Collapse in={isServicesActive} timeout="auto" unmountOnExit>
+            <List disablePadding>
+              {filteredItems.map((item) => {
+                const Icon = item.icon;
+                const isDisabled = item.isDisabled;
+                return (
+                  <ListItemButton
+                    key={item.path}
+                    onClick={() => !isDisabled && navigate(item.path)}
+                    sx={{
+                      ml: 4,
+                      mr: 1,
+                      mt: 0.5,
+                      minHeight: 36,
+                      borderRadius: 2,
+                      color: COLORS.WHITE,
+                      backgroundColor: isDisabled
+                        ? "rgba(255, 0, 0, 0.06)" // 👈 ultra-light red
+                        : isActive(item.path)
+                          ? "hsla(220, 80%, 55%, 0.25)"
+                          : "transparent",
+
+                      cursor: isDisabled ? "not-allowed" : "pointer",
+
+                      "&:hover": {
+                        backgroundColor: isDisabled
+                          ? "rgba(255, 0, 0, 0.08)" // tiny hover change
+                          : "hsla(220, 80%, 55%, 0.35)",
+                      },
+                    }}
+                  >
+                    <Icon size={18} className="service-icon" />
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: 13,
+                      }}
+                      style={{ marginLeft: 10 }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </Collapse>
+        )}
       </List>
 
       {/* BOTTOM */}
@@ -205,7 +288,10 @@ const Sidebar = ({
             Universal Notifier
           </Typography>
         )}
-        <IconButton onClick={onToggle} sx={{ color: COLORS.WHITE }}>
+        <IconButton
+          onClick={onToggle}
+          sx={{ color: COLORS.WHITE, border: "none" }}
+        >
           <MenuIcon />
         </IconButton>
       </div>

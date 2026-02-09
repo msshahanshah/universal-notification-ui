@@ -23,10 +23,13 @@ export default function AppTheme(props: AppThemeProps) {
     return disableCustomTheme
       ? {}
       : createTheme({
-          palette: { mode: "dark",background: {
-      default: "#0b1c2d", // deep blue (NOT near black)
-      paper: "rgba(11, 28, 45, 0.75)",
-    }, },
+          palette: {
+            mode: "dark",
+            background: {
+              default: "#0b1c2d", // deep blue (NOT near black)
+              paper: "rgba(11, 28, 45, 0.75)",
+            },
+          },
           // For more details about CSS variables configuration, see https://mui.com/material-ui/customization/css-theme-variables/configuration/
           cssVariables: {
             colorSchemeSelector: "data-mui-color-scheme",
@@ -48,6 +51,14 @@ export default function AppTheme(props: AppThemeProps) {
                 root: {
                   backgroundImage: "none", // 🔑 remove dark overlay
                   backgroundColor: "#0b1c2d",
+                },
+              },
+            },
+            MuiStack: {
+              styleOverrides: {
+                root: {
+                  height: "100vh",
+                  overflowY: "scroll",
                 },
               },
             },
