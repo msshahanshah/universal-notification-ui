@@ -55,6 +55,7 @@ const Sidebar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
+
   const [search, setSearch] = useState("");
 
   const isActive = (path: string) => location.pathname.includes(path);
@@ -81,7 +82,15 @@ const Sidebar = ({
     item.label.toLowerCase().includes(search.toLowerCase()),
   );
 
-  console.log("open",open)
+  const q = search.trim().toLowerCase();
+
+  const isSearchingDashboard = q.length > 0 && "dashboard".includes(q);
+
+  const isSearchingServices =
+    q.length > 0 &&
+    (sidebarItems.some((item) => item.label.toLowerCase().includes(q)) ||
+      "services".includes(q));
+
   const drawerContent = (
     <div
       style={{
@@ -124,38 +133,42 @@ const Sidebar = ({
       {/* TOP */}
       <List>
         {/* Dashboard */}
-        <ListItemButton
-          onClick={() => navigate("/dashboard")}
-          sx={getItemStyles("/dashboard")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0,
-              justifyContent: "center",
-              color: isActive("/dashboard") ? "#4fc3f7" : COLORS.WHITE,
-            }}
+        {!isSearchingServices && (
+          <ListItemButton
+            onClick={() => navigate("/dashboard")}
+            sx={getItemStyles("/dashboard")}
           >
-            <HomeRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          {open && <ListItemText primary="Dashboard" />}
-        </ListItemButton>
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                justifyContent: "center",
+                color: isActive("/dashboard") ? "#4fc3f7" : COLORS.WHITE,
+              }}
+            >
+              <HomeRoundedIcon fontSize="small" />
+            </ListItemIcon>
+            {open && <ListItemText primary="Dashboard" />}
+          </ListItemButton>
+        )}
 
         {/* Services Parent */}
-        <ListItemButton
-          onClick={() => navigate("/services/slack")}
-          sx={getItemStyles("/services")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0,
-              justifyContent: "center",
-              color: isServicesActive ? "#4fc3f7" : COLORS.WHITE,
-            }}
+        {!isSearchingDashboard && (
+          <ListItemButton
+            onClick={() => navigate("/services/slack")}
+            sx={getItemStyles("/services")}
           >
-            <MiscellaneousServicesIcon fontSize="small" />
-          </ListItemIcon>
-          {open && <ListItemText primary="Services" />}
-        </ListItemButton>
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                justifyContent: "center",
+                color: isServicesActive ? "#4fc3f7" : COLORS.WHITE,
+              }}
+            >
+              <MiscellaneousServicesIcon fontSize="small" />
+            </ListItemIcon>
+            {open && <ListItemText primary="Services" />}
+          </ListItemButton>
+        )}
 
         {/* Services Sub Tabs */}
         {open && (
