@@ -145,7 +145,17 @@ export default function EmailComposer() {
         setSubject("");
         setBody("");
 
-        await uploadToS3FromAttachments(data, attachmentsCopy);
+        if (
+          (Array.isArray(attachmentsCopy) && !attachmentsCopy.length) ||
+          attachmentsCopy.length === 0
+        ) {
+          showSnackbar("Email sent successfully!", "success");
+          queryClient.invalidateQueries({
+            queryKey: logsKeys.all,
+          });
+        } else {
+          await uploadToS3FromAttachments(data, attachmentsCopy);
+        }
       },
       onError: () => {
         showSnackbar("Failed to send email", "error");

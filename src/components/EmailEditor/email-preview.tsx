@@ -103,4 +103,5 @@ const previewShell: React.CSSProperties = {
 const iframe: React.CSSProperties = {
   flex: 1,
   border: "none",
+  background:'#202124'
 };
