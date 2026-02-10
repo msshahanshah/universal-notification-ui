@@ -133,7 +133,7 @@ export default function EmailComposer() {
       fromEmail: from,
       cc,
       bcc,
-      attachments: attachmentsCopy.map((a) => a.name), // ✅ only filenames
+      attachments: attachmentsCopy.map((a: any) => a.name), // ✅ only filenames
     };
 
     mutate(payload, {
@@ -235,8 +235,6 @@ export default function EmailComposer() {
             <EmailEditor
               value={body}
               onChange={setBody}
-              attachments={attachments}
-              setAttachments={setAttachments}
             />
             <AttachmentSection
               attachments={attachments}
@@ -256,8 +254,6 @@ export default function EmailComposer() {
               bcc={bcc}
               subject={subject}
               attachments={attachments}
-              onAdd={handleAttachmentChange}
-              onRemove={removeAttachment}
             />
           </div>
         )}
