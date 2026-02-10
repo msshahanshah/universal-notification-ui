@@ -1,0 +1,11 @@
+.ag-popup,
+.ag-menu,
+.ag-select-list {
+  z-index: 9999 !important;
+}
+
+.ag-root-wrapper,
+.ag-root-wrapper-body,
+.ag-root {
+  overflow: visible !important;
+}

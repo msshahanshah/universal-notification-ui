@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { EmailSuggestion } from "../email-suggestion";
-import Input from "../input";
+
 import {
   validateMultipleEmails,
   validateSingleEmail,
 } from "src/utility/helper";
+
+import Input from "../input";
 
 type Props = {
   from: string;
@@ -18,6 +19,14 @@ type Props = {
   setBcc: (v: string) => void;
   setSubject: (v: string) => void;
   onValidationChange: (hasErrors: boolean) => void;
+  attachments: Attachment[];
+  setAttachments: (attachments: Attachment[]) => void;
+};
+
+type Attachment = {
+  file: File;
+  id: string;
+  previewUrl?: string; // for images
 };
 
 export function GmailShell({
@@ -31,7 +40,7 @@ export function GmailShell({
   setCc,
   setBcc,
   setSubject,
-  onValidationChange,
+  onValidationChange
 }: Props) {
   const [errors, setErrors] = useState({
     from: "",
@@ -104,13 +113,6 @@ export function GmailShell({
         showAsteric={true}
       />
       {errors.to && <ErrorText>{errors.to}</ErrorText>}
-      {/* To */}
-      {/* <EmailSuggestion
-        // id="to"
-        value={to}
-        onChange={(v) => handleMultiChange(v, "to", setTo)}
-        placeholder="To"
-      /> */}
       <Input
         label="Cc"
         id="cc"
@@ -120,13 +122,6 @@ export function GmailShell({
         className="sms-input"
       />
       {errors.cc && <ErrorText>{errors.cc}</ErrorText>}
-
-      {/* Cc */}
-      {/* <EmailSuggestion
-        value={cc}
-        onChange={(v) => handleMultiChange(v, "cc", setCc)}
-        placeholder="Cc"
-      /> */}
       <Input
         label="Bcc"
         id="bcc"
@@ -136,16 +131,6 @@ export function GmailShell({
         className="sms-input"
       />
       {errors.bcc && <ErrorText>{errors.bcc}</ErrorText>}
-
-      {/* Bcc */}
-      {/* <EmailSuggestion
-        value={bcc}
-        onChange={(v) => handleMultiChange(v, "bcc", setBcc)}
-        placeholder="Bcc"
-      /> */}
-      {/* {errors.bcc && <ErrorText>{errors.bcc}</ErrorText>} */}
-
-      {/* Subject */}
       <Input
         label="Subject"
         id="subject"
