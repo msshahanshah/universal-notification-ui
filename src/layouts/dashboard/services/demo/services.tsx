@@ -38,7 +38,6 @@ export default function ServicesLayout() {
 
   const SmsContent = () => <SMS />;
 
-  console.log("activeService", activeService);
   return (
     <div style={styles.wrapper}>
       {/* LEFT */}

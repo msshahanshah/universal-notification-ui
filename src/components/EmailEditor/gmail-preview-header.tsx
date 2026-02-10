@@ -6,16 +6,9 @@ type Props = {
   bcc?: string;
 };
 
-export function GmailPreviewHeader({
-  from,
-  to,
-  subject,
-  cc,
-  bcc,
-}: Props) {
+export function GmailPreviewHeader({ from, to, subject, cc, bcc }: Props) {
   return (
     <div style={header}>
-
       <div style={meta}>
         <div>
           <strong>From:</strong> {from}
@@ -34,7 +27,7 @@ export function GmailPreviewHeader({
           </div>
         )}
         <div>
-          <strong>Subject:</strong> {subject || "(No subject)"}
+          <strong>Subject:</strong> {subject}
         </div>
       </div>
     </div>
@@ -44,17 +37,9 @@ export function GmailPreviewHeader({
 const header: React.CSSProperties = {
   padding: "12px 16px",
   borderBottom: "1px solid #e0e0e0",
-  background: "#fff",
-};
-
-const subjectStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: 18,
-  fontWeight: 500,
+  background: "#202124",
 };
 
 const meta: React.CSSProperties = {
-  marginTop: 6,
   fontSize: 13,
-  color: "#5f6368",
 };

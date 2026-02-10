@@ -19,8 +19,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     isMobile ? setMobileOpen(!mobileOpen) : setOpen(!open);
   };
 
-  const smsEditor = location?.pathname === "/services/sms" && "14px";
-  const emailEditor = location?.pathname === "/services/email-editor" && "36px";
+  const emailPath = location?.pathname === "/services/email-editor";
+  const smsEditor = location?.pathname === "/services/sms" && "50px";
+  const emailEditor = emailPath && "50px";
+  const paddingStyle = emailPath && "0px";
+  
   const slackEditor = location?.pathname === "/services/slack" && "50px";
   const services = location?.pathname === "/services" && "0px";
   const finalMarginTop =
@@ -38,7 +41,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 2,
+          p: paddingStyle || 2,
           ml: isMobile
             ? 0
             : open
