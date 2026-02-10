@@ -52,6 +52,11 @@ export default function SMS() {
         New message
       </Typography>
       <div className="sms-wrapper">
+        {/* TODO: Label component */}
+        <label style={{  fontSize: "12px" }}>
+          Phone number
+          <span style={{ color: "red", marginLeft: 2 }}>*</span>
+        </label>
         <div className="sms-to-row">
           <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
           <Input
@@ -70,6 +75,10 @@ export default function SMS() {
           />
         </div>
 
+        <label style={{ marginBottom: 4, fontSize: "12px" }}>
+          Message
+          <span style={{ color: "red", marginLeft: 2 }}>*</span>
+        </label>
         <textarea
           className="sms-textarea"
           placeholder="Type your message..."

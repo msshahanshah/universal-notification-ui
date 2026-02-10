@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Mail, Slack as SlackIcon, MessageSquare } from "lucide-react";
-import Button from "src/components/button";
-import Input from "src/components/input";
 import SMS from "../SMS";
 import EmailComposer from "../email";
 import Slack from "../slack";
@@ -17,26 +15,26 @@ interface Service {
 }
 
 const services: Service[] = [
-  { 
-    key: "slack", 
-    label: "Slack", 
+  {
+    key: "slack",
+    label: "Slack",
     icon: SlackIcon,
     description: "Send messages to Slack channels",
-    status: "healthy"
+    status: "healthy",
   },
-  { 
-    key: "email", 
-    label: "Email", 
+  {
+    key: "email",
+    label: "Email",
     icon: Mail,
     description: "Send transactional emails",
-    status: "healthy"
+    status: "healthy",
   },
-  { 
-    key: "sms", 
-    label: "SMS", 
+  {
+    key: "sms",
+    label: "SMS",
     icon: MessageSquare,
     description: "Send SMS notifications",
-    status: "healthy"
+    status: "healthy",
   },
 ];
 
@@ -49,11 +47,7 @@ export default function ServicesAccordion() {
   });
 
   const handleToggle = (service: ServiceKey) => {
-    setToggles(prev => ({ ...prev, [service]: !prev[service] }));
-  };
-
-  const handleSend = (service: ServiceKey) => {
-    console.log(`Sending ${service} notification`);
+    setToggles((prev) => ({ ...prev, [service]: !prev[service] }));
   };
 
   const renderServiceContent = () => {
@@ -89,16 +83,13 @@ export default function ServicesAccordion() {
         <div style={styles.sidebarHeader}>
           <h3 style={styles.sidebarTitle}>Services</h3>
         </div>
-        
+
         <div style={styles.servicesList}>
           {services.map((service) => {
-            console.log("activeService",activeService)
             const Icon = service.icon;
             const isActive = activeService === service.key;
             const isEnabled = toggles[service.key];
 
-            console.log("isActive",isActive)
-            
             return (
               <div
                 key={service.key}
@@ -106,7 +97,7 @@ export default function ServicesAccordion() {
                 style={{
                   ...styles.serviceCard,
                   ...(isActive ? styles.activeServiceCard : {}),
-                //   ...(isEnabled ? {} : styles.disabledServiceCard),
+                  //   ...(isEnabled ? {} : styles.disabledServiceCard),
                 }}
               >
                 <div style={styles.serviceHeader}>
@@ -376,7 +367,7 @@ const styles: Record<string, React.CSSProperties> = {
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   .service-icon {
-    color: #60a5fa;
+    color: rgb(79, 195, 247);
     flex-shrink: 0;
     margin-top: 2px;
   }

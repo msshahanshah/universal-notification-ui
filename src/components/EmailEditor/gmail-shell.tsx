@@ -84,20 +84,24 @@ export function GmailShell({
     <div style={shellStyle}>
       {/* From */}
       <Input
+        label="From"
         id="from"
         value={from}
         onChange={(e) => handleFromChange(e.target.value)}
         placeholder="From"
         className="sms-input"
+        showAsteric={true}
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}
 
       <Input
+        label="To"
         id="to"
         value={to}
         onChange={(e) => handleMultiChange(e.target.value, "to", setTo)}
         placeholder="To"
         className="sms-input"
+        showAsteric={true}
       />
       {errors.to && <ErrorText>{errors.to}</ErrorText>}
       {/* To */}
@@ -108,6 +112,7 @@ export function GmailShell({
         placeholder="To"
       /> */}
       <Input
+        label="Cc"
         id="cc"
         value={cc}
         onChange={(v) => handleMultiChange(v.target.value, "cc", setCc)}
@@ -123,6 +128,7 @@ export function GmailShell({
         placeholder="Cc"
       /> */}
       <Input
+        label="Bcc"
         id="bcc"
         value={bcc}
         onChange={(v) => handleMultiChange(v.target.value, "bcc", setBcc)}
@@ -141,11 +147,13 @@ export function GmailShell({
 
       {/* Subject */}
       <Input
+        label="Subject"
         id="subject"
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
         placeholder="Subject"
         className="sms-input"
+        showAsteric
       />
     </div>
   );

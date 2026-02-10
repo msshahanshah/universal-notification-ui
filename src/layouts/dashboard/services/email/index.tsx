@@ -44,12 +44,17 @@ export default function EmailComposer() {
         subject,
         body,
         fromEmail: from,
+        cc,
+        bcc,
       },
       {
         onSuccess: (data) => {
           setTo("");
+          setCc("");
+          setBcc("");
+          setFrom("");
           setSubject("");
-          setBody("<p></p>");
+          setBody("");
           showSnackbar(
             data?.message || "Notification request accepted and queued.",
             "info",

@@ -7,22 +7,38 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: string;
   dataTestId?: string;
+  showAsteric?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, value, id, onChange, autoComplete, dataTestId, ...props }, ref) => {
+  (
+    {
+      label,
+      value,
+      id,
+      onChange,
+      showAsteric = false,
+      autoComplete,
+      dataTestId,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-start",
-          width: "100%"
+          width: "100%",
         }}
       >
         {label && (
           <label style={{ marginBottom: 4, fontSize: "12px" }} htmlFor={id}>
             {label}
+            {showAsteric && (
+              <span style={{ color: "red", marginLeft: 2 }}>*</span>
+            )}
           </label>
         )}
         <input
@@ -35,7 +51,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             height: "2.5rem",
             paddingLeft: "10px",
             border: "hsla(220, 35%, 3%, 0.4)",
-            fontSize: "12px"
+            fontSize: "12px",
           }}
           value={value}
           onChange={onChange}

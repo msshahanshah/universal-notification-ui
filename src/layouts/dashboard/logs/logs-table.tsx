@@ -1,17 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, CircularProgress } from "@mui/material";
 
-import { useLogStatus } from "src/hooks/useLogs";
+import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import Loader from "src/components/loader";
 import { useSnackbar } from "src/provider/snackbar";
-
-import "../../../../App.css";
-import "../../logs/logs-table.css";
-import "./history-table.css";
-import RefreshToken from "../../../../assets/refresh.png";
 import { Table } from "src/components/ag-grid-react/table";
+
+import "../../../App.css";
+import "./logs-table.css";
+import RefreshToken from "../../../assets/refresh.png";
+// import { useWebsocket } from "src/hooks/useWebsocket";
 
 export interface LogData {
   id: number;
@@ -25,31 +24,117 @@ export interface LogData {
   updated_at?: string;
 }
 
-const HistoryTable = ({
-  data,
-  isDataLoading,
-  isError,
-  error,
-}: {
-  data: any;
-  isDataLoading: boolean;
-  isError: boolean;
-  error: any;
-}) => {
+export type LogMessage = {
+  id: number;
+  messageId: string;
+  service: string;
+  destination: string;
+  status: "pending" | "sent" | "failed" | "processing";
+  attempts: number;
+  messageDate: string;
+  type?: string;
+};
+
+const LogsTable = () => {
   const wValue = "100%";
   const hValue = "100%";
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(30);
+  const [data, setData] = useState<LogMessage[]>([]);
+
+  //  {
+  //     id: 12,
+  //     messageId: "8beca3e3-5f8c-473c-9cd8-2df627552430",
+  //     service: "slack",
+  //     destination: "C0AAQJRGF6K",
+  //     status: "pending",
+  //     attempts: 0,
+  //     messageDate: "2026-02-06T10:17:34.858Z",
+  //   },
+
+  // !!!! Do not remove for web socket!!
+  // const token = localStorage.getItem("accessToken");
+  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  // const { sendMessage, status } = useWebsocket({
+  //   url: `wss://${BASE_URL}/?clientId=GKMIT&token=` + token,
+  //   // onMessage: (event: any) => {
+  //   //   console.log("event", event);
+  //   //   setData((prev: any) => {
+  //   //     console.log("prev",prev)
+  //   //     const existingIndex = prev.findIndex(
+  //   //       (item: any) => item.id === 12, // event.id
+  //   //     );
+  //   //     console.log("existingIndex",existingIndex)
+  //   //     if (existingIndex >= 0) {
+  //   //       const updated = [...prev];
+  //   //       console.log("spread op",updated)
+  //   //       updated[existingIndex] = event;
+  //   //       console.log("updated data",JSON.parse(updated))
+  //   //       return updated;
+  //   //     }
+  //   //     return [...prev, event];
+  //   //   });
+  //   //   // setMessages((prev) => [...prev, event]);
+  //   // },
+  //   onMessage: (event: LogMessage) => {
+  //     console.log("event..", event);
+  //     if (event?.type === "stream") {
+  //       setData((prev: LogMessage[]) => {
+  //         console.log("prev", prev);
+  //         const existingIndex = prev.findIndex((item) => item.id === event.id); // event.id
+  //         console.log("existingIndex", existingIndex);
+
+  //         if (existingIndex >= 0) {
+  //           const updated = [...prev];
+  //           updated[existingIndex] = event;
+  //           return updated;
+  //         }
+
+  //         return [...prev, event];
+  //       });
+  //     }
+  //   },
+  // });
+
+  // !!!! Do not remove for web socket!!
 
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
+  // const isTablet = window.matchMedia("(max-width: 1024px)").matches;
 
   const showSnackbar = useSnackbar();
+
+  // console.log("final data", data);
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useLogs({ limit: pageSize, page });
 
   useEffect(() => {
     if (isError) {
       showSnackbar(error?.message || "Failed to fetch logs", "error");
+      return;
     }
-  }, [isError]);
+
+    // !!!! Do not remove for web socket!!
+
+    // if (response?.data) {
+    //   setData((prev) => {
+    //     // keep websocket-updated rows if they exist
+    //     const map = new Map(prev.map((item) => [item.id, item]));
+
+    //     response.data.forEach((item: LogMessage) => {
+    //       if (!map.has(item.id)) {
+    //         map.set(item.id, item);
+    //       }
+    //     });
+
+    //     return Array.from(map.values());
+    //   });
+    // }
+  }, [isError, response?.data, error]);
 
   const containerStyle = useMemo(
     () => ({
@@ -66,7 +151,7 @@ const HistoryTable = ({
     [],
   );
 
-  const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
+  // const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
   const gridApiRef = useRef<GridApi | null>(null);
 
@@ -130,14 +215,12 @@ const HistoryTable = ({
     {
       headerName: "S.No",
       width: 80,
-      pinned: "left",
-      sortable: false,
-      filter: false,
-
+      pinned: isMobile ? undefined : "left",
       valueGetter: (params: any) => {
         if (params.node.rowIndex == null) return "";
         return params.node.rowIndex + 1;
       },
+      filter: true,
     },
     {
       headerName: "Date and Time",
@@ -173,24 +256,28 @@ const HistoryTable = ({
           return cellTime < filterTime ? -1 : 1;
         },
       },
-      flex: 1.5,
+      flex: isMobile ? undefined : 1.5,
+      minWidth: isMobile ? 180 : undefined,
     },
     {
       field: "service",
       headerName: "Service",
-      flex: 1,
+      flex: isMobile ? undefined : 1,
       filter: true,
-      cellStyle: { textTransform: "capitalize" },
     },
     {
       field: "destination",
       headerName: "Destination",
-      flex: 1.5,
+      flex: isMobile ? undefined : 1.5,
+      minWidth: isMobile ? 160 : undefined,
+      filter: true,
     },
     {
       field: "status",
       headerName: "Status",
-      flex: 1,
+      flex: isMobile ? undefined : 1,
+      minWidth: isMobile ? 140 : undefined,
+      filter: true,
       cellStyle: (params): Record<string, string> => {
         const status = params.value?.toLowerCase();
 
@@ -217,13 +304,14 @@ const HistoryTable = ({
     {
       field: "attempts",
       headerName: "Attempts",
-      flex: 0.5,
-      type: "numericColumn",
+      flex: isMobile ? undefined : 0.5,
+      minWidth: isMobile ? 50 : undefined,
+      filter: true,
       cellStyle: { textAlign: "left" },
     },
   ]);
 
- const defaultColDef = useMemo<ColDef>(
+  const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
       filter: !isMobile,
@@ -241,7 +329,8 @@ const HistoryTable = ({
     [isMobile],
   );
 
-  const logsData = data?.data ?? [];
+  // !!!! Do not remove for web socket!! // data ?? [];
+  const logsData = response?.data ?? [];
 
   const onGridReady = (params: GridReadyEvent) => {
     gridApiRef.current = params.api;
@@ -269,7 +358,7 @@ const HistoryTable = ({
     console.log("🧪 ACTIVE FILTER MODEL", model);
   };
 
-  if (isDataLoading) {
+  if (isLoading) {
     return (
       <Box
         display="flex"
@@ -282,12 +371,10 @@ const HistoryTable = ({
     );
   }
 
-  
-
   return (
     <Table
       isMobile={isMobile}
-      isLoading={isDataLoading}
+      isLoading={isLoading}
       columnDefs={columnDefs}
       defaultColDef={defaultColDef}
       logsData={logsData}
@@ -296,8 +383,7 @@ const HistoryTable = ({
       pageSize={pageSize}
       gridApiRef={gridApiRef}
     />
-   
   );
 };
 
-export default HistoryTable;
+export default LogsTable;
