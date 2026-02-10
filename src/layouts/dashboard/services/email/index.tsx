@@ -133,7 +133,7 @@ export default function EmailComposer() {
       fromEmail: from,
       cc,
       bcc,
-      attachments: attachmentsCopy.map((a) => a.name), // ✅ only filenames
+      attachments: attachmentsCopy.map((a: any) => a.name), // ✅ only filenames
     };
 
     mutate(payload, {
@@ -145,7 +145,17 @@ export default function EmailComposer() {
         setSubject("");
         setBody("");
 
-        await uploadToS3FromAttachments(data, attachmentsCopy);
+        if (
+          (Array.isArray(attachmentsCopy) && !attachmentsCopy.length) ||
+          attachmentsCopy.length === 0
+        ) {
+          showSnackbar("Email sent successfully!", "success");
+          queryClient.invalidateQueries({
+            queryKey: logsKeys.all,
+          });
+        } else {
+          await uploadToS3FromAttachments(data, attachmentsCopy);
+        }
       },
       onError: () => {
         showSnackbar("Failed to send email", "error");
@@ -225,8 +235,6 @@ export default function EmailComposer() {
             <EmailEditor
               value={body}
               onChange={setBody}
-              attachments={attachments}
-              setAttachments={setAttachments}
             />
             <AttachmentSection
               attachments={attachments}
@@ -246,8 +254,6 @@ export default function EmailComposer() {
               bcc={bcc}
               subject={subject}
               attachments={attachments}
-              onAdd={handleAttachmentChange}
-              onRemove={removeAttachment}
             />
           </div>
         )}
