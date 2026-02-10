@@ -153,6 +153,7 @@ export function GmailShell({
         onChange={(e) => setSubject(e.target.value)}
         placeholder="Subject"
         className="sms-input"
+        showAsteric
       />
     </div>
   );
