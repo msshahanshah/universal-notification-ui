@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Mail, Slack as SlackIcon, MessageSquare } from "lucide-react";
-import Button from "src/components/button";
-import Input from "src/components/input";
+
 import SMS from "../SMS";
 import EmailComposer from "../email";
 import Slack from "../slack";
@@ -17,26 +16,26 @@ interface Service {
 }
 
 const services: Service[] = [
-  { 
-    key: "slack", 
-    label: "Slack", 
+  {
+    key: "slack",
+    label: "Slack",
     icon: SlackIcon,
     description: "Send messages to Slack channels",
-    status: "healthy"
+    status: "healthy",
   },
-  { 
-    key: "email", 
-    label: "Email", 
+  {
+    key: "email",
+    label: "Email",
     icon: Mail,
     description: "Send transactional emails",
-    status: "healthy"
+    status: "healthy",
   },
-  { 
-    key: "sms", 
-    label: "SMS", 
+  {
+    key: "sms",
+    label: "SMS",
     icon: MessageSquare,
     description: "Send SMS notifications",
-    status: "healthy"
+    status: "healthy",
   },
 ];
 
@@ -49,11 +48,7 @@ export default function ServicesAccordion() {
   });
 
   const handleToggle = (service: ServiceKey) => {
-    setToggles(prev => ({ ...prev, [service]: !prev[service] }));
-  };
-
-  const handleSend = (service: ServiceKey) => {
-    console.log(`Sending ${service} notification`);
+    setToggles((prev) => ({ ...prev, [service]: !prev[service] }));
   };
 
   const renderServiceContent = () => {
@@ -89,16 +84,13 @@ export default function ServicesAccordion() {
         <div style={styles.sidebarHeader}>
           <h3 style={styles.sidebarTitle}>Services</h3>
         </div>
-        
+
         <div style={styles.servicesList}>
           {services.map((service) => {
-            console.log("activeService",activeService)
             const Icon = service.icon;
             const isActive = activeService === service.key;
             const isEnabled = toggles[service.key];
 
-            console.log("isActive",isActive)
-            
             return (
               <div
                 key={service.key}
@@ -106,7 +98,7 @@ export default function ServicesAccordion() {
                 style={{
                   ...styles.serviceCard,
                   ...(isActive ? styles.activeServiceCard : {}),
-                //   ...(isEnabled ? {} : styles.disabledServiceCard),
+                  //   ...(isEnabled ? {} : styles.disabledServiceCard),
                 }}
               >
                 <div style={styles.serviceHeader}>
@@ -114,12 +106,14 @@ export default function ServicesAccordion() {
                     <Icon size={20} className="service-icon" />
                     <div>
                       <div style={styles.serviceLabel}>{service.label}</div>
-                      <div style={styles.serviceDescription}>{service.description}</div>
+                      <div style={styles.serviceDescription}>
+                        {service.description}
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div style={styles.serviceStatus}>
-                    <div 
+                    <div
                       style={{
                         ...styles.statusDot,
                         backgroundColor: getStatusColor(service.status),
@@ -128,7 +122,7 @@ export default function ServicesAccordion() {
                     <span style={styles.statusText}>{service.status}</span>
                   </div>
                 </div>
-                
+
                 <div style={styles.serviceActions}>
                   <button
                     onClick={(e) => {
@@ -137,28 +131,18 @@ export default function ServicesAccordion() {
                     }}
                     style={{
                       ...styles.toggleButton,
-                      backgroundColor: isEnabled ? '#10b981' : '#374151',
+                      backgroundColor: isEnabled ? "#10b981" : "#374151",
                     }}
                   >
-                    <div style={{
-                      ...styles.toggleSlider,
-                      transform: isEnabled ? 'translateX(20px)' : 'translateX(2px)',
-                    }} />
+                    <div
+                      style={{
+                        ...styles.toggleSlider,
+                        transform: isEnabled
+                          ? "translateX(20px)"
+                          : "translateX(2px)",
+                      }}
+                    />
                   </button>
-                  
-                  {/* <Button
-                    label="Send"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSend(service.key);
-                    }}
-                    disabled={!isEnabled}
-                    style={{
-                      ...styles.sendButton,
-                      opacity: isEnabled ? 1 : 0.5,
-                      cursor: isEnabled ? 'pointer' : 'not-allowed',
-                    }}
-                  /> */}
                 </div>
               </div>
             );
@@ -170,16 +154,14 @@ export default function ServicesAccordion() {
       <div style={styles.content}>
         <div style={styles.contentHeader}>
           <div style={styles.contentTitle}>
-            {services.find(s => s.key === activeService)?.label}
+            {services.find((service) => service.key === activeService)?.label}
           </div>
           <div style={styles.contentDescription}>
-            {services.find(s => s.key === activeService)?.description}
+            {services.find((service) => service.key === activeService)?.description}
           </div>
         </div>
-        
-        <div style={styles.contentBody}>
-          {renderServiceContent()}
-        </div>
+
+        <div style={styles.contentBody}>{renderServiceContent()}</div>
       </div>
     </div>
   );
@@ -230,7 +212,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     position: "relative",
-    opacity: .5
+    opacity: 0.5,
   },
 
   activeServiceCard: {
@@ -238,7 +220,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: "rgba(0, 210, 255, 0.4)",
     boxShadow: "0 0 20px rgba(0, 210, 255, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    opacity: 1
+    opacity: 1,
   },
 
   disabledServiceCard: {
@@ -376,7 +358,7 @@ const styles: Record<string, React.CSSProperties> = {
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   .service-icon {
-    color: #60a5fa;
+    color: rgb(79, 195, 247);
     flex-shrink: 0;
     margin-top: 2px;
   }

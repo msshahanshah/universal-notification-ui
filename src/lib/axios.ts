@@ -46,6 +46,7 @@ const getRefreshToken = async (originalRequest: any) => {
 api.interceptors.request.use(
   (config) => {
     config.headers["X-Client-Id"] = "GKMIT";
+    config.headers["ngrok-skip-browser-warning"] = "true";
     const token = localStorage.getItem("accessToken");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -70,16 +71,14 @@ api.interceptors.response.use(
       window.location.href = "/";
       return;
     }
-    // Centralized error handling
+
     if (error.response?.status === 401 && !originalRequest._retry) {
-      console.log("error.response?.status", error.response?.status);
       if (isRefreshing) {
-        // Queue request until refresh finishes
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token: string) => {
               originalRequest.headers.Authorization = `Bearer ${token}`;
-              resolve(api(originalRequest));
+              resolve(api(originalRequest)); // UI waits for retry
             },
             reject,
           });
@@ -89,10 +88,18 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      await getRefreshToken(originalRequest);
-      localStorage.removeItem("token");
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await getRefreshToken(originalRequest);
+          isRefreshing = false;
+          resolve(response); // only success reaches UI
+        } catch (err) {
+          isRefreshing = false;
+          processQueue(err, null);
+          reject(err); // now toast is valid
+        }
+      });
     }
-    return Promise.reject(error);
   },
 );
 

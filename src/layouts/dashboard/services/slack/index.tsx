@@ -9,10 +9,10 @@ import { useSnackbar } from "src/provider/snackbar";
 import FallbackLoader from "src/components/fallback-loader/fallback-loader";
 import { useLogs } from "src/hooks/useLogs";
 import { logsKeys } from "src/api/queryKeys";
-
-import "./slack.css";
 import ErrorText from "src/components/error-text";
 import { slackRegex } from "src/utility/constants";
+
+import "./slack.css";
 
 const HistoryTable = lazy(() => import("./history-table"));
 
@@ -89,8 +89,14 @@ export default function Slack() {
             }
             setChannelID(e.target.value);
           }}
+          showAsteric
         />
 
+        {/* TODO make textarea reusable */}
+        <label style={{ marginBottom: 4, fontSize: "12px" }}>
+          Message
+          <span style={{ color: "red",marginLeft:2 }}>*</span>
+        </label>
         <textarea
           className="sms-textarea"
           placeholder="Type your message..."

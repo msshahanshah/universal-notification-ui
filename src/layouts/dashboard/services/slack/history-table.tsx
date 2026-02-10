@@ -3,14 +3,15 @@ import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
-import { useSnackbar } from "src/provider/snackbar";
-import Loader from "src/components/loader";
 import { useLogStatus } from "src/hooks/useLogs";
+import Loader from "src/components/loader";
+import { useSnackbar } from "src/provider/snackbar";
+
 import "../../../../App.css";
 import "../../logs/logs-table.css";
-
+import "./history-table.css";
 import RefreshToken from "../../../../assets/refresh.png";
-import { myTheme } from "../../logs/constant";
+import { Table } from "src/components/ag-grid-react/table";
 
 export interface LogData {
   id: number;
@@ -37,6 +38,19 @@ const HistoryTable = ({
 }) => {
   const wValue = "100%";
   const hValue = "100%";
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+  const showSnackbar = useSnackbar();
+
+  useEffect(() => {
+    if (isError) {
+      showSnackbar(error?.message || "Failed to fetch logs", "error");
+    }
+  }, [isError]);
+
   const containerStyle = useMemo(
     () => ({
       width: wValue,
@@ -52,7 +66,6 @@ const HistoryTable = ({
     [],
   );
 
-  const showSnackbar = useSnackbar();
   const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
   const gridApiRef = useRef<GridApi | null>(null);
@@ -66,15 +79,6 @@ const HistoryTable = ({
       error: isStatusErrorMessage,
     } = useLogStatus(data.messageId);
 
-    useEffect(() => {
-      if (isStatusError) {
-        showSnackbar(
-          isStatusErrorMessage?.message || "Failed to fetch status",
-          "error",
-        );
-      }
-    }, [isStatusError]);
-
     const latestStatus = statusData?.data?.deliveryStatus ?? data.status;
 
     useEffect(() => {
@@ -84,40 +88,13 @@ const HistoryTable = ({
     }, [latestStatus, data.status, node]);
 
     useEffect(() => {
-      if (!gridApiRef.current) return;
-
-      if (isDataLoading) {
-        gridApiRef.current.showLoadingOverlay();
-        return;
-      }
-
-      if (isError) {
-        gridApiRef.current?.setGridOption(
-          "overlayNoRowsTemplate",
-          `<span style="color:#d32f2f;font-size:14px;">
-    ${error?.message || "Something went wrong"}
-  </span>`,
+      if (isStatusError) {
+        showSnackbar(
+          isStatusErrorMessage?.message || "Failed to fetch status",
+          "error",
         );
-
-        gridApiRef.current?.showNoRowsOverlay();
-
-        return;
       }
-
-      if (!data?.data || data.data.length === 0) {
-        gridApiRef.current?.setGridOption(
-          "overlayNoRowsTemplate",
-          `<span style="color:#666;font-size:14px;">
-    No logs available
-  </span>`,
-        );
-
-        gridApiRef.current?.showNoRowsOverlay();
-        return;
-      }
-
-      gridApiRef.current.hideOverlay();
-    }, [isDataLoading, isError, data, error]);
+    }, [isStatusError]);
 
     const handleRefresh = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -126,16 +103,8 @@ const HistoryTable = ({
       refetchLogStatus();
     };
 
-    const showRefreshSnackbar = () => {
-      if (!isFetchingData && statusData?.data?.deliveryStatus) {
-        return showSnackbar("Status refreshed successfully!", "success");
-      }
-      return null;
-    };
-
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-        {/* <span>{showRefreshSnackbar() || null}</span> */}
         <div>
           {latestStatus.charAt(0).toUpperCase() + latestStatus.slice(1)}
         </div>
@@ -159,23 +128,52 @@ const HistoryTable = ({
 
   const [columnDefs] = useState<ColDef[]>([
     {
-      field: "messageDate",
-      headerName: "Date and Time",
-      flex: 1.5,
+      headerName: "S.No",
+      width: 80,
+      pinned: "left",
+      sortable: false,
+      filter: false,
 
-      filter: "agTextColumnFilter",
+      valueGetter: (params: any) => {
+        if (params.node.rowIndex == null) return "";
+        return params.node.rowIndex + 1;
+      },
+    },
+    {
+      headerName: "Date and Time",
+      field: "messageDate",
+      filter: "agDateColumnFilter",
 
       valueFormatter: (params) =>
-        params.value ? new Date(params.value).toLocaleString("en-GB") : "-",
-
-      filterValueGetter: (params) =>
-        params.data?.messageDate
-          ? new Date(params.data.messageDate).toLocaleString("en-GB")
-          : "",
+        params.value
+          ? new Date(params.value).toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true, // 👈 AM/PM
+            })
+          : "-",
 
       filterParams: {
-        debounceMs: 200,
+        filterOptions: ["equals", "inRange"],
+        suppressAndOrCondition: true,
+        comparator: (filterDate: Date, cellValue: string) => {
+          if (!cellValue) return -1;
+
+          const cellDate = new Date(cellValue);
+
+          // Normalize for exact matching
+          const cellTime = cellDate.setMilliseconds(0);
+          const filterTime = filterDate.setMilliseconds(0);
+
+          if (cellTime === filterTime) return 0;
+          return cellTime < filterTime ? -1 : 1;
+        },
       },
+      flex: 1.5,
     },
     {
       field: "service",
@@ -221,46 +219,84 @@ const HistoryTable = ({
       headerName: "Attempts",
       flex: 0.5,
       type: "numericColumn",
-      cellStyle: { textAlign: "left", minWidth: 100 },
+      cellStyle: { textAlign: "left" },
     },
   ]);
 
-  const defaultColDef = useMemo<ColDef>(
+ const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
-      filter: true,
-      resizable: true,
-      floatingFilter: true,
-      suppressMenu: true,
-      wrapHeaderText: true,
-      autoHeaderHeight: true,
+      filter: !isMobile,
+      floatingFilter: !isMobile,
+      resizable: !isMobile,
+      // suppressMenu: true,
       suppressMovable: true,
+
+      // 🔑 CRITICAL
+      wrapHeaderText: false,
+      autoHeaderHeight: false,
+      headerClass: "ag-header-mobile",
+      cellClass: "ag-cell-mobile",
     }),
-    [],
+    [isMobile],
   );
 
-  const logsData = data || [];
+  const logsData = data?.data ?? [];
+
+  const onGridReady = (params: GridReadyEvent) => {
+    gridApiRef.current = params.api;
+  };
+
+  const onPaginationChanged = () => {
+    if (!gridApiRef.current) return;
+
+    const newPage = gridApiRef.current.paginationGetCurrentPage() + 1;
+    const newPageSize = gridApiRef.current.paginationGetPageSize();
+
+    if (newPage !== page) setPage(newPage);
+
+    if (newPageSize !== pageSize) {
+      setPageSize(newPageSize);
+      setPage(1); // reset page on page size change
+    }
+  };
+
+  const onFilterChanged = () => {
+    if (!gridApiRef.current) return;
+
+    const model = gridApiRef.current.getFilterModel();
+
+    console.log("🧪 ACTIVE FILTER MODEL", model);
+  };
+
+  if (isDataLoading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  
 
   return (
-    <div style={containerStyle} className="ag-theme-quartz grid-12-font">
-      <div style={{ ...gridStyle, minHeight: "300px" }}>
-        <AgGridReact
-          enableCellTextSelection={true}
-          ensureDomOrder={true}
-          columnDefs={columnDefs}
-          defaultColDef={defaultColDef}
-          rowData={logsData?.data as LogData[]}
-          rowHeight={50}
-          pagination={true}
-          paginationPageSize={10}
-          paginationPageSizeSelector={[10]}
-          theme={myTheme}
-          animateRows
-          suppressCellFocus={false}
-          headerHeight={40}
-        />
-      </div>
-    </div>
+    <Table
+      isMobile={isMobile}
+      isLoading={isDataLoading}
+      columnDefs={columnDefs}
+      defaultColDef={defaultColDef}
+      logsData={logsData}
+      onPaginationChanged={onPaginationChanged}
+      onFilterChanged={onFilterChanged}
+      pageSize={pageSize}
+      gridApiRef={gridApiRef}
+    />
+   
   );
 };
 

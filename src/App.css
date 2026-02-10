@@ -152,6 +152,9 @@
     gap: 0;
     text-align: center;
   }
+  /* .ag-header-cell {
+    min-width: 100px;
+  } */
 }
 
 /* Style the text and headers */

@@ -7,7 +7,8 @@ export const useLogs = (params?: Record<string, any>) => {
   return useQuery({
     queryKey: logsKeys.list(params as any),
     queryFn: () => fetchLogs(params),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: true,
+    staleTime: 0,
   });
 };
 

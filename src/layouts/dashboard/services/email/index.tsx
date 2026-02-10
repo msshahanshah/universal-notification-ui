@@ -44,12 +44,14 @@ export default function EmailComposer() {
         subject,
         body,
         fromEmail: from,
+        attachments: false
       },
       {
         onSuccess: (data) => {
           setTo("");
+          setFrom("");
           setSubject("");
-          setBody("<p></p>");
+          setBody("");
           showSnackbar(
             data?.message || "Notification request accepted and queued.",
             "info",
@@ -62,6 +64,7 @@ export default function EmailComposer() {
     );
   };
 
+  console.log("body",body)
   const isDisabled = !from || !subject || !to || isBodyEmpty(body) || hasErrors;
 
   return (

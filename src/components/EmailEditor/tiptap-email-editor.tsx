@@ -1,5 +1,6 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { useEffect } from "react";
 
 import { EmailToolbar } from "./editor-toolbar";
 
@@ -18,6 +19,19 @@ export function EmailEditor({ value, onChange }: Props) {
       onChange(editor.getHTML());
     },
   });
+
+  // 🔑 THIS is what you're missing
+  useEffect(() => {
+    if (!editor) return;
+
+    const current = editor.getHTML();
+
+    // Prevent infinite loop
+    if (value !== current) {
+      editor.commands.setContent(value || "", { emitUpdate: false }); 
+      // second param = don't emit onUpdate again
+    }
+  }, [value, editor]);
 
   return (
     <div style={editorContainer}>
