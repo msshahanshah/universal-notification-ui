@@ -48,7 +48,8 @@ api.interceptors.request.use(
     config.headers["X-Client-Id"] = "GKMIT";
     config.headers["ngrok-skip-browser-warning"] = "true";
     const token = localStorage.getItem("accessToken");
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+    if (token && !config?.url?.includes("bucket"))
+      config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error),

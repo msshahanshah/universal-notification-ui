@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from "react";
+import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 
@@ -10,11 +10,9 @@ import ServicesAccordion from "./layouts/dashboard/services/demo/ServicesAccordi
 import Services1 from "./layouts/dashboard/services/demo/services";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
-import FallbackLoader from "./components/fallback-loader/fallback-loader";
 import ServiceGuard from "./routes/service-guard";
-
-const EmailComposer = lazy(() => import("./layouts/dashboard/services/email"));
-const SMS = lazy(() => import("./layouts/dashboard/services/SMS"));
+import EmailComposer from "./layouts/dashboard/services/email";
+import SMS from "./layouts/dashboard/services/SMS";
 
 export default function App() {
   ModuleRegistry.registerModules([AllCommunityModule]);
@@ -29,22 +27,8 @@ export default function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/services/demo1" element={<Services1 />} />
         <Route path="/services/demo2" element={<ServicesAccordion />} />
-        <Route
-          path="/services/email-editor"
-          element={
-            <Suspense fallback={<FallbackLoader />}>
-              <EmailComposer />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/services/sms"
-          element={
-            <Suspense fallback={<FallbackLoader />}>
-              <SMS />
-            </Suspense>
-          }
-        />
+        <Route path="/services/email-editor" element={<EmailComposer />} />
+        <Route path="/services/sms" element={<SMS />} />
         <Route element={<ServiceGuard service="slack" />}>
           <Route path="/services/slack" element={<Slack />} />
         </Route>

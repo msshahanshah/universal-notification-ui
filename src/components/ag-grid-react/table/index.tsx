@@ -3,6 +3,7 @@ import { GridReadyEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 
 import { myTheme } from "src/layouts/dashboard/logs/constant";
+import './table.css'
 
 export const Table = ({
   isMobile,
