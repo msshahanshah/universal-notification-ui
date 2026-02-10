@@ -1,31 +1,3 @@
-// import "./attachmentSection.css";
-
-// function AttachmentSection({ attachments, onAdd, onRemove }: any) {
-//   return (
-//     <div className="attach-wrapper">
-//       <label className="attach-btn">
-//         📎 Attach Files
-//         <input type="file" multiple onChange={onAdd} hidden />
-//       </label>
-
-//       <div className="attach-preview">
-//         {attachments.map((a: any) => (
-//           <div key={a.id} className="attach-item">
-//             {a.previewUrl ? (
-//               <img src={a.previewUrl} alt="" />
-//             ) : (
-//               <div className="file-icon">📄</div>
-//             )}
-//             <button onClick={() => onRemove(a.id)}>✕</button>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
-
-// export default AttachmentSection;
-
 import "./attachmentSection.css";
 
 function AttachmentSection({
