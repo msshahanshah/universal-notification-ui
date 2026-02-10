@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { GmailShell } from "src/components/EmailEditor/gmail-shell";
 import { EmailEditor } from "src/components/EmailEditor/tiptap-email-editor";
@@ -7,10 +8,55 @@ import { Toggle } from "src/components/toggle";
 import Button from "src/components/button";
 import { useEmailService } from "src/hooks/useService";
 import { useSnackbar } from "src/provider/snackbar";
+import api from "src/lib/axios";
+import { logsKeys } from "src/api/queryKeys";
 
 import "./index.css";
+import AttachmentSection from "./attachmentSection";
 
 type ViewMode = "editor" | "preview";
+
+type Attachment = {
+  file: File;
+  id: string;
+  previewUrl?: string; // for images
+};
+
+type S3Item = {
+  fileName: string;
+  file: File; // your local file object
+  s3: {
+    url: string;
+    fields: Record<string, string>;
+  };
+};
+
+export const uploadFilesToS3 = async (items: S3Item[]) => {
+  for (const item of items) {
+    const formData = new FormData();
+
+    // 🔑 Add all S3 required fields
+    Object.entries(item.s3.fields).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    // 🔑 File MUST be last
+    formData.append("file", item.file);
+
+    try {
+      await api.post(item.s3.url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(`✅ Uploaded: ${item.fileName}`);
+    } catch (error) {
+      console.error(`❌ Failed: ${item.fileName}`, error);
+      throw error; // stop if one fails
+    }
+  }
+};
 
 export default function EmailComposer() {
   const [view, setView] = useState<ViewMode>("editor");
@@ -20,7 +66,10 @@ export default function EmailComposer() {
   const [bcc, setBcc] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [hasErrors, setHasErrors] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { mutate } = useEmailService();
 
@@ -36,35 +85,101 @@ export default function EmailComposer() {
     return div.textContent.trim().length === 0;
   }
 
-  const handleSend = () => {
-    mutate(
-      {
-        service: "email",
-        destination: to?.toLocaleLowerCase(),
-        subject,
-        body,
-        fromEmail: from,
-        cc,
-        bcc,
+  const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
+    if (!data?.preSignedUrls?.length) return;
+
+    for (let i = 0; i < data.preSignedUrls.length; i++) {
+      const presigned = data.preSignedUrls[i];
+      const fileObj = attachmentsCopy[i]?.file;
+
+      if (!fileObj) continue;
+
+      const formData = new FormData();
+
+      // Append S3 fields
+      Object.entries(presigned.s3.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+
+      // File MUST be last
+      formData.append("file", fileObj);
+
+      try {
+        await api.post(presigned.s3.url, formData, {
+          headers: { "Content-Type": "multipart/form-data", Authorization: `` },
+        });
+
+        setAttachments([]);
+        showSnackbar("Email sent successfully!", "success");
+        queryClient.invalidateQueries({
+          queryKey: logsKeys.all,
+        });
+      } catch (err) {
+        console.error("❌ Upload failed:", fileObj.name, err);
+        showSnackbar("Failed to send email", "error");
+        throw err;
+      }
+    }
+  };
+
+  const handleSend = async () => {
+    const attachmentsCopy = [...attachments];
+
+    const payload = {
+      service: "email",
+      destination: to.toLowerCase(),
+      subject,
+      body,
+      fromEmail: from,
+      cc,
+      bcc,
+      attachments: attachmentsCopy.map((a) => a.name), // ✅ only filenames
+    };
+
+    mutate(payload, {
+      onSuccess: async (data) => {
+        setTo("");
+        setCc("");
+        setBcc("");
+        setFrom("");
+        setSubject("");
+        setBody("");
+
+        await uploadToS3FromAttachments(data, attachmentsCopy);
       },
-      {
-        onSuccess: (data) => {
-          setTo("");
-          setCc("");
-          setBcc("");
-          setFrom("");
-          setSubject("");
-          setBody("");
-          showSnackbar(
-            data?.message || "Notification request accepted and queued.",
-            "info",
-          );
-        },
-        onError: () => {
-          showSnackbar("Failed to send email", "error");
-        },
+      onError: () => {
+        showSnackbar("Failed to send email", "error");
       },
-    );
+    });
+  };
+
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+
+    if (!files.length) return;
+
+    setAttachments((prev) => [
+      ...prev,
+      ...files.map((file) => {
+        const isImage = file.type.startsWith("image/");
+
+        return {
+          id: crypto.randomUUID(),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          file, // 🔥 store real File
+          previewUrl: isImage ? URL.createObjectURL(file) : undefined,
+        };
+      }),
+    ]);
+
+    // allow re-selecting same file again
+    e.target.value = "";
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
   const isDisabled = !from || !subject || !to || isBodyEmpty(body) || hasErrors;
@@ -104,13 +219,37 @@ export default function EmailComposer() {
               setCc={setCc}
               setBcc={setBcc}
               onValidationChange={setHasErrors}
+              attachments={attachments}
+              setAttachments={setAttachments}
             />
-            <EmailEditor value={body} onChange={setBody} />
+            <EmailEditor
+              value={body}
+              onChange={setBody}
+              attachments={attachments}
+              setAttachments={setAttachments}
+            />
+            <AttachmentSection
+              attachments={attachments}
+              onAdd={handleAttachmentChange}
+              onRemove={removeAttachment}
+            />
           </>
         )}
 
         {view === "preview" && (
-          <EmailPreview html={body} from={from} to={to} subject={subject} />
+          <div style={{ display: view === "preview" ? "block" : "none" }}>
+            <EmailPreview
+              html={body}
+              from={from}
+              to={to}
+              cc={cc}
+              bcc={bcc}
+              subject={subject}
+              attachments={attachments}
+              onAdd={handleAttachmentChange}
+              onRemove={removeAttachment}
+            />
+          </div>
         )}
         <div className="email-footer">
           <Button

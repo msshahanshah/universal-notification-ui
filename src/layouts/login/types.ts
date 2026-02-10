@@ -17,7 +17,7 @@ export interface EmailPayload {
   fromEmail: string;
   cc?: string;
   bcc?: string;
-  attachments?: boolean;
+  attachments?: Array<string>;
 }
 
 export interface SMSPayload {
