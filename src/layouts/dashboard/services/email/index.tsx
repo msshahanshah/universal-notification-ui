@@ -44,11 +44,14 @@ export default function EmailComposer() {
         subject,
         body,
         fromEmail: from,
-        attachments: false
+        cc,
+        bcc,
       },
       {
         onSuccess: (data) => {
           setTo("");
+          setCc("");
+          setBcc("");
           setFrom("");
           setSubject("");
           setBody("");
@@ -64,7 +67,6 @@ export default function EmailComposer() {
     );
   };
 
-  console.log("body",body)
   const isDisabled = !from || !subject || !to || isBodyEmpty(body) || hasErrors;
 
   return (

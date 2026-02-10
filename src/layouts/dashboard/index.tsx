@@ -2,8 +2,7 @@ import { Box } from "@mui/material";
 import { lazy, Suspense } from "react";
 
 import FallbackLoader from "src/components/fallback-loader/fallback-loader";
-
-const LogsTable = lazy(() => import("./logs/logs-table"));
+import LogsTable from "./logs/logs-table";
 
 export default function Dashboard() {
   const wValue = "100%";

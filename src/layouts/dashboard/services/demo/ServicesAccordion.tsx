@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Mail, Slack as SlackIcon, MessageSquare } from "lucide-react";
-
 import SMS from "../SMS";
 import EmailComposer from "../email";
 import Slack from "../slack";
@@ -106,14 +105,12 @@ export default function ServicesAccordion() {
                     <Icon size={20} className="service-icon" />
                     <div>
                       <div style={styles.serviceLabel}>{service.label}</div>
-                      <div style={styles.serviceDescription}>
-                        {service.description}
-                      </div>
+                      <div style={styles.serviceDescription}>{service.description}</div>
                     </div>
                   </div>
-
+                  
                   <div style={styles.serviceStatus}>
-                    <div
+                    <div 
                       style={{
                         ...styles.statusDot,
                         backgroundColor: getStatusColor(service.status),
@@ -122,7 +119,7 @@ export default function ServicesAccordion() {
                     <span style={styles.statusText}>{service.status}</span>
                   </div>
                 </div>
-
+                
                 <div style={styles.serviceActions}>
                   <button
                     onClick={(e) => {
@@ -131,18 +128,28 @@ export default function ServicesAccordion() {
                     }}
                     style={{
                       ...styles.toggleButton,
-                      backgroundColor: isEnabled ? "#10b981" : "#374151",
+                      backgroundColor: isEnabled ? '#10b981' : '#374151',
                     }}
                   >
-                    <div
-                      style={{
-                        ...styles.toggleSlider,
-                        transform: isEnabled
-                          ? "translateX(20px)"
-                          : "translateX(2px)",
-                      }}
-                    />
+                    <div style={{
+                      ...styles.toggleSlider,
+                      transform: isEnabled ? 'translateX(20px)' : 'translateX(2px)',
+                    }} />
                   </button>
+                  
+                  {/* <Button
+                    label="Send"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSend(service.key);
+                    }}
+                    disabled={!isEnabled}
+                    style={{
+                      ...styles.sendButton,
+                      opacity: isEnabled ? 1 : 0.5,
+                      cursor: isEnabled ? 'pointer' : 'not-allowed',
+                    }}
+                  /> */}
                 </div>
               </div>
             );
@@ -154,14 +161,16 @@ export default function ServicesAccordion() {
       <div style={styles.content}>
         <div style={styles.contentHeader}>
           <div style={styles.contentTitle}>
-            {services.find((service) => service.key === activeService)?.label}
+            {services.find(s => s.key === activeService)?.label}
           </div>
           <div style={styles.contentDescription}>
-            {services.find((service) => service.key === activeService)?.description}
+            {services.find(s => s.key === activeService)?.description}
           </div>
         </div>
-
-        <div style={styles.contentBody}>{renderServiceContent()}</div>
+        
+        <div style={styles.contentBody}>
+          {renderServiceContent()}
+        </div>
       </div>
     </div>
   );
@@ -212,7 +221,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     transition: "all 0.2s ease",
     position: "relative",
-    opacity: 0.5,
+    opacity: .5
   },
 
   activeServiceCard: {
@@ -220,7 +229,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderColor: "rgba(0, 210, 255, 0.4)",
     boxShadow: "0 0 20px rgba(0, 210, 255, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.08)",
-    opacity: 1,
+    opacity: 1
   },
 
   disabledServiceCard: {

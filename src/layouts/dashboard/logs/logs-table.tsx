@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { Box, CircularProgress } from "@mui/material";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import Loader from "src/components/loader";
 import { useSnackbar } from "src/provider/snackbar";
+import { Table } from "src/components/ag-grid-react/table";
 
 import "../../../App.css";
 import "./logs-table.css";
-import { myTheme } from "./constant";
 import RefreshToken from "../../../assets/refresh.png";
-import { Table } from "src/components/ag-grid-react/table";
-import { useWebsocket } from "src/hooks/useWebsocket";
+// import { useWebsocket } from "src/hooks/useWebsocket";
 
 export interface LogData {
   id: number;
@@ -212,104 +210,6 @@ const LogsTable = () => {
       </div>
     );
   };
-
-  // const [columnDefs] = useState<ColDef[]>([
-  //   {
-  //     headerName: "S.No",
-  //     width: 80,
-  //     // pinned: "left",
-  //     sortable: false,
-  //     filter: false,
-  //     pinned: isMobile ? undefined : "left",
-
-  //     valueGetter: (params: any) => {
-  //       if (params.node.rowIndex == null) return "";
-  //       return params.node.rowIndex + 1;
-  //     },
-  //   },
-  //   {
-  //     headerName: "Date and Time",
-  //     field: "messageDate",
-  //     filter: "agDateColumnFilter",
-
-  //     valueFormatter: (params) =>
-  //       params.value
-  //         ? new Date(params.value).toLocaleString("en-GB", {
-  //             day: "2-digit",
-  //             month: "2-digit",
-  //             year: "numeric",
-  //             hour: "2-digit",
-  //             minute: "2-digit",
-  //             second: "2-digit",
-  //             hour12: true, // 👈 AM/PM
-  //           })
-  //         : "-",
-
-  //     filterParams: {
-  //       filterOptions: ["equals", "inRange"],
-  //       suppressAndOrCondition: true,
-  //       comparator: (filterDate: Date, cellValue: string) => {
-  //         if (!cellValue) return -1;
-
-  //         const cellDate = new Date(cellValue);
-
-  //         // Normalize for exact matching
-  //         const cellTime = cellDate.setMilliseconds(0);
-  //         const filterTime = filterDate.setMilliseconds(0);
-
-  //         if (cellTime === filterTime) return 0;
-  //         return cellTime < filterTime ? -1 : 1;
-  //       },
-  //     },
-  //     flex: 1.5,
-  //   },
-  //   {
-  //     field: "service",
-  //     headerName: "Service",
-  //     flex: 1,
-  //     filter: true,
-  //     cellStyle: { textTransform: "capitalize" },
-  //   },
-  //   {
-  //     field: "destination",
-  //     headerName: "Destination",
-  //     flex: 1.5,
-  //   },
-  //   {
-  //     field: "status",
-  //     headerName: "Status",
-  //     flex: 1,
-  //     cellStyle: (params): Record<string, string> => {
-  //       const status = params.value?.toLowerCase();
-
-  //       if (status === "sent") {
-  //         return { color: "#04b34f", fontWeight: "500" };
-  //       }
-  //       if (status === "failed") {
-  //         return { color: "#BB2124", fontWeight: "500" };
-  //       }
-  //       if (status === "pending") {
-  //         return { color: "#FFC107", fontWeight: "500" };
-  //       }
-  //       if (status === "processing") {
-  //         return { color: "#17a2b8", fontWeight: "500" };
-  //       }
-  //       return { color: "#666", fontWeight: "500" };
-  //     },
-  //     cellRenderer: StatusCell,
-  //     valueFormatter: (params) => {
-  //       if (params.value === undefined || params.value === null) return "-";
-  //       return params.value.charAt(0).toUpperCase() + params.value.slice(1);
-  //     },
-  //   },
-  //   {
-  //     field: "attempts",
-  //     headerName: "Attempts",
-  //     flex: 0.5,
-  //     type: "numericColumn",
-  //     cellStyle: { textAlign: "left" },
-  //   },
-  // ]);
 
   const [columnDefs] = useState<ColDef[]>([
     {
