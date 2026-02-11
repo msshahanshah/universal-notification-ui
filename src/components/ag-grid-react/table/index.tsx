@@ -59,7 +59,7 @@ export const Table = ({
           rowHeight={50}
           pagination={true}
           paginationPageSize={pageSize}
-          paginationPageSizeSelector={[50, 75, 100]}
+          paginationPageSizeSelector={[pageSize,50, 75, 100]}
           suppressPaginationPanel={false}
           animateRows
           headerHeight={50}
