@@ -9,3 +9,42 @@
 .ag-root {
   overflow: visible !important;
 }
+
+.ag-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ag-tooltip {
+  z-index: 99999 !important;
+}
+
+.ag-theme-quartz {
+  position: relative;
+  z-index: 1;
+}
+
+/* Tooltip container */
+.ag-tooltip {
+  background: rgba(15, 23, 32, 0.95) !important;
+  color: #e6edf3 !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,0.6),
+    0 0 12px rgba(0, 210, 255, 0.25) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(6px);
+  max-width: 320px;
+  white-space: normal !important;
+  word-break: break-word;
+  z-index: 99999 !important;
+}
+
+/* Small arrow */
+.ag-tooltip::after {
+  border-top-color: rgba(15, 23, 32, 0.95) !important;
+}

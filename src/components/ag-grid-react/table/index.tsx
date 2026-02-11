@@ -17,6 +17,7 @@ export const Table = ({
   paginationPageSize,
   paginationPageSizeSelector,
   shouldPaginate,
+  enableBrowserTooltips
 }: any) => {
   const wValue = "100%";
   const hValue = "100%";
@@ -70,6 +71,8 @@ export const Table = ({
           enableCellTextSelection
           loading={isLoading}
           onFilterChanged={onFilterChanged}
+          enableBrowserTooltips={enableBrowserTooltips}
+          tooltipShowDelay={500}
         />
       </div>
     </div>

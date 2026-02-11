@@ -226,6 +226,7 @@ const LogsTable = () => {
       headerName: "Date and Time",
       field: "messageDate",
       filter: "agDateColumnFilter",
+      tooltipField: "messageDate",
 
       valueFormatter: (params) =>
         params.value
@@ -267,6 +268,7 @@ const LogsTable = () => {
       filterParams: {
         filterOptions: ["equals", "contains"],
       },
+      tooltipField: "service",
     },
     {
       field: "destination",
@@ -277,6 +279,7 @@ const LogsTable = () => {
       filterParams: {
         filterOptions: ["contains", "equals"],
       },
+      tooltipField: "destination",
     },
     {
       field: "status",
@@ -309,6 +312,7 @@ const LogsTable = () => {
       filterParams: {
         filterOptions: ["contains", "equals"],
       },
+      tooltipField: "status",
     },
     {
       field: "attempts",
@@ -320,6 +324,7 @@ const LogsTable = () => {
       filterParams: {
         filterOptions: ["contains", "equals"],
       },
+      tooltipField: "attempts",
     },
   ]);
 
@@ -397,6 +402,7 @@ const LogsTable = () => {
       paginationPageSize={pageSize}
       paginationPageSizeSelector={[50, 75, 100]}
       shouldPaginate={true}
+      enableBrowserTooltips={true}
     />
   );
 };
