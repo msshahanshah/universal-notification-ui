@@ -176,13 +176,6 @@ const HistoryTable = ({
       flex: 1.5,
     },
     {
-      field: "service",
-      headerName: "Service",
-      flex: 1,
-      filter: true,
-      cellStyle: { textTransform: "capitalize" },
-    },
-    {
       field: "destination",
       headerName: "Destination",
       flex: 1.5,
@@ -223,7 +216,7 @@ const HistoryTable = ({
     },
   ]);
 
- const defaultColDef = useMemo<ColDef>(
+  const defaultColDef = useMemo<ColDef>(
     () => ({
       sortable: true,
       filter: !isMobile,
@@ -282,8 +275,6 @@ const HistoryTable = ({
     );
   }
 
-  
-
   return (
     <Table
       isMobile={isMobile}
@@ -296,7 +287,6 @@ const HistoryTable = ({
       pageSize={pageSize}
       gridApiRef={gridApiRef}
     />
-   
   );
 };
 
