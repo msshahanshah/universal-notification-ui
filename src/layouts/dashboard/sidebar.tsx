@@ -78,11 +78,18 @@ const Sidebar = ({
     },
   });
 
-  const filteredItems = sidebarItems.filter((item) =>
-    item.label.toLowerCase().includes(search.toLowerCase()),
-  );
+  // const filteredItems = sidebarItems.filter((item) =>
+  //   item.label.toLowerCase().includes(search.toLowerCase()),
+  // );
 
   const q = search.trim().toLowerCase();
+
+  const matchesDashboard = "dashboard".includes(q);
+  const matchesServicesWord = "services".includes(q);
+
+  const matchesServiceItems = sidebarItems.some((item) =>
+    item.label.toLowerCase().includes(q),
+  );
 
   const isSearchingDashboard = q.length > 0 && "dashboard".includes(q);
 
@@ -90,6 +97,17 @@ const Sidebar = ({
     q.length > 0 &&
     (sidebarItems.some((item) => item.label.toLowerCase().includes(q)) ||
       "services".includes(q));
+
+  const isSearching = q.length > 0;
+
+  const showDashboard = !isSearching || matchesDashboard;
+
+  const showServicesParent =
+    !isSearching || matchesServicesWord || matchesServiceItems;
+
+  const filteredItems = !isSearching
+    ? sidebarItems
+    : sidebarItems.filter((item) => item.label.toLowerCase().includes(q));
 
   const drawerContent = (
     <div
@@ -133,7 +151,7 @@ const Sidebar = ({
       {/* TOP */}
       <List>
         {/* Dashboard */}
-        {!isSearchingServices && (
+        {showDashboard && (
           <ListItemButton
             onClick={() => navigate("/dashboard")}
             sx={getItemStyles("/dashboard")}
@@ -152,7 +170,7 @@ const Sidebar = ({
         )}
 
         {/* Services Parent */}
-        {!isSearchingDashboard && (
+        {showServicesParent && (
           <ListItemButton
             onClick={() => navigate("/services/slack")}
             sx={getItemStyles("/services")}
@@ -172,7 +190,11 @@ const Sidebar = ({
 
         {/* Services Sub Tabs */}
         {open && (
-          <Collapse in={isServicesActive} timeout="auto" unmountOnExit>
+          <Collapse
+            in={isServicesActive || (isSearching && matchesServiceItems)}
+            timeout="auto"
+            unmountOnExit
+          >
             <List disablePadding>
               {filteredItems.map((item) => {
                 const Icon = item.icon;
