@@ -220,7 +220,7 @@ const LogsTable = () => {
         if (params.node.rowIndex == null) return "";
         return params.node.rowIndex + 1;
       },
-      filter: true,
+      filter: false,
     },
     {
       headerName: "Date and Time",
@@ -264,6 +264,9 @@ const LogsTable = () => {
       headerName: "Service",
       flex: isMobile ? undefined : 1,
       filter: true,
+      filterParams: {
+        filterOptions: ["equals", "contains"],
+      },
     },
     {
       field: "destination",
@@ -271,6 +274,9 @@ const LogsTable = () => {
       flex: isMobile ? undefined : 1.5,
       minWidth: isMobile ? 160 : undefined,
       filter: true,
+      filterParams: {
+        filterOptions: ["contains", "equals"],
+      },
     },
     {
       field: "status",
@@ -300,6 +306,9 @@ const LogsTable = () => {
         if (params.value === undefined || params.value === null) return "-";
         return params.value.charAt(0).toUpperCase() + params.value.slice(1);
       },
+      filterParams: {
+        filterOptions: ["contains", "equals"],
+      },
     },
     {
       field: "attempts",
@@ -308,6 +317,9 @@ const LogsTable = () => {
       minWidth: isMobile ? 50 : undefined,
       filter: true,
       cellStyle: { textAlign: "left" },
+      filterParams: {
+        filterOptions: ["contains", "equals"],
+      },
     },
   ]);
 
