@@ -95,7 +95,7 @@ export default function Slack() {
         {/* TODO make textarea reusable */}
         <label style={{ marginBottom: 4, fontSize: "12px" }}>
           Message
-          <span style={{ color: "red",marginLeft:2 }}>*</span>
+          <span style={{ color: "red", marginLeft: 2 }}>*</span>
         </label>
         <textarea
           className="sms-textarea"

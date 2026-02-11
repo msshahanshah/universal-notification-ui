@@ -286,6 +286,7 @@ const HistoryTable = ({
       onFilterChanged={onFilterChanged}
       pageSize={pageSize}
       gridApiRef={gridApiRef}
+      shouldPaginate={false}
     />
   );
 };

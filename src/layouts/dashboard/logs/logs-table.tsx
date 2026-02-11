@@ -39,7 +39,7 @@ const LogsTable = () => {
   const wValue = "100%";
   const hValue = "100%";
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(30);
+  const [pageSize, setPageSize] = useState(50);
   const [data, setData] = useState<LogMessage[]>([]);
 
   //  {
@@ -394,6 +394,9 @@ const LogsTable = () => {
       onFilterChanged={onFilterChanged}
       pageSize={pageSize}
       gridApiRef={gridApiRef}
+      paginationPageSize={pageSize}
+      paginationPageSizeSelector={[50, 75, 100]}
+      shouldPaginate={true}
     />
   );
 };

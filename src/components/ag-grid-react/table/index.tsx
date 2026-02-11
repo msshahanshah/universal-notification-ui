@@ -3,7 +3,7 @@ import { GridReadyEvent } from "ag-grid-community";
 import { AgGridReact } from "ag-grid-react";
 
 import { myTheme } from "src/layouts/dashboard/logs/constant";
-import './table.css'
+import "./table.css";
 
 export const Table = ({
   isMobile,
@@ -13,8 +13,10 @@ export const Table = ({
   logsData,
   onPaginationChanged,
   onFilterChanged,
-  pageSize,
   gridApiRef,
+  paginationPageSize,
+  paginationPageSizeSelector,
+  shouldPaginate,
 }: any) => {
   const wValue = "100%";
   const hValue = "100%";
@@ -57,10 +59,12 @@ export const Table = ({
           defaultColDef={defaultColDef}
           rowData={logsData}
           rowHeight={50}
-          pagination={true}
-          paginationPageSize={pageSize}
-          paginationPageSizeSelector={[pageSize,50, 75, 100]}
-          suppressPaginationPanel={false}
+          pagination={shouldPaginate}
+          paginationPageSize={paginationPageSize}
+          paginationPageSizeSelector={
+            shouldPaginate ? paginationPageSizeSelector : false
+          }
+          suppressPaginationPanel={!shouldPaginate}
           animateRows
           headerHeight={50}
           enableCellTextSelection
