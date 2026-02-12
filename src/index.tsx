@@ -10,6 +10,7 @@ import AppLayout from "./theme/app-layout";
 import { SnackbarProvider } from "./provider/snackbar";
 
 import "./index.css";
+import PinballGame from "./components/PinballGame";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -19,9 +20,12 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <SnackbarProvider>
-          <AppLayout>
+          {/* <AppLayout> */}
             <App />
-          </AppLayout>
+          {/* </AppLayout> */}
+          {/* <main className="min-h-screen flex items-center justify-center bg-black">
+            <PinballGame />
+          </main> */}
         </SnackbarProvider>
       </BrowserRouter>
     </QueryClientProvider>

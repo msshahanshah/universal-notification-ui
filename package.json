@@ -9,6 +9,9 @@
     "@mui/material": "^7.3.7",
     "@react-email/components": "1.0.6",
     "@react-email/render": "2.0.4",
+    "@react-three/cannon": "^6.6.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@tanstack/react-query": "^5.90.18",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@testing-library/dom": "^10.4.1",
@@ -23,11 +26,13 @@
     "axios": "^1.13.2",
     "dompurify": "^3.3.1",
     "lucide-react": "^0.563.0",
+    "matter-js": "^0.20.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router": "^6.30.3",
     "react-router-dom": "^6.30.3",
     "typescript": "^4.9.5",
+    "use-sound": "^5.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
