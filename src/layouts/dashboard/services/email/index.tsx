@@ -95,6 +95,13 @@ export default function EmailComposer() {
   };
 
   const handleSend = async () => {
+    function sanitizeFileName(file: File) {
+      const ext = file.name.split(".").pop();
+      const timestamp = Date.now();
+      const random = Math.random().toString(36).substring(2, 8);
+      return `screenshots-${timestamp}-${random}.${ext}`;
+    }
+
     const attachmentsCopy = [...attachments];
 
     const payload = {
@@ -105,7 +112,7 @@ export default function EmailComposer() {
       fromEmail: from,
       cc,
       bcc,
-      attachments: attachmentsCopy.map((a: any) => a.name), // ✅ only filenames
+      attachments: attachmentsCopy.map((a: any) => sanitizeFileName(a.file)), // ✅ only filenames
     };
 
     mutate(payload, {
