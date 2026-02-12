@@ -31,33 +31,6 @@ type S3Item = {
   };
 };
 
-export const uploadFilesToS3 = async (items: S3Item[]) => {
-  for (const item of items) {
-    const formData = new FormData();
-
-    // 🔑 Add all S3 required fields
-    Object.entries(item.s3.fields).forEach(([key, value]) => {
-      formData.append(key, value);
-    });
-
-    // 🔑 File MUST be last
-    formData.append("file", item.file);
-
-    try {
-      await api.post(item.s3.url, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      console.log(`✅ Uploaded: ${item.fileName}`);
-    } catch (error) {
-      console.error(`❌ Failed: ${item.fileName}`, error);
-      throw error; // stop if one fails
-    }
-  }
-};
-
 export default function EmailComposer() {
   const [view, setView] = useState<ViewMode>("editor");
   const [from, setFrom] = useState("");
@@ -110,7 +83,6 @@ export default function EmailComposer() {
         });
 
         setAttachments([]);
-        showSnackbar("Email sent successfully!", "success");
         queryClient.invalidateQueries({
           queryKey: logsKeys.all,
         });
@@ -145,11 +117,12 @@ export default function EmailComposer() {
         setSubject("");
         setBody("");
 
+        showSnackbar(data?.message || "Email sent successfully!", "success");
+
         if (
           (Array.isArray(attachmentsCopy) && !attachmentsCopy.length) ||
           attachmentsCopy.length === 0
         ) {
-          showSnackbar("Email sent successfully!", "success");
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
@@ -157,8 +130,8 @@ export default function EmailComposer() {
           await uploadToS3FromAttachments(data, attachmentsCopy);
         }
       },
-      onError: () => {
-        showSnackbar("Failed to send email", "error");
+      onError: (error) => {
+        showSnackbar(error?.message || "Failed to send email", "error");
       },
     });
   };
@@ -232,10 +205,7 @@ export default function EmailComposer() {
               attachments={attachments}
               setAttachments={setAttachments}
             />
-            <EmailEditor
-              value={body}
-              onChange={setBody}
-            />
+            <EmailEditor value={body} onChange={setBody} />
             <AttachmentSection
               attachments={attachments}
               onAdd={handleAttachmentChange}

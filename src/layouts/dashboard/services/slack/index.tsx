@@ -55,8 +55,8 @@ export default function Slack() {
           setChannelID("");
           showSnackbar(data?.message || "Message sent successfully", "info");
         },
-        onError: () => {
-          showSnackbar("Failed to send message", "error");
+        onError: (error) => {
+          showSnackbar(error?.message || "Failed to send message", "error");
         },
       },
     );
