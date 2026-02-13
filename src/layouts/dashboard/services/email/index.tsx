@@ -83,12 +83,13 @@ export default function EmailComposer() {
         });
 
         setAttachments([]);
+        showSnackbar("Notification request accepted and queued.", "success");
         queryClient.invalidateQueries({
           queryKey: logsKeys.all,
         });
       } catch (err) {
         console.error("❌ Upload failed:", fileObj.name, err);
-        showSnackbar("Failed to send email", "error");
+        showSnackbar("Failed to upload attachments", "error");
         throw err;
       }
     }
@@ -124,8 +125,6 @@ export default function EmailComposer() {
         setSubject("");
         setBody("");
 
-        showSnackbar(data?.message || "Email sent successfully!", "success");
-
         if (
           (Array.isArray(attachmentsCopy) && !attachmentsCopy.length) ||
           attachmentsCopy.length === 0
@@ -133,6 +132,7 @@ export default function EmailComposer() {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
+          showSnackbar(data?.message || "Email sent successfully!", "success");
         } else {
           await uploadToS3FromAttachments(data, attachmentsCopy);
         }
