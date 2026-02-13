@@ -97,10 +97,7 @@ export default function EmailComposer() {
 
   const handleSend = async () => {
     function sanitizeFileName(file: File) {
-      const ext = file.name.split(".").pop();
-      const timestamp = Date.now();
-      const random = Math.random().toString(36).substring(2, 8);
-      return `screenshots-${timestamp}-${random}.${ext}`;
+      return file.name;
     }
 
     const attachmentsCopy = [...attachments];
