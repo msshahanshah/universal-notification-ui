@@ -40,7 +40,7 @@ export function GmailShell({
   setCc,
   setBcc,
   setSubject,
-  onValidationChange
+  onValidationChange,
 }: Props) {
   const [errors, setErrors] = useState({
     from: "",
@@ -107,7 +107,7 @@ export function GmailShell({
         label="To"
         id="to"
         value={to}
-        onChange={(e) => handleMultiChange(e.target.value, "to", setTo)}
+        onChange={(e) => handleMultiChange(e?.target?.value, "to", setTo)}
         placeholder="To"
         className="sms-input"
         showAsteric={true}
