@@ -49,10 +49,12 @@ export function GmailShell({
     bcc: "",
   });
 
+  const [subjectError, setSubjectError] = useState("");
+
   useEffect(() => {
-    const hasErrors = Object.values(errors).some(Boolean);
+    const hasErrors = Object.values(errors).some(Boolean) || !!subjectError;
     onValidationChange(hasErrors);
-  }, [errors, onValidationChange]);
+  }, [errors, onValidationChange, subjectError]);
 
   const handleFromChange = (val: string) => {
     setFrom(val);
@@ -135,11 +137,22 @@ export function GmailShell({
         label="Subject"
         id="subject"
         value={subject}
-        onChange={(e) => setSubject(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value.trim();
+          if (value?.length > 255) {
+            setSubjectError("Subject must not exceed 255 characters.");
+          } else {
+            if (!!subjectError) {
+              setSubjectError("");
+            }
+          }
+          setSubject(e.target.value);
+        }}
         placeholder="Subject"
         className="sms-input"
         showAsteric
       />
+      {subjectError && <ErrorText>{subjectError}</ErrorText>}
     </div>
   );
 }
