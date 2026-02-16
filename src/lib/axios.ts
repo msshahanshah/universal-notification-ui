@@ -64,10 +64,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (
-      error.response?.status === 500 ||
-      (error.response?.status === 401 && originalRequest?.url === "/refresh")
-    ) {
+    if (error.response?.status === 401 && originalRequest?.url === "/refresh") {
       localStorage.clear();
       window.location.href = "/";
       return;
