@@ -30,7 +30,6 @@ type Attachment = {
   previewUrl?: string; // for images
 };
 
-
 export function GmailShell({
   from,
   to,
@@ -47,10 +46,10 @@ export function GmailShell({
   const theme = useTheme();
 
   const inputStyle: React.CSSProperties = {
-    backgroundColor: theme.palette.background.paper,
+    // backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.secondary,
-    // background: "hsla(220, 35%, 3%, 0.4)",
   };
+
   const [errors, setErrors] = useState({
     from: "",
     to: "",
@@ -111,7 +110,7 @@ export function GmailShell({
         placeholder="From"
         className="sms-input"
         showAsteric={true}
-        style={inputStyle}    
+        style={inputStyle}
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}
 
@@ -134,7 +133,7 @@ export function GmailShell({
         placeholder="Cc"
         className="sms-input"
         style={inputStyle}
-        />
+      />
       {errors.cc && <ErrorText>{errors.cc}</ErrorText>}
       <Input
         label="Bcc"

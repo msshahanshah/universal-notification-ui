@@ -69,9 +69,15 @@ export default function Slack() {
 
   const isDisabled = !channelID || !message || !!invalidChannelId;
 
+  const inputStyle = {
+    // backgroundColor: theme.palette.background.paper,
+    color:'#fff', // theme.palette.text.secondary,
+    border: "1px solid black",
+  };
+
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 4 , color: "text.secondary"}}>
+      <Typography variant="h6" sx={{ mb: 4, color: "text.secondary" }}>
         New message
       </Typography>
       <div
@@ -92,7 +98,7 @@ export default function Slack() {
             setChannelID(e.target.value);
           }}
           showAsteric
-          style={{ color: "#fff" }}
+          style={inputStyle}
         />
 
         {/* TODO make textarea reusable */}
@@ -111,7 +117,8 @@ export default function Slack() {
           placeholder="Type your message..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          rows={6}
+          rows={6}  
+          style={inputStyle}
         />
         <ErrorText>{invalidChannelId}</ErrorText>
         <div className="sms-footer">
@@ -123,7 +130,10 @@ export default function Slack() {
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 0, mb: "32px", color: "text.secondary"}}>
+      <Typography
+        variant="h6"
+        sx={{ mt: 0, mb: "32px", color: "text.secondary" }}
+      >
         History (Last 10 messages)
       </Typography>
       <Suspense fallback={<FallbackLoader />}>

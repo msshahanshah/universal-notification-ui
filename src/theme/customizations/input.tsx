@@ -368,12 +368,12 @@ export const inputsCustomizations: Components<Theme> = {
       root: {
         border: 'none',
       },
-      input: {
+      input: ({theme})=>({
         '&::placeholder': {
           opacity: 0.7,
-          color: gray[500],
+          color: theme.palette.text.secondary,
         },
-      },
+      }),
     },
   },
   MuiOutlinedInput: {

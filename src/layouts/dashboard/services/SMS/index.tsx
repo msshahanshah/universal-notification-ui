@@ -22,6 +22,12 @@ export default function SMS() {
   const showSnackbar = useSnackbar();
   const { mutate } = useSmsService();
 
+  const inputStyle = {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.secondary,
+    border: "1px solid black",
+  };
+
   const [recipients, setRecipients] = useState<Recipient[]>([
     { countryCode: "+91", number: "" },
   ]);
@@ -135,6 +141,7 @@ export default function SMS() {
                 inputMode="numeric"
                 className="sms-input"
                 onChange={(e) => updateNumber(index, e.target.value)}
+                // style={inputStyle}
                 style={{ color: "#fff" }}
               />
 
