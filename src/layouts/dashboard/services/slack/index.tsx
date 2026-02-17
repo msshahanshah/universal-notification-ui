@@ -71,7 +71,7 @@ export default function Slack() {
 
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 4 }}>
+      <Typography variant="h6" sx={{ mb: 4 , color: "text.secondary"}}>
         New message
       </Typography>
       <div
@@ -123,7 +123,7 @@ export default function Slack() {
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 0, mb: "32px" }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: "32px", color: "text.secondary"}}>
         History (Last 10 messages)
       </Typography>
       <Suspense fallback={<FallbackLoader />}>

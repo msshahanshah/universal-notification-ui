@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useState } from "react";
 import {
-  CssBaseline,
+  // CssBaseline,
   styled,
   Typography,
   useColorScheme,
@@ -19,6 +19,7 @@ import PasswordInput from "src/components/password-input";
 
 import "src/App.css";
 import "./login.css";
+import COLORS from "src/utility/colors";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -46,7 +47,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Login = (props: { disableCustomTheme?: boolean }) => {
-  const { setMode } = useColorScheme();
+  // const { setMode } = useColorScheme();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -60,7 +61,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
     username === "" || password === "" || isPending || hasApiError;
 
   const onSubmit = async ({ username, password }: any) => {
-    setMode("dark");
+    // setMode("dark");
     if (!usernameRegex.test(username) || !passwordRegex.test(password)) {
       setErrorMessage("Invalid username or password");
       setHasApiError(true);
@@ -128,6 +129,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               dataTestId="username-input"
               name="user_field"
               autoFocus
+              style={{ color: COLORS.WHITE }}
             />
             <PasswordInput
               label="Password"
@@ -138,6 +140,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               autoComplete="new-password"
               className="input-field"
               dataTestId="password-input"
+              style={{ color: COLORS.WHITE }}
             />
 
             <div style={{ height: 20 }}>

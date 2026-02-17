@@ -13,6 +13,7 @@ interface PasswordInputProps {
   className?: string;
   dataTestId?: string;
   name?: string;
+  style?: React.CSSProperties;
 }
 
 const PasswordInput = ({
@@ -24,6 +25,7 @@ const PasswordInput = ({
   className,
   dataTestId,
   name,
+  style
 }: PasswordInputProps) => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +47,7 @@ const PasswordInput = ({
         className={className}
         dataTestId={dataTestId}
         name={name}
+        style={style}
       />
 
       <button
@@ -61,9 +64,9 @@ const PasswordInput = ({
         }}
       >
         {showPassword ? (
-          <VisibilityOff style={{ color: theme.palette.text.primary }} />
+          <VisibilityOff style={{ color: theme.palette.text.secondary }} />
         ) : (
-          <Visibility style={{ color: theme.palette.text.primary }} />
+          <Visibility style={{ color: theme.palette.text.secondary }} />
         )}
       </button>
     </div>

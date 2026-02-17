@@ -100,7 +100,7 @@ export default function SMS() {
 
   return (
     <div className="sms-container">
-      <Typography variant="h6" sx={{ mt: 0, mb: 4 }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: 4, color: "text.secondary" }}>
         New message
       </Typography>
 

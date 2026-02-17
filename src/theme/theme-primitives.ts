@@ -360,7 +360,7 @@ export const colorSchemes = {
       },
       text: {
         primary: gray[800], // "hsl(0, 0%, 100%)",
-        secondary: gray[400],
+        secondary: "#fff",
       },
       action: {
         hover: alpha(gray[600], 0.2),
