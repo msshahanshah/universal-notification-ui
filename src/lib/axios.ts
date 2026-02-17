@@ -45,7 +45,11 @@ const getRefreshToken = async (originalRequest: any) => {
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    config.headers["X-Client-Id"] = "GKMIT";
+    const clientId = localStorage.getItem("clientId");
+    if (clientId) {
+      config.headers["X-Client-Id"] = clientId;
+    }
+
     config.headers["ngrok-skip-browser-warning"] = "true";
     const token = localStorage.getItem("accessToken");
     if (token && !config?.url?.includes("amazonaws.com"))
