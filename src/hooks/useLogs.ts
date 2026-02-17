@@ -12,7 +12,7 @@ export const useLogs = (params?: Record<string, any>) => {
   });
 };
 
-export const useLogStatus = (id: number) => {
+export const useLogStatus = (id: string) => {
   return useQuery({
     queryKey: ["logs", "status", id],
     queryFn: () => fetchLogStatus(id),

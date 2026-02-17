@@ -2,6 +2,7 @@ import { useState, ChangeEvent } from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import Input from "./input";
+import { useTheme } from "@mui/material";
 
 interface PasswordInputProps {
   label: string;
@@ -22,8 +23,9 @@ const PasswordInput = ({
   autoComplete,
   className,
   dataTestId,
-  name
+  name,
 }: PasswordInputProps) => {
+  const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -58,7 +60,11 @@ const PasswordInput = ({
           cursor: "pointer",
         }}
       >
-        {showPassword ? <VisibilityOff /> : <Visibility />}
+        {showPassword ? (
+          <VisibilityOff style={{ color: theme.palette.text.primary }} />
+        ) : (
+          <Visibility style={{ color: theme.palette.text.primary }} />
+        )}
       </button>
     </div>
   );

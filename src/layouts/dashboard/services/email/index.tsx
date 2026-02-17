@@ -31,6 +31,33 @@ type S3Item = {
   };
 };
 
+export const uploadFilesToS3 = async (items: S3Item[]) => {
+  for (const item of items) {
+    const formData = new FormData();
+
+    // 🔑 Add all S3 required fields
+    Object.entries(item.s3.fields).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+
+    // 🔑 File MUST be last
+    formData.append("file", item.file);
+
+    try {
+      await api.post(item.s3.url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log(`✅ Uploaded: ${item.fileName}`);
+    } catch (error) {
+      console.error(`❌ Failed: ${item.fileName}`, error);
+      throw error; // stop if one fails
+    }
+  }
+};
+
 export default function EmailComposer() {
   const [view, setView] = useState<ViewMode>("editor");
   const [from, setFrom] = useState("");
@@ -95,8 +122,53 @@ export default function EmailComposer() {
     }
   };
 
-  const handleSend = async () => {
+  function renameDuplicateFiles(files: File[]): File[] {
+    const nameCount = new Map<string, number>();
+
+    return files.map((file) => {
+      const originalName = file.name;
+      const dotIndex = originalName.lastIndexOf(".");
+
+      const baseName =
+        dotIndex !== -1 ? originalName.slice(0, dotIndex) : originalName;
+
+      const extension = dotIndex !== -1 ? originalName.slice(dotIndex) : "";
+
+      // Initialize counter
+      if (!nameCount.has(baseName)) {
+        nameCount.set(baseName, 0);
+        return file; // first occurrence stays same
+      }
+
+      // Increment count
+      const count = nameCount.get(baseName)! + 1;
+      nameCount.set(baseName, count);
+
+      const newName = `${baseName}${count}${extension}`;
+
+      return new File([file], newName, { type: file.type });
+    });
+  }
+
+  const handleSend = async (data: any) => {
     const attachmentsCopy = [...attachments];
+    const combinedFiles = [...attachments.map((a) => a.file)];
+    const renamedFiles = renameDuplicateFiles(combinedFiles);
+
+    const formData = new FormData();
+
+    formData.append("service", "email");
+    formData.append("destination", to.toLowerCase());
+    formData.append("subject", subject);
+    formData.append("body", body);
+    formData.append("fromEmail", from);
+
+    if (cc) formData.append("cc", cc);
+    if (bcc) formData.append("bcc", bcc);
+
+    renamedFiles.forEach((file) => {
+      formData.append("attachments", file); // 🔥 IMPORTANT
+    });
 
     const payload = {
       service: "email",
@@ -106,8 +178,10 @@ export default function EmailComposer() {
       fromEmail: from,
       cc,
       bcc,
-      attachments: attachmentsCopy.map((a: any) => a.file), // ✅ only filenames
+      attachments: renamedFiles.map((file) => file.name), // ✅ only filenames
     };
+
+    console.log("payload", payload);
 
     mutate(payload, {
       onSuccess: async (data) => {
@@ -131,6 +205,7 @@ export default function EmailComposer() {
         }
       },
       onError: (error) => {
+        console.log("onerror", error);
         showSnackbar(error?.message || "Failed to send email", "error");
       },
     });
@@ -138,12 +213,18 @@ export default function EmailComposer() {
 
   const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-
     if (!files.length) return;
 
-    setAttachments((prev) => [
-      ...prev,
-      ...files.map((file) => {
+    // 🔥 Combine existing + new files
+    const combinedFiles = [...attachments.map((a) => a.file), ...files];
+
+    // 🔥 Rename duplicates
+    const renamedFiles = renameDuplicateFiles(combinedFiles);
+    console.log("renamedFiles", renamedFiles);
+
+    setAttachments(
+      renamedFiles.map((file) => {
+        console.log("file", file);
         const isImage = file.type.startsWith("image/");
 
         return {
@@ -151,13 +232,12 @@ export default function EmailComposer() {
           name: file.name,
           size: file.size,
           type: file.type,
-          file, // 🔥 store real File
+          file,
           previewUrl: isImage ? URL.createObjectURL(file) : undefined,
         };
       }),
-    ]);
+    );
 
-    // allow re-selecting same file again
     e.target.value = "";
   };
 
@@ -171,6 +251,8 @@ export default function EmailComposer() {
     !to?.trim() ||
     isBodyEmpty(body) ||
     hasErrors;
+
+  console.log("subject", subject, subject?.length);
 
   return (
     <div style={pageStyle}>
@@ -237,7 +319,7 @@ export default function EmailComposer() {
             disabled={isDisabled}
             label="Send"
             className={isDisabled ? "button-disabled" : "send-btn"}
-            onClick={handleSend}
+            onClick={() => handleSend(attachments)}
           />
         </div>
       </div>

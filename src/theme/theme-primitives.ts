@@ -279,7 +279,7 @@ export const colorSchemes = {
       },
       text: {
         primary: gray[800],
-        secondary: gray[600],
+        secondary: 'rgba(255, 255, 255, 0.7)', // gray[600],
         warning: orange[400],
       },
       action: {

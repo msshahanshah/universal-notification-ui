@@ -19,6 +19,7 @@ import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
+import { useTheme, alpha } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
 
@@ -52,6 +53,7 @@ const Sidebar = ({
   onToggle: () => void;
   mobileOpen: boolean;
 }) => {
+  const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -61,26 +63,26 @@ const Sidebar = ({
   const isActive = (path: string) => location.pathname.includes(path);
   const isServicesActive = isActive("/services");
 
-  const getItemStyles = (path: string) => ({
-    gap: 1.5,
-    borderRadius: 2,
-    mx: 1,
-    mt: 1,
-    px: 1.5,
-    color: COLORS.WHITE,
-    minHeight: 44,
-    justifyContent: "center",
-    backgroundColor: isActive(path)
-      ? "hsla(220, 80%, 55%, 0.25)"
-      : "transparent",
-    "&:hover": {
-      backgroundColor: "hsla(220, 80%, 55%, 0.35)",
-    },
-  });
+  const getItemStyles = (path: string) => {
+    const active = isActive(path);
 
-  // const filteredItems = sidebarItems.filter((item) =>
-  //   item.label.toLowerCase().includes(search.toLowerCase()),
-  // );
+    return {
+      gap: 1.5,
+      borderRadius: 2,
+      mx: 1,
+      mt: 1,
+      px: 1.5,
+      color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+      minHeight: 44,
+      justifyContent: "center",
+      backgroundColor: active
+        ? alpha(theme.palette.primary.main, 0.15)
+        : "transparent",
+      "&:hover": {
+        backgroundColor: alpha(theme.palette.primary.main, 0.25),
+      },
+    };
+  };
 
   const q = search.trim().toLowerCase();
 
@@ -90,13 +92,6 @@ const Sidebar = ({
   const matchesServiceItems = sidebarItems.some((item) =>
     item.label.toLowerCase().includes(q),
   );
-
-  const isSearchingDashboard = q.length > 0 && "dashboard".includes(q);
-
-  const isSearchingServices =
-    q.length > 0 &&
-    (sidebarItems.some((item) => item.label.toLowerCase().includes(q)) ||
-      "services".includes(q));
 
   const isSearching = q.length > 0;
 
@@ -131,16 +126,19 @@ const Sidebar = ({
             alignItems: "center",
             gap: 1,
             borderRadius: 2,
-            backgroundColor: "rgba(255,255,255,0.06)",
+            backgroundColor: alpha(theme.palette.common.white, 0.05),
+            border: `1px solid ${theme.palette.divider}`,
           }}
         >
-          <SearchIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }} />
+          <SearchIcon
+            sx={{ fontSize: 18, color: theme.palette.text.secondary }}
+          />
           <InputBase
             placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{
-              color: COLORS.WHITE,
+              color: theme.palette.text.primary,
               fontSize: 14,
               width: "100%",
             }}
@@ -209,19 +207,21 @@ const Sidebar = ({
                       mt: 0.5,
                       minHeight: 36,
                       borderRadius: 2,
-                      color: COLORS.WHITE,
+                      // color: COLORS.WHITE,
                       backgroundColor: isDisabled
-                        ? "rgba(255, 0, 0, 0.06)" // 👈 ultra-light red
+                        ? theme.palette.action.disabledBackground
                         : isActive(item.path)
-                          ? "hsla(220, 80%, 55%, 0.25)"
+                          ? alpha(theme.palette.primary.main, 0.15)
                           : "transparent",
 
-                      cursor: isDisabled ? "not-allowed" : "pointer",
+                      color: isDisabled
+                        ? theme.palette.text.disabled
+                        : theme.palette.text.secondary,
 
                       "&:hover": {
                         backgroundColor: isDisabled
-                          ? "rgba(255, 0, 0, 0.08)" // tiny hover change
-                          : "hsla(220, 80%, 55%, 0.35)",
+                          ? theme.palette.action.disabledBackground
+                          : alpha(theme.palette.primary.main, 0.25),
                       },
                     }}
                   >
@@ -285,7 +285,9 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
-          backgroundColor: COLORS.SIDEBAR_BG_COLOR,
+          backgroundColor: theme.palette.background.navbar, // theme.palette.background.paper,
+          backdropFilter: "blur(12px)",
+          borderRight: `1px solid ${theme.palette.divider}`,
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,

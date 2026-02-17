@@ -1,3 +1,4 @@
+import { useTheme } from "@mui/material";
 import { ChangeEvent, forwardRef, InputHTMLAttributes } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,6 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   autoComplete?: string;
   dataTestId?: string;
   showAsteric?: boolean;
+  style?: React.CSSProperties;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -20,10 +22,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       showAsteric = false,
       autoComplete,
       dataTestId,
+      style,
       ...props
     },
     ref,
   ) => {
+    const theme = useTheme();
     return (
       <div
         style={{
@@ -34,7 +38,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }}
       >
         {label && (
-          <label style={{ marginBottom: 4, fontSize: "12px" }} htmlFor={id}>
+          <label
+            style={{
+              marginBottom: 4,
+              fontSize: "12px",
+              color: theme.palette.text.secondary,
+            }}
+            htmlFor={id}
+          >
             {label}
             {showAsteric && (
               <span style={{ color: "red", marginLeft: 2 }}>*</span>
@@ -52,6 +63,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             paddingLeft: "10px",
             border: "hsla(220, 35%, 3%, 0.4)",
             fontSize: "12px",
+            color: theme.palette.text.primary,
+            ...style,
           }}
           value={value}
           onChange={onChange}

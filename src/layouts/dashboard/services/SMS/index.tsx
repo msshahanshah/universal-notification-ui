@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useSmsService } from "src/hooks/useService";
@@ -7,22 +7,71 @@ import Button from "src/components/button";
 import Input from "src/components/input";
 import { useSnackbar } from "src/provider/snackbar";
 import { logsKeys } from "src/api/queryKeys";
-
-import "./sms-composer.css";
 import { CountryCodeSelect } from "./country-code-select";
 
+import "./sms-composer.css";
+
+interface Recipient {
+  countryCode: string;
+  number: string;
+}
+
 export default function SMS() {
-  const [countryCode, setCountryCode] = useState("+91");
-  const [to, setTo] = useState<any>("");
+  const theme = useTheme();
+  const queryClient = useQueryClient();
+  const showSnackbar = useSnackbar();
+  const { mutate } = useSmsService();
+
+  const [recipients, setRecipients] = useState<Recipient[]>([
+    { countryCode: "+91", number: "" },
+  ]);
+
   const [message, setMessage] = useState("");
 
-  const destination = `${countryCode}${to}`;
+  /* -------------------- Handlers -------------------- */
 
-  const { mutate } = useSmsService();
-  const showSnackbar = useSnackbar();
-  const queryClient = useQueryClient();
+  const updateNumber = (index: number, value: string) => {
+    const clean = value.replace(/\D/g, "");
+
+    const updated = [...recipients];
+    updated[index].number = clean;
+
+    setRecipients(updated);
+  };
+
+  const updateCountryCode = (index: number, code: string) => {
+    const updated = [...recipients];
+    updated[index].countryCode = code;
+
+    setRecipients(updated);
+  };
+
+  const addRecipient = () => {
+    setRecipients([...recipients, { countryCode: "+91", number: "" }]);
+  };
+
+  const removeRecipient = (index: number) => {
+    const updated = recipients.filter((_, i) => i !== index);
+    setRecipients(updated);
+  };
+
+  /* -------------------- Validation -------------------- */
+
+  const isValidRecipients =
+    recipients.length > 0 &&
+    recipients.every(
+      (r) => r.countryCode && r.number && /^\d{8,15}$/.test(r.number),
+    );
+
+  const isDisabled = !message.trim() || !isValidRecipients;
+
+  /* -------------------- Submit -------------------- */
 
   const handleSend = () => {
+    const destination = recipients
+      .map((r) => `${r.countryCode}${r.number}`)
+      .join(",");
+
     mutate(
       {
         service: "sms",
@@ -34,51 +83,99 @@ export default function SMS() {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
+
           setMessage("");
-          setTo("");
+          setRecipients([{ countryCode: "+91", number: "" }]);
+
           showSnackbar(data?.message || "Message sent successfully", "info");
         },
-        onError: (error) => {
+        onError: (error: any) => {
           showSnackbar(error?.message || "Failed to send message", "error");
         },
       },
     );
   };
 
-  const isDisabled = !to || !message;
+  /* -------------------- UI -------------------- */
+
   return (
     <div className="sms-container">
       <Typography variant="h6" sx={{ mt: 0, mb: 4 }}>
         New message
       </Typography>
-      <div className="sms-wrapper">
-        {/* TODO: Label component */}
-        <label style={{  fontSize: "12px" }}>
+
+      <div
+        className="sms-wrapper"
+        style={{ backgroundColor: theme.palette.background.sidebar }}
+      >
+        {/* Phone Numbers */}
+        <label
+          style={{
+            fontSize: "12px",
+            color: theme.palette.text.secondary,
+          }}
+        >
           Phone number
           <span style={{ color: "red", marginLeft: 2 }}>*</span>
         </label>
-        <div className="sms-to-row">
-          <CountryCodeSelect value={countryCode} onChange={setCountryCode} />
-          <Input
-            type="tel"
-            id="to"
-            className="sms-input"
-            placeholder="Enter receiver number"
-            value={to}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={10}
-            onChange={(e) => {
-              const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
-              setTo(onlyNums);
-            }}
+
+        <div>
+          {recipients.map((recipient, index) => (
+            <div key={index} className="sms-to-row">
+              <CountryCodeSelect
+                value={recipient.countryCode}
+                onChange={(code) => updateCountryCode(index, code)}
+              />
+
+              <Input
+                type="tel"
+                id={`recipient-${index}`}
+                placeholder="Enter receiver number"
+                value={recipient.number}
+                inputMode="numeric"
+                className="sms-input"
+                onChange={(e) => updateNumber(index, e.target.value)}
+              />
+
+              {recipients.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeRecipient(index)}
+                  style={{
+                    marginLeft: 8,
+                    cursor: "pointer",
+                    background: "transparent",
+                    border: "none",
+                    color: "red",
+                    fontSize: 18,
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+
+          <Button
+            label="Add Another Number"
+            onClick={addRecipient}
+            className="sms-add-btn"
           />
         </div>
 
-        <label style={{ marginBottom: 4, fontSize: "12px" }}>
+        {/* Message */}
+        <label
+          style={{
+            marginTop: 16,
+            marginBottom: 4,
+            fontSize: "12px",
+            color: theme.palette.text.secondary,
+          }}
+        >
           Message
           <span style={{ color: "red", marginLeft: 2 }}>*</span>
         </label>
+
         <textarea
           className="sms-textarea"
           placeholder="Type your message..."
@@ -89,7 +186,7 @@ export default function SMS() {
 
         <div className="sms-footer">
           <Button
-            disabled={!to || !message}
+            disabled={isDisabled}
             label="Send"
             className={isDisabled ? "button-disabled" : "sms-send-btn"}
             onClick={handleSend}
