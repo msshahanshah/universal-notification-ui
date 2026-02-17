@@ -42,31 +42,29 @@ type Order = "asc" | "desc" | "";
 
 export const getSortLabelStyles = (theme: any) => ({
   "&.Mui-active": {
-    // color: theme.palette.text.secondary, // active text color
+    color: theme.palette.text.secondary, // active text color
     fontWeight: 600,
-    color: 'grey',
   },
   "& .MuiTableSortLabel-icon": {
     opacity: 0.4,
   },
   "&.Mui-active .MuiTableSortLabel-icon": {
-    // color: theme.palette.text.secondary, // active arrow color
-    color: 'grey',
+    color: theme.palette.text.secondary, // active arrow color
     opacity: 1,
   },
 });
 
 export const textFieldTheme = (theme: any) => ({
   "& .MuiInputLabel-root": {
-    color: 'grey' // theme.palette.text.secondary, // default label color theme?.palette?.text?.secondary
+    color: theme.palette.text.secondary, // default label color theme?.palette?.text?.secondary
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color: 'grey', // theme.palette.text.secondary, // focused label color (blue)
+    color:  theme.palette.text.secondary, // focused label color (blue)
     fontWeight: "bold",
     marginTop:-1
   },
   "& .MuiOutlinedInput-input": {
-    color: 'grey', // theme.palette.text.primary,
+    color: theme.palette.text.primary,
   },
 });
 
