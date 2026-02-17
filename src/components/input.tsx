@@ -74,12 +74,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             fontSize: 13,
 
             /* 🔥 THEME FIXES */
-            color: theme.palette.text.primary,
-            // backgroundColor: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.divider}`,
-
+            color: theme.palette.text.secondary,
+            border: `1px solid black`,
             transition: "all 0.2s ease",
-
             ...style,
           }}
           onFocus={(e) => {

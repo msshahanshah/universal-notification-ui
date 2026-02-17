@@ -4,9 +4,11 @@ import StarterKit from "@tiptap/starter-kit";
 import DOMPurify from "dompurify";
 import { useEffect } from "react";
 import { Plugin } from "prosemirror-state";
+import { useTheme } from "@mui/system";
 
 import { EmailToolbar } from "./editor-toolbar";
 import "./index.css";
+import { Box } from "@mui/material";
 
 type Props = {
   value: string; // sanitized HTML
@@ -14,6 +16,7 @@ type Props = {
 };
 
 export function EmailEditor({ value, onChange }: Props) {
+  const theme = useTheme();
   const BlockHtmlInput = Extension.create({
     name: "blockHtmlInput",
 
@@ -72,15 +75,39 @@ export function EmailEditor({ value, onChange }: Props) {
 
   return (
     <div>
-      <label style={{ marginBottom: 4, fontSize: "12px" }}>
+      <label
+        style={{
+          marginBottom: 4,
+          fontSize: "12px",
+          color: theme.palette.text.secondary,
+        }}
+      >
         Body
         <span style={{ color: "red", marginLeft: 2 }}>*</span>
       </label>
       <div style={editorContainer}>
         <EmailToolbar editor={editor} />
-        <div className="editor-wrapper">
+        <Box
+          className="editor-wrapper"
+          sx={{
+            backgroundColor: theme.palette.background.paper,
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: 1,
+            p: 2,
+
+            "& .ProseMirror": {
+              color: theme.palette.text.secondary,
+              outline: "none",
+              minHeight: "150px",
+            },
+
+            "& .ProseMirror p": {
+              margin: 0,
+            },
+          }}
+        >
           <EditorContent editor={editor} />
-        </div>
+        </Box>
       </div>
     </div>
   );
@@ -89,6 +116,5 @@ export function EmailEditor({ value, onChange }: Props) {
 const editorContainer: React.CSSProperties = {
   border: "1px solid #ddd",
   borderRadius: 8,
-  background: "hsla(220, 35%, 3%, 0.4)",
-  marginTop: 4
+  marginTop: 4,
 };
