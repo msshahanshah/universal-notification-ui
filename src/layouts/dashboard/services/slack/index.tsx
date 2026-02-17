@@ -76,7 +76,7 @@ export default function Slack() {
       </Typography>
       <div
         className="sms-wrapper"
-        style={{ backgroundColor: theme.palette.background.sidebar }}
+        style={{ backgroundColor: theme.palette.background.paper }}
       >
         <Input
           label="Channel ID"
@@ -92,7 +92,7 @@ export default function Slack() {
             setChannelID(e.target.value);
           }}
           showAsteric
-          style={{ color: theme.palette.text.secondary }}
+          style={{ color: "#fff" }}
         />
 
         {/* TODO make textarea reusable */}
