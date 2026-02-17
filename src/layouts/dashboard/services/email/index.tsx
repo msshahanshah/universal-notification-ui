@@ -181,8 +181,6 @@ export default function EmailComposer() {
       attachments: renamedFiles.map((file) => file.name), // ✅ only filenames
     };
 
-    console.log("payload", payload);
-
     mutate(payload, {
       onSuccess: async (data) => {
         setTo("");
@@ -205,7 +203,6 @@ export default function EmailComposer() {
         }
       },
       onError: (error) => {
-        console.log("onerror", error);
         showSnackbar(error?.message || "Failed to send email", "error");
       },
     });
@@ -220,11 +217,9 @@ export default function EmailComposer() {
 
     // 🔥 Rename duplicates
     const renamedFiles = renameDuplicateFiles(combinedFiles);
-    console.log("renamedFiles", renamedFiles);
 
     setAttachments(
       renamedFiles.map((file) => {
-        console.log("file", file);
         const isImage = file.type.startsWith("image/");
 
         return {
@@ -251,8 +246,6 @@ export default function EmailComposer() {
     !to?.trim() ||
     isBodyEmpty(body) ||
     hasErrors;
-
-  console.log("subject", subject, subject?.length);
 
   return (
     <div style={pageStyle}>
