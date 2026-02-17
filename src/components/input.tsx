@@ -63,7 +63,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             paddingLeft: "10px",
             border: "hsla(220, 35%, 3%, 0.4)",
             fontSize: "12px",
-            color: theme.palette.text.primary,
+            color: theme.palette.text.secondary,
             ...style,
           }}
           value={value}

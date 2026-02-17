@@ -5,7 +5,6 @@ import {
   AllCommunityModule,
   PaginationModule,
   ClientSideRowModelModule,
-  InfiniteRowModelModule,
 } from "ag-grid-community";
 import { TooltipModule } from "ag-grid-community";
 
@@ -27,7 +26,6 @@ export default function App() {
     TooltipModule,
     PaginationModule,
     ClientSideRowModelModule,
-    InfiniteRowModelModule,
   ]);
 
   return (

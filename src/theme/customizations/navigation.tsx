@@ -1,3 +1,5 @@
+// mui drawer
+
 import * as React from 'react';
 import { Theme, alpha, Components } from '@mui/material/styles';
 import { SvgIconProps } from '@mui/material/SvgIcon';
@@ -150,9 +152,9 @@ export const navigationCustomizations: Components<Theme> = {
   MuiDrawer: {
     styleOverrides: {
       paper: ({ theme }) => ({
-        // backgroundColor: (theme.vars || theme).palette.background.default,
+        backgroundColor: (theme.vars || theme).palette.background.navbar,
         backgroundImage: "none", // 🔑 remove overlay
-          backgroundColor: "#0b1220", // your sidebar color
+          // backgroundColor: "#0b1220", // your sidebar color
       }),
     },
   },
@@ -279,3 +281,4 @@ export const navigationCustomizations: Components<Theme> = {
     },
   },
 };
+

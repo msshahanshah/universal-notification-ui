@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { COUNTRY_CODES } from "./country-codes";
 import './sms-composer.css'
+import { useTheme } from "@mui/material/styles";
 
 type Props = {
   value: string;
@@ -11,6 +12,8 @@ type Props = {
 export function CountryCodeSelect({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const theme = useTheme()
 
    useEffect(() => {
       const onEsc = (e: KeyboardEvent) => {
@@ -47,7 +50,7 @@ export function CountryCodeSelect({ value, onChange }: Props) {
       </button>
 
       {open && (
-        <div className="country-select-list" role="listbox">
+        <div className="country-select-list" role="listbox" style={{color: theme.palette.text.secondary , backgroundColor: theme.palette.background.defaultBg}}>
           {COUNTRY_CODES.map((c) => {
 
             const selectedValue=c.code===value;

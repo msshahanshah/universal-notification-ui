@@ -123,8 +123,8 @@ export default function LogsTable() {
     return {
       page: page + 1,
       limit: pageSize,
-      sort,
-      order,
+      // sort,
+      // order,
       destination: debouncedFilters.destination || undefined,
       service: debouncedFilters.service || undefined,
       status: debouncedFilters.status || undefined,
