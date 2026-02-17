@@ -150,9 +150,18 @@ const Sidebar = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{
-              color: theme.palette.text.primary,
+              color: theme.palette.text.secondary,
               fontSize: 14,
               width: "100%",
+              "&::placeholder": {
+                color: theme.palette.text.secondary,
+                opacity: 1, // important (default is 0.5 in some browsers)
+              },
+
+              "& input::placeholder": {
+                color: theme.palette.text.secondary,
+                opacity: 1,
+              },
             }}
           />
         </Box>
@@ -171,7 +180,7 @@ const Sidebar = ({
                 minWidth: 0,
                 justifyContent: "center",
                 color: isActive("/dashboard")
-                  ? theme.palette.text.primary
+                  ? theme.palette.text.secondary
                   : theme.palette.text.secondary,
               }}
             >
@@ -232,7 +241,7 @@ const Sidebar = ({
 
                       color: isDisabled
                         ? theme.palette.text.disabled
-                        : theme.palette.text.secondary,
+                        : "text.secondary",
 
                       "&:hover": {
                         backgroundColor: isDisabled
@@ -267,7 +276,7 @@ const Sidebar = ({
           }}
           sx={getItemStyles("/logout")}
         >
-          <ListItemIcon sx={{ color: theme.palette.text.primary }}>
+          <ListItemIcon sx={{ color: "text.secondary" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           {open && <ListItemText primary="Logout" />}
@@ -285,7 +294,7 @@ const Sidebar = ({
         onClose={onToggle}
         ModalProps={{
           BackdropProps: {
-            sx: { backgroundColor: "rgba(0,0,0,0.15)" },
+            sx: { backgroundColor: theme.palette.background.paper },
           },
         }}
       >
@@ -310,7 +319,7 @@ const Sidebar = ({
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.standard,
             }),
-          width: open ? 240 : 72, // if you want controlled width
+          width: "auto",
         },
       }}
     >
@@ -325,13 +334,13 @@ const Sidebar = ({
         }}
       >
         {open && (
-          <Typography sx={{ color: theme.palette.text.primary, fontSize: 18 }}>
+          <Typography sx={{ color: "text.secondary", fontSize: 18 }}>
             Universal Notifier
           </Typography>
         )}
         <IconButton
           onClick={onToggle}
-          sx={{ color: theme.palette.text.primary, border: "none" }}
+          sx={{ color: "text.secondary", border: "none",background: "transparent" }}
         >
           <MenuIcon />
         </IconButton>
