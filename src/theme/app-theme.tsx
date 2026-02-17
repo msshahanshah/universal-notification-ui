@@ -10,7 +10,13 @@ import { dataDisplayCustomizations } from "./customizations/data-display";
 import { feedbackCustomizations } from "./customizations/feedback";
 import { navigationCustomizations } from "./customizations/navigation";
 import { surfacesCustomizations } from "./customizations/surfaces";
-import { colorSchemes, typography, shadows, shape, gray } from "./theme-primitives";
+import {
+  colorSchemes,
+  typography,
+  shadows,
+  shape,
+  gray,
+} from "./theme-primitives";
 import { CssBaseline } from "@mui/material";
 
 interface AppThemeProps {
@@ -26,7 +32,7 @@ export default function AppTheme(props: AppThemeProps) {
   const { children, disableCustomTheme, themeComponents } = props;
 
   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  console.log('prefersDark',prefersDark ? "dark" : "light");
+
   const theme = React.useMemo(() => {
     return disableCustomTheme
       ? {}
@@ -72,6 +78,13 @@ export default function AppTheme(props: AppThemeProps) {
                   height: "100vh",
                   overflowY: "scroll",
                 },
+              },
+            },
+            MuiTableCell: {
+              styleOverrides: {
+                root: ({ theme }) => ({
+                  color: theme.palette.text.secondary,
+                }),
               },
             },
           },

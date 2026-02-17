@@ -46,7 +46,8 @@ export const getSortLabelStyles = (theme: any) => ({
     fontWeight: 600,
   },
   "& .MuiTableSortLabel-icon": {
-    opacity: 0.4,
+    color: theme.palette.text.secondary,
+    opacity: 1,
   },
   "&.Mui-active .MuiTableSortLabel-icon": {
     color: theme.palette.text.secondary, // active arrow color
@@ -59,12 +60,12 @@ export const textFieldTheme = (theme: any) => ({
     color: theme.palette.text.secondary, // default label color theme?.palette?.text?.secondary
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color:  theme.palette.text.secondary, // focused label color (blue)
+    color: theme.palette.text.secondary, // focused label color (blue)
     fontWeight: "bold",
-    marginTop:-1
+    marginTop: -1,
   },
   "& .MuiOutlinedInput-input": {
-    color: theme.palette.text.primary,
+    color: theme.palette.text.secondary,
   },
 });
 
@@ -88,6 +89,12 @@ export default function LogsTable() {
 
   const theme = useTheme();
 
+  const headerCellStyles = {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    fontWeight: 600,
+  };
+
   const buildUTCRange = (
     startDate?: string,
     startTime?: string,
@@ -110,7 +117,7 @@ export default function LogsTable() {
   };
 
   const debouncedFilters = useDebounce(filters, 500);
-   const showSnackbar = useSnackbar();
+  const showSnackbar = useSnackbar();
 
   const queryParams = useMemo(() => {
     const timeRange = buildUTCRange(
@@ -133,16 +140,13 @@ export default function LogsTable() {
     };
   }, [page, pageSize, sort, order, debouncedFilters]);
 
-  const { data: response, isLoading, isError,
-    error, } = useLogs(queryParams);
+  const { data: response, isLoading, isError, error } = useLogs(queryParams);
 
   const rows: Log[] = response?.data || [];
   const pagination = response?.pagination;
 
-  console.log("isError",isError)
   useEffect(() => {
     if (isError) {
-      console.log("USEFFECT",error)
       showSnackbar(error?.message || "Failed to fetch logs", "error");
       return;
     }
@@ -299,7 +303,13 @@ export default function LogsTable() {
         </Box>
 
         {/* Row 2 → Other Filters */}
-        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap" marginTop={1}>
+        <Box
+          display="flex"
+          gap={2}
+          alignItems="center"
+          flexWrap="wrap"
+          marginTop={1}
+        >
           <TextField
             size="small"
             label="Service"
@@ -347,17 +357,16 @@ export default function LogsTable() {
         sx={{
           minHeight: "60vh",
           maxHeight: "60vh", // control height here
-          overflow: "auto",
+
           border: `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
+          overflow: "auto"
         }}
       >
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell sx={getSortLabelStyles(theme)}>
-                S. No
-              </TableCell>
+              <TableCell sx={getSortLabelStyles(theme)}>S. No</TableCell>
               <TableCell>
                 <TableSortLabel
                   active={sort === "messageDate"}
@@ -459,6 +468,31 @@ export default function LogsTable() {
           setPageSize(parseInt(e.target.value, 10));
           setPage(0);
         }}
+        // sx={{
+        //   backgroundColor: theme.palette.background.paper,
+        //   color: theme.palette.text.secondary,
+        //   borderTop: `1px solid ${theme.palette.divider}`,
+
+        //   "& .MuiTablePagination-toolbar": {
+        //     color: theme.palette.text.primary,
+        //   },
+
+        //   "& .MuiTablePagination-selectLabel": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiTablePagination-displayedRows": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiSelect-select": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiSvgIcon-root": {
+        //     color: theme.palette.text.secondary,
+        //   },
+        // }}
       />
     </Paper>
   );
