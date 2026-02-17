@@ -73,6 +73,11 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
       return;
     }
 
+    const clientId = username?.split("@")?.[1];
+    if (clientId) {
+      localStorage.setItem("clientId", clientId?.toUpperCase());
+    }
+
     try {
       const response = await mutateAsync({ username, password });
       localStorage.setItem("accessToken", response.data.accessToken);
