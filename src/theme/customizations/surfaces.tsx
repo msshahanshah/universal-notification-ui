@@ -1,3 +1,5 @@
+// surfaces
+
 import { alpha, Theme, Components } from '@mui/material/styles';
 import { gray } from '../theme-primitives';
 
@@ -12,7 +14,7 @@ export const surfacesCustomizations: Components<Theme> = {
       root: ({ theme }) => ({
         padding: 4,
         overflow: 'clip',
-        backgroundColor: (theme.vars || theme).palette.background.default,
+        backgroundColor: (theme.vars || theme).palette.background.defaultBg,
         border: '1px solid',
         borderColor: (theme.vars || theme).palette.divider,
         ':before': {
@@ -111,3 +113,4 @@ export const surfacesCustomizations: Components<Theme> = {
     },
   },
 };
+

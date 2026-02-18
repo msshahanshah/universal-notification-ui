@@ -100,13 +100,13 @@ export default function SMS() {
 
   return (
     <div className="sms-container">
-      <Typography variant="h6" sx={{ mt: 0, mb: 4 }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: 4, color: "text.secondary" }}>
         New message
       </Typography>
 
       <div
         className="sms-wrapper"
-        style={{ backgroundColor: theme.palette.background.sidebar }}
+        style={{ backgroundColor: theme.palette.background.paper }}
       >
         {/* Phone Numbers */}
         <label
@@ -135,6 +135,7 @@ export default function SMS() {
                 inputMode="numeric"
                 className="sms-input"
                 onChange={(e) => updateNumber(index, e.target.value)}
+                style={{ color: "#fff" }}
               />
 
               {recipients.length > 1 && (

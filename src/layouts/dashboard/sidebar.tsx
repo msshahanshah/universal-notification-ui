@@ -19,7 +19,7 @@ import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
-import { useTheme, alpha } from "@mui/material/styles";
+import { useTheme, alpha, useColorScheme } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
 
@@ -53,6 +53,7 @@ const Sidebar = ({
   onToggle: () => void;
   mobileOpen: boolean;
 }) => {
+  const { mode, setMode } = useColorScheme();
   const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -104,15 +105,23 @@ const Sidebar = ({
     ? sidebarItems
     : sidebarItems.filter((item) => item.label.toLowerCase().includes(q));
 
+  console.log("MODE:", theme.palette.mode);
+  console.log("PAPER:", theme.palette.background.paper);
+
   const drawerContent = (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        backgroundColor: "hsla(220, 35%, 3%, 0.4)",
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.text.primary,
       }}
     >
+      {/* <div>{mode} Mode Enabled </div>
+      <div onClick={() => setMode(mode === "dark" ? "light" : "dark")}>
+        Change Mode
+      </div> */}
       {/* SEARCH BAR */}
       {open && (
         <Box
@@ -126,7 +135,10 @@ const Sidebar = ({
             alignItems: "center",
             gap: 1,
             borderRadius: 2,
-            backgroundColor: alpha(theme.palette.common.white, 0.05),
+            backgroundColor:
+              mode === "dark"
+                ? alpha(theme.palette.common.white, 0.05)
+                : alpha(theme.palette.grey[300], 0.4),
             border: `1px solid ${theme.palette.divider}`,
           }}
         >
@@ -138,9 +150,18 @@ const Sidebar = ({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{
-              color: theme.palette.text.primary,
+              color: theme.palette.text.secondary,
               fontSize: 14,
               width: "100%",
+              "&::placeholder": {
+                color: theme.palette.text.secondary,
+                opacity: 1, // important (default is 0.5 in some browsers)
+              },
+
+              "& input::placeholder": {
+                color: theme.palette.text.secondary,
+                opacity: 1,
+              },
             }}
           />
         </Box>
@@ -158,7 +179,9 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isActive("/dashboard") ? "#4fc3f7" : COLORS.WHITE,
+                color: isActive("/dashboard")
+                  ? theme.palette.text.secondary
+                  : theme.palette.text.secondary,
               }}
             >
               <HomeRoundedIcon fontSize="small" />
@@ -177,7 +200,9 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isServicesActive ? "#4fc3f7" : COLORS.WHITE,
+                color: isServicesActive
+                  ? theme.palette.primary.main
+                  : theme.palette.text.secondary,
               }}
             >
               <MiscellaneousServicesIcon fontSize="small" />
@@ -216,7 +241,7 @@ const Sidebar = ({
 
                       color: isDisabled
                         ? theme.palette.text.disabled
-                        : theme.palette.text.secondary,
+                        : "text.secondary",
 
                       "&:hover": {
                         backgroundColor: isDisabled
@@ -245,12 +270,13 @@ const Sidebar = ({
       <List sx={{ mt: "auto" }}>
         <ListItemButton
           onClick={() => {
-            localStorage.clear();
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
             window.location.href = "/";
           }}
           sx={getItemStyles("/logout")}
         >
-          <ListItemIcon sx={{ color: COLORS.WHITE }}>
+          <ListItemIcon sx={{ color: "text.secondary" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           {open && <ListItemText primary="Logout" />}
@@ -268,7 +294,7 @@ const Sidebar = ({
         onClose={onToggle}
         ModalProps={{
           BackdropProps: {
-            sx: { backgroundColor: "rgba(0,0,0,0.15)" },
+            sx: { backgroundColor: theme.palette.background.paper },
           },
         }}
       >
@@ -285,7 +311,7 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
-          backgroundColor: theme.palette.background.navbar, // theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           backdropFilter: "blur(12px)",
           borderRight: `1px solid ${theme.palette.divider}`,
           transition: (theme) =>
@@ -308,13 +334,13 @@ const Sidebar = ({
         }}
       >
         {open && (
-          <Typography sx={{ color: COLORS.WHITE, fontSize: 18 }}>
+          <Typography sx={{ color: "text.secondary", fontSize: 18 }}>
             Universal Notifier
           </Typography>
         )}
         <IconButton
           onClick={onToggle}
-          sx={{ color: COLORS.WHITE, border: "none" }}
+          sx={{ color: "text.secondary", border: "none",background: "transparent" }}
         >
           <MenuIcon />
         </IconButton>

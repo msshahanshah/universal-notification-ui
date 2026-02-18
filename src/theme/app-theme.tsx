@@ -1,12 +1,23 @@
 import * as React from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+  ThemeProvider,
+  createTheme,
+  getInitColorSchemeScript,
+} from "@mui/material/styles";
 import type { ThemeOptions } from "@mui/material/styles";
 import { inputsCustomizations } from "./customizations/input";
 import { dataDisplayCustomizations } from "./customizations/data-display";
 import { feedbackCustomizations } from "./customizations/feedback";
 import { navigationCustomizations } from "./customizations/navigation";
 import { surfacesCustomizations } from "./customizations/surfaces";
-import { colorSchemes, typography, shadows, shape } from "./theme-primitives";
+import {
+  colorSchemes,
+  typography,
+  shadows,
+  shape,
+  gray,
+} from "./theme-primitives";
+import { CssBaseline } from "@mui/material";
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -19,15 +30,22 @@ interface AppThemeProps {
 
 export default function AppTheme(props: AppThemeProps) {
   const { children, disableCustomTheme, themeComponents } = props;
+
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
   const theme = React.useMemo(() => {
     return disableCustomTheme
       ? {}
       : createTheme({
           palette: {
-            mode: "dark",
+            mode: prefersDark ? "dark" : "light",
             background: {
-              default: "#0b1c2d", // deep blue (NOT near black)
-              paper: "rgba(11, 28, 45, 0.75)",
+              default: prefersDark ? "#0b1c2d" : "#f5f7fa", // deep blue (NOT near black)
+              paper: prefersDark ? "rgba(11, 28, 45, 0.75)" : "#ffffff",
+            },
+            text: {
+              primary: prefersDark ? gray[800] : "#000000",
+              secondary: prefersDark ? "#fff" : "hsl(220, 15%, 30%)",
             },
           },
           // For more details about CSS variables configuration, see https://mui.com/material-ui/customization/css-theme-variables/configuration/
@@ -62,6 +80,13 @@ export default function AppTheme(props: AppThemeProps) {
                 },
               },
             },
+            MuiTableCell: {
+              styleOverrides: {
+                root: ({ theme }) => ({
+                  color: theme.palette.text.secondary,
+                }),
+              },
+            },
           },
         });
   }, [disableCustomTheme, themeComponents]);
@@ -70,8 +95,21 @@ export default function AppTheme(props: AppThemeProps) {
     return <React.Fragment>{children}</React.Fragment>;
   }
   return (
-    <ThemeProvider theme={theme} disableTransitionOnChange defaultMode="dark">
-      {children}
-    </ThemeProvider>
+    <>
+      {getInitColorSchemeScript({
+        defaultMode: "system",
+        modeStorageKey: "app-color-mode", // persists even after logout
+      })}
+
+      <ThemeProvider
+        theme={theme}
+        // defaultMode="system"
+        modeStorageKey="app-color-mode"
+        disableTransitionOnChange
+      >
+        <CssBaseline />
+        {children}
+      </ThemeProvider>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import AttachmentSection from "src/layouts/dashboard/services/email/attachmentSection";
 import { GmailPreviewHeader } from "./gmail-preview-header";
+import { useTheme } from "@mui/system";
 
 type Props = {
   html: string;
@@ -28,6 +29,7 @@ export function EmailPreview({
   handleAttachmentChange,
   removeAttachment,
 }: Props) {
+  const theme = useTheme()
   return (
     <div style={previewShell}>
       {/* Gmail-style header */}
@@ -55,8 +57,8 @@ export function EmailPreview({
             margin: 0;
 
             /* 🌙 DARK MODE */
-            background: #202124;
-            color: #e8eaed;
+            background: ${theme.palette.background.paper};
+            color: ${theme.palette.text.secondary};
           }
 
           a { color: #8ab4f8; }
@@ -83,7 +85,7 @@ export function EmailPreview({
         attachments={attachments}
         onAdd={handleAttachmentChange}
         onRemove={removeAttachment}
-        style={{ background: "#202124", marginTop: 0 }}
+        style={{ background: theme.palette.background.paper, marginTop: 0 }}
         hideBtn
       />
     </div>
@@ -97,7 +99,7 @@ const previewShell: React.CSSProperties = {
   border: "1px solid #dadce0",
   borderRadius: 8,
   overflow: "hidden",
-  background: "#D3E3FD",
+  background: (theme: any) => theme.palette.background.default,
 };
 
 const iframe: React.CSSProperties = {

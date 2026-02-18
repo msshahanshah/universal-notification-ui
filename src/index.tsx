@@ -6,10 +6,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { queryClient } from "./lib/queryClient";
-import AppLayout from "./theme/app-layout";
 import { SnackbarProvider } from "./provider/snackbar";
+import CssBaseline from "@mui/material/CssBaseline";
 
 import "./index.css";
+import AppTheme from "./theme/app-theme";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -19,9 +20,9 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <SnackbarProvider>
-          <AppLayout>
+          <AppTheme>
             <App />
-          </AppLayout>
+          </AppTheme>
         </SnackbarProvider>
       </BrowserRouter>
     </QueryClientProvider>

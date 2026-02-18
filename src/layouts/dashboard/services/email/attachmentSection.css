@@ -10,7 +10,7 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.05);
+  background: black;
   border: 1px solid rgba(255,255,255,0.08);
   color: #fff;
   backdrop-filter: blur(8px);

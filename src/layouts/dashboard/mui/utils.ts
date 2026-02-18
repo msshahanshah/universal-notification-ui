@@ -35,7 +35,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     case "sent":
       return {
         // backgroundColor: theme.palette.success.light,
-        color: theme.palette.success.dark,
+        color:'#04b34f', // theme.palette.success.dark,
         px: 1,
         py: 0.5,
         borderRadius: 1,
@@ -43,7 +43,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     case "failed":
       return {
         // backgroundColor: theme.palette.error.light,
-        color: theme.palette.error.dark,
+        color: '#BB2124', // theme.palette.error.dark,
         px: 1,
         py: 0.5,
         borderRadius: 1,
@@ -59,7 +59,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     case "processing":
       return {
         // backgroundColor: theme.palette.error.light,
-        color: theme.palette.error.dark,
+        color: "#17a2b8", // theme.palette.error.dark,
         px: 1,
         py: 0.5,
         borderRadius: 1,
@@ -67,7 +67,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     default:
       return {
         // backgroundColor: theme.palette.warning.light,
-        color: theme.palette.warning.dark,
+        color: "#666", // theme.palette.warning.dark,
         px: 1,
         py: 0.5,
         borderRadius: 1,

@@ -6,6 +6,7 @@ import {
 } from "src/utility/helper";
 
 import Input from "../input";
+import { useTheme } from "@mui/material";
 
 type Props = {
   from: string;
@@ -29,6 +30,7 @@ type Attachment = {
   previewUrl?: string; // for images
 };
 
+
 export function GmailShell({
   from,
   to,
@@ -42,6 +44,13 @@ export function GmailShell({
   setSubject,
   onValidationChange,
 }: Props) {
+  const theme = useTheme();
+
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.secondary,
+    // background: "hsla(220, 35%, 3%, 0.4)",
+  };
   const [errors, setErrors] = useState({
     from: "",
     to: "",
@@ -102,6 +111,7 @@ export function GmailShell({
         placeholder="From"
         className="sms-input"
         showAsteric={true}
+        style={inputStyle}    
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}
 
@@ -113,6 +123,7 @@ export function GmailShell({
         placeholder="To"
         className="sms-input"
         showAsteric={true}
+        style={inputStyle}
       />
       {errors.to && <ErrorText>{errors.to}</ErrorText>}
       <Input
@@ -122,7 +133,8 @@ export function GmailShell({
         onChange={(v) => handleMultiChange(v.target.value, "cc", setCc)}
         placeholder="Cc"
         className="sms-input"
-      />
+        style={inputStyle}
+        />
       {errors.cc && <ErrorText>{errors.cc}</ErrorText>}
       <Input
         label="Bcc"
@@ -131,6 +143,7 @@ export function GmailShell({
         onChange={(v) => handleMultiChange(v.target.value, "bcc", setBcc)}
         placeholder="Bcc"
         className="sms-input"
+        style={inputStyle}
       />
       {errors.bcc && <ErrorText>{errors.bcc}</ErrorText>}
       <Input
@@ -151,6 +164,7 @@ export function GmailShell({
         placeholder="Subject"
         className="sms-input"
         showAsteric
+        style={inputStyle}
       />
       {subjectError && <ErrorText>{subjectError}</ErrorText>}
     </div>
