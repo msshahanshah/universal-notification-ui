@@ -7,6 +7,7 @@ import {
 
 import Input from "../input";
 import { useTheme } from "@mui/material";
+import COLORS from "src/utility/colors";
 
 type Props = {
   from: string;
@@ -43,11 +44,9 @@ export function GmailShell({
   setSubject,
   onValidationChange,
 }: Props) {
-  const theme = useTheme();
 
   const inputStyle: React.CSSProperties = {
-    // backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.secondary,
+    color: COLORS.WHITE,
   };
 
   const [errors, setErrors] = useState({
