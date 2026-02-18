@@ -21,8 +21,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
 import { useTheme, alpha, useColorScheme } from "@mui/material/styles";
 
-import COLORS from "src/utility/colors";
-
 const sidebarItems = [
   {
     label: "Slack",
@@ -105,9 +103,6 @@ const Sidebar = ({
     ? sidebarItems
     : sidebarItems.filter((item) => item.label.toLowerCase().includes(q));
 
-  console.log("MODE:", theme.palette.mode);
-  console.log("PAPER:", theme.palette.background.paper);
-
   const drawerContent = (
     <div
       style={{
@@ -118,10 +113,6 @@ const Sidebar = ({
         color: theme.palette.text.primary,
       }}
     >
-      {/* <div>{mode} Mode Enabled </div>
-      <div onClick={() => setMode(mode === "dark" ? "light" : "dark")}>
-        Change Mode
-      </div> */}
       {/* SEARCH BAR */}
       {open && (
         <Box
@@ -232,7 +223,7 @@ const Sidebar = ({
                       mt: 0.5,
                       minHeight: 36,
                       borderRadius: 2,
-                      // color: COLORS.WHITE,
+                     
                       backgroundColor: isDisabled
                         ? theme.palette.action.disabledBackground
                         : isActive(item.path)

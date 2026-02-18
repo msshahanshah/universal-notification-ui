@@ -61,7 +61,6 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
     username === "" || password === "" || isPending || hasApiError;
 
   const onSubmit = async ({ username, password }: any) => {
-    // setMode("dark");
     if (!usernameRegex.test(username) || !passwordRegex.test(password)) {
       setErrorMessage("Invalid username or password");
       setHasApiError(true);
