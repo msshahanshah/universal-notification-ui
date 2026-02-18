@@ -468,31 +468,31 @@ export default function LogsTable() {
           setPageSize(parseInt(e.target.value, 10));
           setPage(0);
         }}
-        // sx={{
-        //   backgroundColor: theme.palette.background.paper,
-        //   color: theme.palette.text.secondary,
-        //   borderTop: `1px solid ${theme.palette.divider}`,
+        sx={{
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.secondary,
+          borderTop: `1px solid ${theme.palette.divider}`,
 
-        //   "& .MuiTablePagination-toolbar": {
-        //     color: theme.palette.text.primary,
-        //   },
+          "& .MuiTablePagination-toolbar": {
+            color: theme.palette.text.primary,
+          },
 
-        //   "& .MuiTablePagination-selectLabel": {
-        //     color: theme.palette.text.secondary,
-        //   },
+          "& .MuiTablePagination-selectLabel": {
+            color: theme.palette.text.secondary,
+          },
 
-        //   "& .MuiTablePagination-displayedRows": {
-        //     color: theme.palette.text.secondary,
-        //   },
+          "& .MuiTablePagination-displayedRows": {
+            color: theme.palette.text.secondary,
+          },
 
-        //   "& .MuiSelect-select": {
-        //     color: theme.palette.text.secondary,
-        //   },
+          "& .MuiSelect-select": {
+            color: theme.palette.text.secondary,
+          },
 
-        //   "& .MuiSvgIcon-root": {
-        //     color: theme.palette.text.secondary,
-        //   },
-        // }}
+          "& .MuiSvgIcon-root": {
+            color: theme.palette.text.secondary,
+          },
+        }}
       />
     </Paper>
   );
