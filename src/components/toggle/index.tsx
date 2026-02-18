@@ -19,20 +19,31 @@ export function Toggle<T extends string>({
   const theme = useTheme();
   return (
     <div style={toggleContainer}>
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          onClick={() => onChange(opt.value)}
-          style={{
-            ...toggleButton,
-            ...(value === opt.value ? activeButton : {}),
-            backgroundColor: theme.palette.primary.dark,
-            color: theme.palette.primary.contrastText,
-          }}
-        >
-          {opt.label}
-        </button>
-      ))}
+      {options.map((opt) => {
+        const isActive = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            onClick={() => onChange(opt.value)}
+            style={{
+              padding: "6px 12px",
+              cursor: "pointer",
+              border: "none",
+              fontSize: 14,
+              transition: "0.2s ease",
+              backgroundColor: isActive
+                ? theme.palette.primary.main
+                : theme.palette.background.paper,
+              color: isActive
+                ? theme.palette.primary.contrastText
+                : theme.palette.text.secondary,
+              fontWeight: isActive ? "bold" : 500,
+            }}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -44,19 +55,4 @@ const toggleContainer: React.CSSProperties = {
   overflow: "hidden",
   border: "1px solid #ddd",
   cursor: "pointer",
-};
-
-const toggleButton: React.CSSProperties = {
-  padding: "6px 12px",
-  cursor: "pointer",
-  border: "none",
-  backgroundColor: (theme) => theme.palette.background.paper,
-  fontSize: 14,
-};
-
-const activeButton: React.CSSProperties = {
-  backgroundColor: (theme) => theme.palette.primary.main,
-  color: "#fff",
-  fontWeight: "bold",
-  fontSize: 14,
 };

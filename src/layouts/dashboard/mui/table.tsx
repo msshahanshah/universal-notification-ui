@@ -1,7 +1,6 @@
 import {
   Box,
   CircularProgress,
-  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -22,11 +21,9 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
-
-// import { getStatusStyle } from "./styles";
-import { formatDateForTable, getStatusStyle } from "./utils";
-import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
+
+import { formatDateForTable, getStatusStyle } from "./utils";
 
 interface Log {
   id: number;
