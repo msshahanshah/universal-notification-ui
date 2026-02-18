@@ -1,21 +1,26 @@
 import { Editor, useEditorState } from "@tiptap/react";
+import { useTheme } from "@mui/material";
 
 type Props = { editor: Editor | null };
 
 export function EmailToolbar({ editor }: Props) {
+  const theme = useTheme();
+
   if (!editor) return null;
 
-  const buttonStyle: React.CSSProperties = {};
-
   const getButtonStyle = (isActive: boolean): React.CSSProperties => ({
-    ...buttonStyle,
-    background: isActive ? "rgba(48, 110, 232, 0.25)" : "rgb(18, 18, 18)",
-    color: isActive ? "#fff" : "#ccc",
-    fontWeight: isActive ? "bold" : "normal",
+    backgroundColor: isActive
+      ? theme.palette.primary.main
+      : theme.palette.background.paper,
+    color: isActive
+      ? theme.palette.primary.contrastText
+      : theme.palette.text.secondary,
+    fontWeight: isActive ? "bold" : 500,
     cursor: "pointer",
     padding: "4px 8px",
-    border: "1px solid rgb(221, 221, 221)",
+    border: `1px solid ${theme.palette.divider}`,
     borderRadius: 8,
+    transition: "all 0.2s ease",
   });
 
   const editorState = useEditorState({
@@ -30,31 +35,43 @@ export function EmailToolbar({ editor }: Props) {
   });
 
   return (
-    <div style={toolbarStyle}>
+    <div
+      style={{
+        display: "flex",
+        gap: 8,
+        padding: 8,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
       <button
         style={getButtonStyle(editorState.isBold)}
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
         B
       </button>
+
       <button
         style={getButtonStyle(editorState.isItalic)}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
         I
       </button>
+
       <button
         style={getButtonStyle(editorState.isUnderline)}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
         U
       </button>
+
       <button
         style={getButtonStyle(editorState.isBullet)}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
         • List
       </button>
+
       <button
         style={getButtonStyle(editorState.isOrderedList)}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -64,10 +81,3 @@ export function EmailToolbar({ editor }: Props) {
     </div>
   );
 }
-
-const toolbarStyle: React.CSSProperties = {
-  display: "flex",
-  gap: 8,
-  padding: 8,
-  borderBottom: "1px solid #e0e0e0",
-};
