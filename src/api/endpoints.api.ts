@@ -1,3 +1,19 @@
+export const cleanQueryParams = (params?: Record<string, any>) => {
+  if (!params) return {};
+
+  return Object.entries(params).reduce((acc, [key, value]) => {
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      !(typeof value === "string" && value.trim() === "")
+    ) {
+      acc[key] = value;
+    }
+    return acc;
+  }, {} as Record<string, any>);
+};
+
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: "/login",
@@ -8,25 +24,14 @@ export const ENDPOINTS = {
   },
   LOGS: {
     LIST: (params?: Record<string, any>) => {
-      if (!params || Object.keys(params).length === 0) {
-        return "/logs";
-      }
+      const cleaned = cleanQueryParams(params);
 
-      const query = new URLSearchParams(
-        Object.entries(params).reduce(
-          (acc, [key, value]) => {
-            if (value !== undefined && value !== null) {
-              acc[key] = String(value);
-            }
-            return acc;
-          },
-          {} as Record<string, string>,
-        ),
-      ).toString();
+      const query = new URLSearchParams(cleaned).toString();
 
-      return `/logs?${query}`;
+      return query ? `/logs?${query}` : "/logs";
     },
+
     CREATE: "/logs",
-    DELIVERY_STATUS: (id: number) => `/delivery-status/${id}`,
+    DELIVERY_STATUS: (id: string) => `/delivery-status/${id}`,
   },
 };

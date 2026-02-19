@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
 import { Box, CircularProgress } from "@mui/material";
 
@@ -10,7 +10,6 @@ import { Table } from "src/components/ag-grid-react/table";
 import "../../../App.css";
 import "./logs-table.css";
 import RefreshToken from "../../../assets/refresh.png";
-// import { useWebsocket } from "src/hooks/useWebsocket";
 
 export interface LogData {
   id: number;
@@ -38,120 +37,39 @@ export type LogMessage = {
 const LogsTable = () => {
   const wValue = "100%";
   const hValue = "100%";
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(50);
+  const [page, setPage] = useState(2);
+  const [pageSize, setPageSize] = useState(5);
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [sortModel, setSortModel] = useState<string>("");
+
+  const paginationPageSizeSelector = useMemo(() => {
+    return [50, 75, 100];
+  }, []);
+  const paginationNumberFormatter = useCallback((params) => {
+    return "[" + params.value.toLocaleString() + "]";
+  }, []);
+
+  console.log("sortModel", sortModel);
   const [data, setData] = useState<LogMessage[]>([]);
 
-  //  {
-  //     id: 12,
-  //     messageId: "8beca3e3-5f8c-473c-9cd8-2df627552430",
-  //     service: "slack",
-  //     destination: "C0AAQJRGF6K",
-  //     status: "pending",
-  //     attempts: 0,
-  //     messageDate: "2026-02-06T10:17:34.858Z",
-  //   },
-
-  // !!!! Do not remove for web socket!!
-  // const token = localStorage.getItem("accessToken");
-  // const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-  // const { sendMessage, status } = useWebsocket({
-  //   url: `wss://${BASE_URL}/?clientId=GKMIT&token=` + token,
-  //   // onMessage: (event: any) => {
-  //   //   console.log("event", event);
-  //   //   setData((prev: any) => {
-  //   //     console.log("prev",prev)
-  //   //     const existingIndex = prev.findIndex(
-  //   //       (item: any) => item.id === 12, // event.id
-  //   //     );
-  //   //     console.log("existingIndex",existingIndex)
-  //   //     if (existingIndex >= 0) {
-  //   //       const updated = [...prev];
-  //   //       console.log("spread op",updated)
-  //   //       updated[existingIndex] = event;
-  //   //       console.log("updated data",JSON.parse(updated))
-  //   //       return updated;
-  //   //     }
-  //   //     return [...prev, event];
-  //   //   });
-  //   //   // setMessages((prev) => [...prev, event]);
-  //   // },
-  //   onMessage: (event: LogMessage) => {
-  //     console.log("event..", event);
-  //     if (event?.type === "stream") {
-  //       setData((prev: LogMessage[]) => {
-  //         console.log("prev", prev);
-  //         const existingIndex = prev.findIndex((item) => item.id === event.id); // event.id
-  //         console.log("existingIndex", existingIndex);
-
-  //         if (existingIndex >= 0) {
-  //           const updated = [...prev];
-  //           updated[existingIndex] = event;
-  //           return updated;
-  //         }
-
-  //         return [...prev, event];
-  //       });
-  //     }
-  //   },
-  // });
-
-  // !!!! Do not remove for web socket!!
-
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
-  // const isTablet = window.matchMedia("(max-width: 1024px)").matches;
 
   const showSnackbar = useSnackbar();
 
-  // console.log("final data", data);
   const {
     data: response,
     isLoading,
     isError,
     error,
-  } = useLogs({ limit: pageSize, page });
+  } = useLogs({ limit: pageSize, page, ...filters });
+  // , sort: sortModel
 
   useEffect(() => {
     if (isError) {
       showSnackbar(error?.message || "Failed to fetch logs", "error");
       return;
     }
-
-    // !!!! Do not remove for web socket!!
-
-    // if (response?.data) {
-    //   setData((prev) => {
-    //     // keep websocket-updated rows if they exist
-    //     const map = new Map(prev.map((item) => [item.id, item]));
-
-    //     response.data.forEach((item: LogMessage) => {
-    //       if (!map.has(item.id)) {
-    //         map.set(item.id, item);
-    //       }
-    //     });
-
-    //     return Array.from(map.values());
-    //   });
-    // }
   }, [isError, response?.data, error]);
-
-  const containerStyle = useMemo(
-    () => ({
-      width: wValue,
-      height: hValue,
-      marginTop: 15,
-      boxShadow: `
-      0 8px 24px rgba(0, 0, 0, 0.6),
-      0 0 0 1px rgba(255, 255, 255, 0.04),
-      0 0 20px rgba(0, 210, 255, 0.25)
-    `,
-      borderRadius: 8,
-    }),
-    [],
-  );
-
-  // const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
   const gridApiRef = useRef<GridApi | null>(null);
 
@@ -211,6 +129,67 @@ const LogsTable = () => {
     );
   };
 
+  const buildFilterParams = (model: any) => {
+    const params: Record<string, any> = {};
+
+    Object.entries(model).forEach(([field, value]: any) => {
+      if (!value?.filter) return;
+
+      // Multi-select (set filter)
+      if (value.values) {
+        params[field] = value.values.join(",");
+      } else {
+        params[field] = value.filter;
+      }
+    });
+
+    return params;
+  };
+
+  const CustomTooltip = (props: any) => {
+    const data = props.api.getDisplayedRowAtIndex(props.rowIndex)?.data;
+
+    console.log("data", data);
+    if (!data) return null;
+    return (
+      <div
+        className="custom-tooltip"
+        style={{
+          backgroundColor: "white",
+          padding: "10px",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      >
+        <div>
+          <strong>To:</strong> {data.destination || "N/A"}
+        </div>
+        {data.fromEmail && (
+          <div>
+            <strong>From:</strong> {data.fromEmail}
+          </div>
+        )}
+        {data.cc && (
+          <div>
+            <strong>CC:</strong> {data.cc}
+          </div>
+        )}
+        {data.bcc && (
+          <div>
+            <strong>BCC:</strong> {data.bcc}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const frameworkComponents = useMemo(
+    () => ({
+      customTooltip: CustomTooltip,
+    }),
+    [],
+  );
+
   const [columnDefs] = useState<ColDef[]>([
     {
       headerName: "S.No",
@@ -267,6 +246,7 @@ const LogsTable = () => {
       filter: true,
       filterParams: {
         filterOptions: ["equals", "contains"],
+        debounceMs: 300,
       },
       tooltipField: "service",
     },
@@ -279,7 +259,9 @@ const LogsTable = () => {
       filterParams: {
         filterOptions: ["contains", "equals"],
       },
-      tooltipField: "destination",
+      tooltipComponent: CustomTooltip,
+      // tooltipShowDelay: 500, // Show tooltip after 500ms
+      // tooltipMouseTrack: true, // Tooltip follows mouse
     },
     {
       field: "status",
@@ -334,7 +316,6 @@ const LogsTable = () => {
       filter: !isMobile,
       floatingFilter: !isMobile,
       resizable: !isMobile,
-      // suppressMenu: true,
       suppressMovable: true,
 
       // 🔑 CRITICAL
@@ -346,12 +327,24 @@ const LogsTable = () => {
     [isMobile],
   );
 
-  // !!!! Do not remove for web socket!! // data ?? [];
   const logsData = response?.data ?? [];
 
-  const onGridReady = (params: GridReadyEvent) => {
-    gridApiRef.current = params.api;
-  };
+  const onGridReady = useCallback(
+    (params: GridReadyEvent) => {
+      gridApiRef.current = params.api;
+      // Set initial sort model if needed
+      if (sortModel) {
+        const [colId, sort] = sortModel.startsWith("-")
+          ? [sortModel.substring(1), "desc"]
+          : [sortModel, "asc"];
+        params.columnApi.applyColumnState({
+          state: [{ colId, sort }],
+          defaultState: { sort: null },
+        });
+      }
+    },
+    [sortModel],
+  );
 
   const onPaginationChanged = () => {
     if (!gridApiRef.current) return;
@@ -367,13 +360,74 @@ const LogsTable = () => {
     }
   };
 
-  const onFilterChanged = () => {
+  // const onFilterChanged = () => {
+  //   if (!gridApiRef.current) return;
+
+  //   const model = gridApiRef.current.getFilterModel();
+  //   const apiFilters = buildFilterParams(model);
+
+  //   setFilters(apiFilters);
+  //   setPage(1); // reset page on filter
+  // };
+
+  const onFilterChanged = useCallback(
+    ({ api }: { api: GridApi }) => {
+      const filterModel = api.getFilterModel();
+      const newFilters: Record<string, any> = {};
+      Object.entries(filterModel).forEach(([field, filter]) => {
+        if (filter.filterType === "text" && filter.filter) {
+          newFilters[field] = filter.filter;
+        }
+      });
+      // Only update if filters actually changed
+      if (JSON.stringify(newFilters) !== JSON.stringify(filters)) {
+        setFilters(newFilters);
+        // Reset to first page when filters change
+        setPage(1);
+      }
+    },
+    [filters],
+  );
+
+  const onSortChanged = () => {
     if (!gridApiRef.current) return;
 
-    const model = gridApiRef.current.getFilterModel();
+    // const sortModel = gridApiRef.current.getSortModel();
 
-    console.log("🧪 ACTIVE FILTER MODEL", model);
+    gridApiRef.current.state.sorting.sortModel;
+
+    console.log("sortModel", sortModel);
+    const sortQuery = sortModel
+      .map((s: any) => (s.sort === "asc" ? s.colId : `-${s.colId}`))
+      .join(",");
+
+    console.log("sortQuery..", sortQuery);
+
+    setSortModel(sortQuery);
   };
+
+  //   const dataSource = {
+  //   getRows: async (params) => {
+  //     const { startRow, endRow } = params;
+
+  //     const response = await fetch(
+  //       `/api/users?start=${startRow}&limit=${endRow - startRow}`
+  //     );
+
+  //     const data = await response.json();
+
+  //     params.successCallback(data.rows, data.totalCount);
+  //   }
+  // };
+
+  const totalRows = response?.pagination?.totalPages || 0;
+  console.log("totalRows", totalRows);
+
+  useEffect(() => {
+    if (gridApiRef.current && totalRows) {
+      gridApiRef.current.paginationSetRowCount(totalRows, false);
+    }
+  }, [totalRows]);
 
   if (isLoading) {
     return (
@@ -388,21 +442,42 @@ const LogsTable = () => {
     );
   }
 
+  // const onFirstDataRendered = useCallback((params) => {
+  //   params.api.paginationGoToPage(1);
+  // }, []);
+
   return (
     <Table
       isMobile={isMobile}
       isLoading={isLoading}
       columnDefs={columnDefs}
-      defaultColDef={defaultColDef}
+      frameworkComponents={frameworkComponents}
+      defaultColDef={{
+        // ... other default column defs
+        ...defaultColDef,
+        tooltipComponent: "customTooltip",
+      }}
+      // defaultColDef={defaultColDef}
       logsData={logsData}
-      onPaginationChanged={onPaginationChanged}
-      onFilterChanged={onFilterChanged}
       pageSize={pageSize}
       gridApiRef={gridApiRef}
+      // PAGINATION
       paginationPageSize={pageSize}
-      paginationPageSizeSelector={[50, 75, 100]}
+      paginationPageSizeSelector={paginationPageSizeSelector}
+      paginationNumberFormatter={paginationNumberFormatter}
+      onPaginationChanged={onPaginationChanged}
       shouldPaginate={true}
       enableBrowserTooltips={true}
+      onFilterChanged={onFilterChanged}
+      onSortChanged={onSortChanged}
+      sortModel={sortModel}
+      onGridReady={onGridReady}
+      // datasource={datasource}
+      // onFirstDataRendered={onFirstDataRendered}
+      // onSortModelChange={(newModel) => {
+      //   setSortModel(newModel);
+      //   console.log(newModel);
+      // }}
     />
   );
 };

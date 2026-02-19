@@ -1,5 +1,5 @@
 import { Suspense, useState, lazy } from "react";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useSlackService } from "src/hooks/useService";
@@ -7,7 +7,6 @@ import Button from "src/components/button";
 import Input from "src/components/input";
 import { useSnackbar } from "src/provider/snackbar";
 import FallbackLoader from "src/components/fallback-loader/fallback-loader";
-import { useLogs } from "src/hooks/useLogs";
 import { logsKeys } from "src/api/queryKeys";
 import ErrorText from "src/components/error-text";
 import { slackRegex } from "src/utility/constants";
@@ -20,11 +19,11 @@ export default function Slack() {
   const [channelID, setChannelID] = useState<any>("");
   const [message, setMessage] = useState("");
   const [invalidChannelId, setInvalidChannelId] = useState("");
+
+  const theme = useTheme();
   const { mutate } = useSlackService();
   const showSnackbar = useSnackbar();
   const queryClient = useQueryClient();
-
-  const slackLogsParams = { service: "slack", limit: 10 };
 
   const resetStates = () => {
     setMessage("");
@@ -33,12 +32,17 @@ export default function Slack() {
   };
 
   const handleSend = (channelID: string) => {
-    if (!slackRegex.test(channelID)) {
-      setInvalidChannelId("Invalid channel ID");
+    const channelIds = channelID
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+
+    const hasInvalid = channelIds.some((id) => !slackRegex.test(id));
+
+    if (hasInvalid) {
+      setInvalidChannelId("One or more Channel IDs are invalid");
       return;
     }
-
-    resetStates();
 
     mutate(
       {
@@ -48,6 +52,7 @@ export default function Slack() {
       },
       {
         onSuccess: (data) => {
+          resetStates();
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
@@ -63,19 +68,16 @@ export default function Slack() {
   };
 
   const isDisabled = !channelID || !message || !!invalidChannelId;
-  const {
-    data: response,
-    isLoading,
-    isError,
-    error,
-  } = useLogs(slackLogsParams);
 
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 4 }}>
+      <Typography variant="h6" sx={{ mb: 4 , color: "text.secondary"}}>
         New message
       </Typography>
-      <div className="sms-wrapper">
+      <div
+        className="sms-wrapper"
+        style={{ backgroundColor: theme.palette.background.paper }}
+      >
         <Input
           label="Channel ID"
           type="text"
@@ -90,10 +92,17 @@ export default function Slack() {
             setChannelID(e.target.value);
           }}
           showAsteric
+          style={{ color: "#fff" }}
         />
 
         {/* TODO make textarea reusable */}
-        <label style={{ marginBottom: 4, fontSize: "12px" }}>
+        <label
+          style={{
+            marginBottom: 4,
+            fontSize: "12px",
+            color: theme.palette.text.secondary,
+          }}
+        >
           Message
           <span style={{ color: "red", marginLeft: 2 }}>*</span>
         </label>
@@ -107,23 +116,18 @@ export default function Slack() {
         <ErrorText>{invalidChannelId}</ErrorText>
         <div className="sms-footer">
           <Button
-            disabled={!channelID || !message}
+            disabled={!channelID?.trim() || !message?.trim()}
             label="Send"
             className={isDisabled ? "button-disabled" : "sms-send-btn"}
             onClick={() => handleSend(channelID)}
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 0 }}>
+      <Typography variant="h6" sx={{ mt: 0, mb: "32px", color: "text.secondary"}}>
         History (Last 10 messages)
       </Typography>
       <Suspense fallback={<FallbackLoader />}>
-        <HistoryTable
-          data={response}
-          isDataLoading={isLoading}
-          isError={isError}
-          error={error}
-        />
+        <HistoryTable />
       </Suspense>
     </div>
   );

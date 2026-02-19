@@ -60,14 +60,19 @@ api.interceptors.response.use(
   (response) => response, // return only data
   async (error) => {
     const originalRequest = error.config;
+
+    if (error?.success === false) {
+      return Promise.reject({
+        ...error.data,
+        message: error.message,
+      });
+    }
+
     if (originalRequest.url?.includes("/login")) {
       return Promise.reject(error);
     }
 
-    if (
-      error.response?.status === 500 ||
-      (error.response?.status === 401 && originalRequest?.url === "/refresh")
-    ) {
+    if (error.response?.status === 401 && originalRequest?.url === "/refresh") {
       localStorage.clear();
       window.location.href = "/";
       return;
@@ -101,6 +106,8 @@ api.interceptors.response.use(
         }
       });
     }
+
+    return Promise.reject(error);
   },
 );
 

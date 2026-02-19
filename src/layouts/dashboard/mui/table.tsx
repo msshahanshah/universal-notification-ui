@@ -1,6 +1,7 @@
 import {
   Box,
   CircularProgress,
+  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -8,22 +9,24 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   TableSortLabel,
   TextField,
   Typography,
   Tooltip,
   IconButton,
-  useTheme,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useTheme } from "@mui/material/styles";
+import { useEffect, useMemo, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
-// import { getStatusStyle } from "../../mui/styles";
-import { formatDateForTable, getStatusStyle } from "../../mui/utils";
+
+// import { getStatusStyle } from "./styles";
+import { formatDateForTable, getStatusStyle } from "./utils";
 import COLORS from "src/utility/colors";
-import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
+import { useSnackbar } from "src/provider/snackbar";
 
 interface Log {
   id: number;
@@ -37,11 +40,42 @@ interface Log {
 
 type Order = "asc" | "desc" | "";
 
-export default function HistoryTable() {
+export const getSortLabelStyles = (theme: any) => ({
+  "&.Mui-active": {
+    color: theme.palette.text.secondary, // active text color
+    fontWeight: 600,
+  },
+  "& .MuiTableSortLabel-icon": {
+    color: theme.palette.text.secondary,
+    opacity: 1,
+  },
+  "&.Mui-active .MuiTableSortLabel-icon": {
+    color: theme.palette.text.secondary, // active arrow color
+    opacity: 1,
+  },
+});
+
+export const textFieldTheme = (theme: any) => ({
+  "& .MuiInputLabel-root": {
+    color: theme.palette.text.secondary, // default label color theme?.palette?.text?.secondary
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: theme.palette.text.secondary, // focused label color (blue)
+    fontWeight: "bold",
+    marginTop: -1,
+  },
+  "& .MuiOutlinedInput-input": {
+    color: theme.palette.text.secondary,
+  },
+});
+
+export default function LogsTable() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
   const [sort, setSort] = useState<string>("messageDate");
-  const [order, setOrder] = useState<Order>("");
+  const [order, setOrder] = useState<Order>("desc");
+
   const [filters, setFilters] = useState({
     startDate: "",
     startTime: "",
@@ -54,6 +88,13 @@ export default function HistoryTable() {
   });
 
   const theme = useTheme();
+
+  const headerCellStyles = {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    fontWeight: 600,
+  };
+
   const buildUTCRange = (
     startDate?: string,
     startTime?: string,
@@ -76,6 +117,7 @@ export default function HistoryTable() {
   };
 
   const debouncedFilters = useDebounce(filters, 500);
+  const showSnackbar = useSnackbar();
 
   const queryParams = useMemo(() => {
     const timeRange = buildUTCRange(
@@ -87,25 +129,48 @@ export default function HistoryTable() {
 
     return {
       page: page + 1,
-      limit: 10,
-      sort,
-      order,
+      limit: pageSize,
+      // sort,
+      // order,
       destination: debouncedFilters.destination || undefined,
-      service: "slack",
+      service: debouncedFilters.service || undefined,
       status: debouncedFilters.status || undefined,
       attempts: debouncedFilters.attempts || undefined,
       ...timeRange,
     };
   }, [page, pageSize, sort, order, debouncedFilters]);
 
-  const { data: response, isLoading } = useLogs(queryParams);
+  const { data: response, isLoading, isError, error } = useLogs(queryParams);
 
   const rows: Log[] = response?.data || [];
+  const pagination = response?.pagination;
+
+  useEffect(() => {
+    if (isError) {
+      showSnackbar(error?.message || "Failed to fetch logs", "error");
+      return;
+    }
+  }, [isError, response?.data, error]);
 
   const renderCell = (value: any) => {
     return (
-      <Tooltip title={value} placement="bottom">
-        <Box display="flex" alignItems="center" gap={1}>
+      <Tooltip
+        title={value}
+        componentsProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: theme.palette.grey[900],
+              fontSize: 12,
+            },
+          },
+        }}
+      >
+        <Box
+          display="flex"
+          alignItems="center"
+          gap={1}
+          // sx={getStatusStyle(latestStatus)}
+        >
           <Typography>{value}</Typography>
         </Box>
       </Tooltip>
@@ -128,7 +193,7 @@ export default function HistoryTable() {
     };
 
     return (
-      <Tooltip title={latestStatus} placement="bottom">
+      <Tooltip title={latestStatus}>
         <Box
           display="flex"
           alignItems="center"
@@ -187,7 +252,6 @@ export default function HistoryTable() {
         p: 2,
         backgroundColor: theme.palette.background.sidebar,
         border: `1px solid ${theme.palette.divider}`,
-        width: "100%",
       }}
     >
       {/* Filters */}
@@ -239,7 +303,23 @@ export default function HistoryTable() {
         </Box>
 
         {/* Row 2 → Other Filters */}
-        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap" marginTop={1}>
+        <Box
+          display="flex"
+          gap={2}
+          alignItems="center"
+          flexWrap="wrap"
+          marginTop={1}
+        >
+          <TextField
+            size="small"
+            label="Service"
+            value={filters.service}
+            onChange={(e) =>
+              setFilters((prev) => ({ ...prev, service: e.target.value }))
+            }
+            sx={textFieldTheme(theme)}
+          />
+
           <TextField
             size="small"
             label="Status"
@@ -275,11 +355,12 @@ export default function HistoryTable() {
       {/* Table */}
       <TableContainer
         sx={{
-          minHeight: "20vh",
-          maxHeight: "30vh", // control height here
-          overflow: "auto",
+          minHeight: "60vh",
+          maxHeight: "60vh", // control height here
+
           border: `1px solid ${theme.palette.divider}`,
           borderRadius: 1,
+          overflow: "auto"
         }}
       >
         <Table stickyHeader>
@@ -294,6 +375,17 @@ export default function HistoryTable() {
                   sx={getSortLabelStyles(theme)}
                 >
                   Date
+                </TableSortLabel>
+              </TableCell>
+
+              <TableCell>
+                <TableSortLabel
+                  active={sort === "service"}
+                  direction={order as "asc" | "desc"}
+                  onClick={() => handleSort("service")}
+                  sx={getSortLabelStyles(theme)}
+                >
+                  Service
                 </TableSortLabel>
               </TableCell>
 
@@ -352,7 +444,7 @@ export default function HistoryTable() {
                   <TableCell>
                     {renderCell(formatDateForTable(row.messageDate))}
                   </TableCell>
-
+                  <TableCell>{renderCell(row.service)}</TableCell>
                   <TableCell>{renderCell(row.destination)}</TableCell>
                   <TableCell>
                     <StatusCell row={row} />
@@ -366,17 +458,42 @@ export default function HistoryTable() {
       </TableContainer>
 
       {/* Pagination */}
-      {/* <TablePagination
+      <TablePagination
         component="div"
-        count={(pagination?.totalPages || 0) * 10}
+        count={(pagination?.totalPages || 0) * pageSize}
         page={page}
         onPageChange={(_, newPage) => setPage(newPage)}
-        rowsPerPage={10}
-        // onRowsPerPageChange={(e) => {
-        //   setPageSize(parseInt(e.target.value, 10));
-        //   setPage(0);
+        rowsPerPage={pageSize}
+        onRowsPerPageChange={(e) => {
+          setPageSize(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+        // sx={{
+        //   backgroundColor: theme.palette.background.paper,
+        //   color: theme.palette.text.secondary,
+        //   borderTop: `1px solid ${theme.palette.divider}`,
+
+        //   "& .MuiTablePagination-toolbar": {
+        //     color: theme.palette.text.primary,
+        //   },
+
+        //   "& .MuiTablePagination-selectLabel": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiTablePagination-displayedRows": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiSelect-select": {
+        //     color: theme.palette.text.secondary,
+        //   },
+
+        //   "& .MuiSvgIcon-root": {
+        //     color: theme.palette.text.secondary,
+        //   },
         // }}
-      /> */}
+      />
     </Paper>
   );
 }
