@@ -34,10 +34,10 @@ jobs:
           echo "SLACK_WEBHOOK_URL=SLACK_WEBHOOK_URL"                   >> $GITHUB_ENV
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: "npm"
@@ -53,7 +53,7 @@ jobs:
         run: npm run build
 
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets[env.AWS_ROLE_ARN] }}
           role-session-name: github-actions-${{ env.ENVIRONMENT }}-${{ github.run_number }}
@@ -61,11 +61,11 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://${{ secrets[env.S3_BUCKET] }} --delete
+          aws s3 sync --region ${{ secrets.AWS_REGION }} dist/ s3://${{ secrets[env.S3_BUCKET] }} --delete
 
       - name: Invalidate CloudFront
         run: |
-          aws cloudfront create-invalidation \
+          aws cloudfront create-invalidation --region us-east-1 \
             --distribution-id ${{ secrets[env.CF_DISTRIBUTION_ID] }} \
             --paths "/*"
   
