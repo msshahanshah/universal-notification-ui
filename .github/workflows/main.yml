@@ -1,0 +1,80 @@
+name: Universal Notification UI Pipeline
+
+on:
+  push:
+    branches:
+      - "staging"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   
+      contents: read    
+
+
+    steps:
+
+      - name: Set environment name
+        run: |
+          if [ "${GITHUB_REF_NAME}" == "main" ]; then
+            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=stage" >> $GITHUB_ENV
+          fi
+
+      - name: Set secret-key variable names
+        run: |
+          echo "VITE_API_BASE_URL=${ENVIRONMENT}_VITE_API_BASE_URL"   >> $GITHUB_ENV
+          echo "S3_BUCKET=${ENVIRONMENT}_UI_S3_BUCKET"                   >> $GITHUB_ENV
+          echo "CF_DISTRIBUTION_ID=${ENVIRONMENT}_CF_DISTRIBUTION_ID" >> $GITHUB_ENV
+          echo "AWS_ROLE_ARN=AWS_ROLE_ARN"             >> $GITHUB_ENV
+          echo "SLACK_WEBHOOK_URL=SLACK_WEBHOOK_URL"                   >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Write .env file
+        run: |
+          echo "VITE_API_BASE_URL=${{ secrets[env.VITE_API_BASE_URL] }}"                    >> .env
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets[env.AWS_ROLE_ARN] }}
+          role-session-name: github-actions-${{ env.ENVIRONMENT }}-${{ github.run_number }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync dist/ s3://${{ secrets[env.S3_BUCKET] }} --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets[env.CF_DISTRIBUTION_ID] }} \
+            --paths "/*"
+  
+      # - name: Send Slack notification
+      #   if: always()
+      #   uses: rtCamp/action-slack-notify@v2
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}
+      #     SLACK_MESSAGE: "Status: ${{ job.status }}\nBranch: ${{ env.ENVIRONMENT }}\n${{ github.event.head_commit.url }}"
+      #     SLACK_FOOTER: "Universal Notification UI"
+      #     SLACK_COLOR: ${{ job.status }}
+      #     MSG_MINIMAL: event,actions url
