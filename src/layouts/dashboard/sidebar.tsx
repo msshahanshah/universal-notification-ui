@@ -149,7 +149,7 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isActive("/dashboard") ? "#4fc3f7" : COLORS.WHITE,
+                color: isActive("/dashboard") ? COLORS.LIGHT_BLUE : COLORS.WHITE,
               }}
             >
               <HomeRoundedIcon fontSize="small" />
@@ -166,7 +166,7 @@ const Sidebar = ({
             sx={{
               minWidth: 0,
               justifyContent: "center",
-              color: isActive("/webhook-config") ? "#4fc3f7" : COLORS.WHITE,
+              color: isActive("/webhook-config") ? COLORS.LIGHT_BLUE : COLORS.WHITE,
             }}
           >
             <HomeRoundedIcon fontSize="small" />
@@ -184,7 +184,7 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isServicesActive ? "#4fc3f7" : COLORS.WHITE,
+                color: isServicesActive ? COLORS.LIGHT_BLUE : COLORS.WHITE,
               }}
             >
               <MiscellaneousServicesIcon fontSize="small" />
