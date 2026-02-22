@@ -14,6 +14,7 @@ import Slack from "./layouts/dashboard/services/slack";
 import ServiceGuard from "./routes/service-guard";
 import EmailComposer from "./layouts/dashboard/services/email";
 import SMS from "./layouts/dashboard/services/SMS";
+import WebhookConfigPage from "./webhook-config";
 
 export default function App() {
   ModuleRegistry.registerModules([AllCommunityModule, TooltipModule]);
@@ -25,6 +26,7 @@ export default function App() {
       </Route>
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/webhook-config" element={<WebhookConfigPage />} />
         <Route path="/services" element={<Services />} />
         <Route path="/services/demo1" element={<Services1 />} />
         <Route path="/services/demo2" element={<ServicesAccordion />} />

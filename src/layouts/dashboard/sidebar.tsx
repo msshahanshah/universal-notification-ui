@@ -78,10 +78,6 @@ const Sidebar = ({
     },
   });
 
-  // const filteredItems = sidebarItems.filter((item) =>
-  //   item.label.toLowerCase().includes(search.toLowerCase()),
-  // );
-
   const q = search.trim().toLowerCase();
 
   const matchesDashboard = "dashboard".includes(q);
@@ -90,13 +86,6 @@ const Sidebar = ({
   const matchesServiceItems = sidebarItems.some((item) =>
     item.label.toLowerCase().includes(q),
   );
-
-  const isSearchingDashboard = q.length > 0 && "dashboard".includes(q);
-
-  const isSearchingServices =
-    q.length > 0 &&
-    (sidebarItems.some((item) => item.label.toLowerCase().includes(q)) ||
-      "services".includes(q));
 
   const isSearching = q.length > 0;
 
@@ -168,6 +157,22 @@ const Sidebar = ({
             {open && <ListItemText primary="Dashboard" />}
           </ListItemButton>
         )}
+
+        <ListItemButton
+          onClick={() => navigate("/webhook-config")}
+          sx={getItemStyles("/webhook-config")}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              justifyContent: "center",
+              color: isActive("/webhook-config") ? "#4fc3f7" : COLORS.WHITE,
+            }}
+          >
+            <HomeRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          {open && <ListItemText primary="Webhook Config" />}
+        </ListItemButton>
 
         {/* Services Parent */}
         {showServicesParent && (
