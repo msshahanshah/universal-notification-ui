@@ -5,11 +5,6 @@ on:
     branches:
       - "staging"
   workflow_dispatch:
-    inputs:
-      deploy_branch:
-        description: "Branch to deploy"
-        required: true
-        default: staging
 
 jobs:
   build:
