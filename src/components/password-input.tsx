@@ -64,9 +64,9 @@ const PasswordInput = ({
         }}
       >
         {showPassword ? (
-          <VisibilityOff style={{ color: theme.palette.text.secondary }} />
+          <VisibilityOff style={{ color: theme.vars?.palette.text.secondary }} />
         ) : (
-          <Visibility style={{ color: theme.palette.text.secondary }} />
+          <Visibility style={{ color: theme.vars?.palette.text.secondary }} />
         )}
       </button>
     </div>

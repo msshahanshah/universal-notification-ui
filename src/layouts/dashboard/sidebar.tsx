@@ -73,15 +73,25 @@ const Sidebar = ({
       mx: 1,
       mt: 1,
       px: 1.5,
-      color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+      // color: active
+      //   ? theme.vars?.palette.primary.main
+      //   : theme.vars?.palette.text.secondary,
       minHeight: 44,
       justifyContent: "center",
-      backgroundColor: active
-        ? alpha(theme.palette.primary.main, 0.15)
-        : "transparent",
+      // color: COLORS.WHITE,
+      bgcolor: active ? "primary.main" : "transparent",
+
+      color: active ? COLORS.WHITE : "text.secondary",
+
       "&:hover": {
-        backgroundColor: alpha(theme.palette.primary.main, 0.25),
+        bgcolor: active ? "primary.main" : "transparent",
       },
+      // bgColor: active
+      //   ? alpha("primary.main", 0.15)
+      //   : "transparent",
+      // "&:hover": {
+      //   bgColor: alpha("primary.main", 0.25),
+      // },
     };
   };
 
@@ -105,8 +115,9 @@ const Sidebar = ({
     ? sidebarItems
     : sidebarItems.filter((item) => item.label.toLowerCase().includes(q));
 
-  console.log("MODE:", theme.palette.mode);
-  console.log("PAPER:", theme.palette.background.paper);
+  // console.log("MODE:", theme.vars?.palette.mode);
+  console.log("PAPER:", theme.vars?.palette.background.paper);
+  console.log("VARS", theme.vars?.palette.background.paper);
 
   const drawerContent = (
     <div
@@ -114,9 +125,12 @@ const Sidebar = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        backgroundColor: theme.palette.background.paper,
-        color: theme.palette.text.primary,
+        backgroundColor: theme.vars?.palette.background.paper,
+        color: theme.vars?.palette.text.primary,
       }}
+      // sx={{
+      //   bgcolor: "background.paper",
+      // }}
     >
       {/* <div>{mode} Mode Enabled </div>
       <div onClick={() => setMode(mode === "dark" ? "light" : "dark")}>
@@ -135,31 +149,32 @@ const Sidebar = ({
             alignItems: "center",
             gap: 1,
             borderRadius: 2,
-            backgroundColor:
-              mode === "dark"
-                ? alpha(theme.palette.common.white, 0.05)
-                : alpha(theme.palette.grey[300], 0.4),
-            border: `1px solid ${theme.palette.divider}`,
+            bgColor: "background.default",
+            // backgroundColor:
+            //   mode === "dark"
+            //     ? alpha(theme.vars?.palette?.common?.white, 0.05)
+            //     : alpha(theme.vars?.palette?.grey[300], 0.4),
+            border: `1px solid ${theme.vars?.palette?.divider}`,
           }}
         >
           <SearchIcon
-            sx={{ fontSize: 18, color: theme.palette.text.secondary }}
+            sx={{ fontSize: 18, color: theme.vars?.palette.text.secondary }}
           />
           <InputBase
             placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{
-              color: theme.palette.text.secondary,
+              color: theme.vars?.palette.text.secondary,
               fontSize: 14,
               width: "100%",
               "&::placeholder": {
-                color: theme.palette.text.secondary,
+                color: theme.vars?.palette.text.secondary,
                 opacity: 1, // important (default is 0.5 in some browsers)
               },
 
               "& input::placeholder": {
-                color: theme.palette.text.secondary,
+                color: theme.vars?.palette.text.secondary,
                 opacity: 1,
               },
             }}
@@ -179,12 +194,9 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isActive("/dashboard")
-                  ? theme.palette.text.secondary
-                  : theme.palette.text.secondary,
               }}
             >
-              <HomeRoundedIcon fontSize="small" />
+              <HomeRoundedIcon fontSize="small" className="service-icon" />
             </ListItemIcon>
             {open && <ListItemText primary="Dashboard" />}
           </ListItemButton>
@@ -200,12 +212,12 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isServicesActive
-                  ? theme.palette.primary.main
-                  : theme.palette.text.secondary,
               }}
             >
-              <MiscellaneousServicesIcon fontSize="small" />
+              <MiscellaneousServicesIcon
+                fontSize="small"
+                className="service-icon"
+              />
             </ListItemIcon>
             {open && <ListItemText primary="Services" />}
           </ListItemButton>
@@ -227,27 +239,12 @@ const Sidebar = ({
                     key={item.path}
                     onClick={() => !isDisabled && navigate(item.path)}
                     sx={{
+                      ...getItemStyles(item.path),
                       ml: 4,
                       mr: 1,
                       mt: 0.5,
                       minHeight: 36,
                       borderRadius: 2,
-                      // color: COLORS.WHITE,
-                      backgroundColor: isDisabled
-                        ? theme.palette.action.disabledBackground
-                        : isActive(item.path)
-                          ? alpha(theme.palette.primary.main, 0.15)
-                          : "transparent",
-
-                      color: isDisabled
-                        ? theme.palette.text.disabled
-                        : "text.secondary",
-
-                      "&:hover": {
-                        backgroundColor: isDisabled
-                          ? theme.palette.action.disabledBackground
-                          : alpha(theme.palette.primary.main, 0.25),
-                      },
                     }}
                   >
                     <Icon size={18} className="service-icon" />
@@ -294,7 +291,7 @@ const Sidebar = ({
         onClose={onToggle}
         ModalProps={{
           BackdropProps: {
-            sx: { backgroundColor: theme.palette.background.paper },
+            sx: { backgroundColor: theme.vars?.palette.background.paper },
           },
         }}
       >
@@ -311,9 +308,10 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
-          backgroundColor: theme.palette.background.paper,
+          // backgroundColor: theme.vars?.palette.background.paper,
+          bgcolor: "background.paper",
           backdropFilter: "blur(12px)",
-          borderRight: `1px solid ${theme.palette.divider}`,
+          borderRight: `1px solid ${theme.vars?.palette.divider}`,
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
@@ -340,7 +338,11 @@ const Sidebar = ({
         )}
         <IconButton
           onClick={onToggle}
-          sx={{ color: "text.secondary", border: "none",background: "transparent" }}
+          sx={{
+            color: "text.secondary",
+            border: "none",
+            background: "transparent",
+          }}
         >
           <MenuIcon />
         </IconButton>

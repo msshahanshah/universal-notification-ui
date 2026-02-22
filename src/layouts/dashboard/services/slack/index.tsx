@@ -76,7 +76,7 @@ export default function Slack() {
       </Typography>
       <div
         className="sms-wrapper"
-        style={{ backgroundColor: theme.palette.background.paper }}
+        style={{ backgroundColor: theme.vars?.palette.background.paper }}
       >
         <Input
           label="Channel ID"
@@ -100,7 +100,7 @@ export default function Slack() {
           style={{
             marginBottom: 4,
             fontSize: "12px",
-            color: theme.palette.text.secondary,
+            color: theme.vars?.palette.text.secondary,
           }}
         >
           Message

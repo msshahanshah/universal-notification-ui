@@ -29,7 +29,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: "auto",
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.vars?.palette.background.paper,
   boxShadow: theme.shadows[6],
 
   [theme.breakpoints.up("sm")]: {
@@ -105,7 +105,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
             sx={{
               width: "100%",
               fontSize: "clamp(2rem, 10vw, 2.15rem)",
-              color: theme.palette.text.secondary,
+              color: theme.vars?.palette.text.secondary,
             }}
           >
             Welcome Back!
@@ -140,7 +140,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               autoComplete="new-password"
               className="input-field"
               dataTestId="password-input"
-              style={{ color: COLORS.WHITE }}
+              style={{ color: COLORS.WHITE, border:'none' }}
             />
 
             <div style={{ height: 20 }}>

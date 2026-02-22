@@ -185,8 +185,8 @@ export default function HistoryTable() {
     <Paper
       sx={{
         p: 2,
-        backgroundColor: theme.palette.background.sidebar,
-        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.vars?.palette.background.sidebar,
+        border: `1px solid ${theme.vars?.palette.divider}`,
         width: "100%",
       }}
     >
@@ -278,7 +278,7 @@ export default function HistoryTable() {
           minHeight: "20vh",
           maxHeight: "30vh", // control height here
           overflow: "auto",
-          border: `1px solid ${theme.palette.divider}`,
+          border: `1px solid ${theme.vars?.palette.divider}`,
           borderRadius: 1,
         }}
       >

@@ -42,30 +42,30 @@ type Order = "asc" | "desc" | "";
 
 export const getSortLabelStyles = (theme: any) => ({
   "&.Mui-active": {
-    color: theme.palette.text.secondary, // active text color
+    color: theme.vars?.palette.text.secondary, // active text color
     fontWeight: 600,
   },
   "& .MuiTableSortLabel-icon": {
-    color: theme.palette.text.secondary,
+    color: theme.vars?.palette.text.secondary,
     opacity: 1,
   },
   "&.Mui-active .MuiTableSortLabel-icon": {
-    color: theme.palette.text.secondary, // active arrow color
+    color: theme.vars?.palette.text.secondary, // active arrow color
     opacity: 1,
   },
 });
 
 export const textFieldTheme = (theme: any) => ({
   "& .MuiInputLabel-root": {
-    color: theme.palette.text.secondary, // default label color theme?.palette?.text?.secondary
+    color: theme.vars?.palette.text.secondary, // default label color theme?.palette?.text?.secondary
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color: theme.palette.text.secondary, // focused label color (blue)
+    color: theme.vars?.palette.text.secondary, // focused label color (blue)
     fontWeight: "bold",
     marginTop: -1,
   },
   "& .MuiOutlinedInput-input": {
-    color: theme.palette.text.secondary,
+    color: theme.vars?.palette.text.secondary,
   },
 });
 
@@ -90,8 +90,8 @@ export default function LogsTable() {
   const theme = useTheme();
 
   const headerCellStyles = {
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.primary,
+    backgroundColor: theme.vars?.palette.background.paper,
+    color: theme.vars?.palette.text.primary,
     fontWeight: 600,
   };
 
@@ -159,7 +159,7 @@ export default function LogsTable() {
         componentsProps={{
           tooltip: {
             sx: {
-              backgroundColor: theme.palette.grey[900],
+              backgroundColor: theme.vars?.palette.grey[900],
               fontSize: 12,
             },
           },
@@ -250,8 +250,8 @@ export default function LogsTable() {
     <Paper
       sx={{
         p: 2,
-        backgroundColor: theme.palette.background.sidebar,
-        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.vars?.palette.background.sidebar,
+        border: `1px solid ${theme.vars?.palette.divider}`,
       }}
     >
       {/* Filters */}
@@ -358,7 +358,7 @@ export default function LogsTable() {
           minHeight: "60vh",
           maxHeight: "60vh", // control height here
 
-          border: `1px solid ${theme.palette.divider}`,
+          border: `1px solid ${theme.vars?.palette.divider}`,
           borderRadius: 1,
           overflow: "auto"
         }}
@@ -469,28 +469,28 @@ export default function LogsTable() {
           setPage(0);
         }}
         // sx={{
-        //   backgroundColor: theme.palette.background.paper,
-        //   color: theme.palette.text.secondary,
-        //   borderTop: `1px solid ${theme.palette.divider}`,
+        //   backgroundColor: theme.vars?.palette.background.paper,
+        //   color: theme.vars?.palette.text.secondary,
+        //   borderTop: `1px solid ${theme.vars?.palette.divider}`,
 
         //   "& .MuiTablePagination-toolbar": {
-        //     color: theme.palette.text.primary,
+        //     color: theme.vars?.palette.text.primary,
         //   },
 
         //   "& .MuiTablePagination-selectLabel": {
-        //     color: theme.palette.text.secondary,
+        //     color: theme.vars?.palette.text.secondary,
         //   },
 
         //   "& .MuiTablePagination-displayedRows": {
-        //     color: theme.palette.text.secondary,
+        //     color: theme.vars?.palette.text.secondary,
         //   },
 
         //   "& .MuiSelect-select": {
-        //     color: theme.palette.text.secondary,
+        //     color: theme.vars?.palette.text.secondary,
         //   },
 
         //   "& .MuiSvgIcon-root": {
-        //     color: theme.palette.text.secondary,
+        //     color: theme.vars?.palette.text.secondary,
         //   },
         // }}
       />

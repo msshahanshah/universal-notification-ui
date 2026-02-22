@@ -57,8 +57,8 @@ export function EmailPreview({
             margin: 0;
 
             /* 🌙 DARK MODE */
-            background: ${theme.palette.background.paper};
-            color: ${theme.palette.text.secondary};
+            background: ${theme.vars?.palette.background.paper};
+            color: ${theme.vars?.palette.text.secondary};
           }
 
           a { color: #8ab4f8; }
@@ -85,7 +85,7 @@ export function EmailPreview({
         attachments={attachments}
         onAdd={handleAttachmentChange}
         onRemove={removeAttachment}
-        style={{ background: theme.palette.background.paper, marginTop: 0 }}
+        style={{ background: theme.vars?.palette.background.paper, marginTop: 0 }}
         hideBtn
       />
     </div>
@@ -99,7 +99,7 @@ const previewShell: React.CSSProperties = {
   border: "1px solid #dadce0",
   borderRadius: 8,
   overflow: "hidden",
-  background: (theme: any) => theme.palette.background.default,
+  background: (theme: any) => theme.vars?.palette.background.default,
 };
 
 const iframe: React.CSSProperties = {
