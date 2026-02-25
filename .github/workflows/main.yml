@@ -20,14 +20,14 @@ jobs:
       - name: Set environment name
         run: |
           if [ "${GITHUB_REF_NAME}" == "main" ]; then
-            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            echo "ENVIRONMENT=PROD" >> $GITHUB_ENV
           else
-            echo "ENVIRONMENT=stage" >> $GITHUB_ENV
+            echo "ENVIRONMENT=STAGE" >> $GITHUB_ENV
           fi
 
       - name: Set secret-key variable names
         run: |
-          echo "VITE_API_BASE_URL=${ENVIRONMENT}_VITE_API_BASE_URL"   >> $GITHUB_ENV
+          echo "VITE_API_BASE_URL_SECRET_NAME=${ENVIRONMENT}_VITE_API_BASE_URL"   >> $GITHUB_ENV
           echo "S3_BUCKET=${ENVIRONMENT}_UI_S3_BUCKET"                   >> $GITHUB_ENV
           echo "CF_DISTRIBUTION_ID=${ENVIRONMENT}_CF_DISTRIBUTION_ID" >> $GITHUB_ENV
           echo "AWS_ROLE_ARN=AWS_ROLE_ARN"             >> $GITHUB_ENV
@@ -47,7 +47,7 @@ jobs:
 
       - name: Write .env file
         run: |
-          echo "VITE_API_BASE_URL=${{ secrets[env.VITE_API_BASE_URL] }}" > .env
+          echo "VITE_API_BASE_URL=${{ secrets[env.VITE_API_BASE_URL_SECRET_NAME] }}" > .env
 
       - name: Build
         run: npm run build
