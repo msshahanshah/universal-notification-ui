@@ -14,7 +14,7 @@ import Slack from "./layouts/dashboard/services/slack";
 import ServiceGuard from "./routes/service-guard";
 import EmailComposer from "./layouts/dashboard/services/email";
 import SMS from "./layouts/dashboard/services/SMS";
-import WebhookConfigPage from "./webhook-config";
+import WebhookConfigPage from "./webhook";
 
 export default function App() {
   ModuleRegistry.registerModules([AllCommunityModule, TooltipModule]);

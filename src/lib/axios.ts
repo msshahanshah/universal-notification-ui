@@ -30,8 +30,8 @@ const getRefreshToken = async (originalRequest: any) => {
   }
   const refreshTokenData = await fetchRefreshToken({ refreshToken });
 
-  localStorage.setItem("accessToken", refreshTokenData?.data?.accessToken);
-  if (refreshTokenData?.data?.accessToken) {
+  if (!!refreshTokenData?.data?.accessToken) {
+    localStorage.setItem("accessToken", refreshTokenData?.data?.accessToken);
     api.defaults.headers.Authorization = `Bearer ${refreshTokenData?.data?.accessToken}`;
     originalRequest.headers["Authorization"] =
       `Bearer ${refreshTokenData?.data?.accessToken}`;

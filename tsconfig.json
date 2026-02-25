@@ -22,7 +22,8 @@
       "src/pages/*": ["src/pages/*"],
       "src/routes/*": ["src/routes/*"],
       "src/utility/*": ["src/utility/*"],
-      "src/assets/*": ["src/assets/*"]
+      "src/assets/*": ["src/assets/*"],
+      "src/layouts/*": ["src/layouts/*"]
     }
   },
   "include": ["src"],

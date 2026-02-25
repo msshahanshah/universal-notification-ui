@@ -6,6 +6,11 @@ export const ENDPOINTS = {
   SERVICES: {
     NOTIFY: "/notify",
   },
+  WEBHOOK: {
+    SAVE: "/api/webhook/config",
+    GET: (clientId: string) => `/api/webhook/configs?client_id=${clientId}`,
+    UPDATE: (clientId: string) => `/api/webhook/config/${clientId}`,
+  },
   LOGS: {
     LIST: (params?: Record<string, any>) => {
       if (!params || Object.keys(params).length === 0) {
