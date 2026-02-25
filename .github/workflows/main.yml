@@ -74,7 +74,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets[env.SLACK_WEBHOOK_URL] }}
-          SLACK_MESSAGE: "Status: ${{ job.status }}\nBranch: ${{ env.ENVIRONMENT }}\n${{ github.event.head_commit.url }}"
+          SLACK_MESSAGE: "Status: ${{ job.status }}\nBranch: ${{ github.ref_name }}\n${{ github.event.head_commit.url }}"
           SLACK_FOOTER: "Universal Notification UI"
           SLACK_COLOR: ${{ job.status }}
           MSG_MINIMAL: event,actions url
