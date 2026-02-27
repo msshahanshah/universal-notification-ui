@@ -67,7 +67,7 @@ export default function Slack() {
     );
   };
 
-  const isDisabled = !channelID || !message || !!invalidChannelId;
+  const isDisabled = !channelID?.trim() || !message?.trim() || !!invalidChannelId;
 
   return (
     <div className="slack-container">
@@ -117,7 +117,7 @@ export default function Slack() {
         <ErrorText>{invalidChannelId}</ErrorText>
         <div className="sms-footer">
           <Button
-            disabled={!channelID?.trim() || !message?.trim()}
+            disabled={isDisabled}
             label="Send"
             className={isDisabled ? "button-disabled" : "sms-send-btn"}
             onClick={() => handleSend(channelID)}
