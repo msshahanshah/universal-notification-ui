@@ -38,22 +38,6 @@ export const navigationCustomizations: Components<Theme> = {
       }),
     },
   },
-  // MuiMenuItem: {
-  //   styleOverrides: {
-  //     root: ({ theme }) => ({
-  //       borderRadius: (theme.vars || theme).shape.borderRadius,
-  //       padding: "6px 8px",
-  //       [`&.${menuItemClasses.focusVisible}`]: {
-  //         backgroundColor: "transparent",
-  //       },
-  //       [`&.${menuItemClasses.selected}`]: {
-  //         [`&.${menuItemClasses.focusVisible}`]: {
-  //           backgroundColor: "action.selected",
-  //         },
-  //       },
-  //     }),
-  //   },
-  // },
   MuiMenu: {
     styleOverrides: {
       list: {
@@ -176,7 +160,6 @@ export const navigationCustomizations: Components<Theme> = {
       paper: ({ theme }) => ({
         backgroundColor: (theme.vars || theme).palette.background.navbar,
         backgroundImage: "none", // 🔑 remove overlay
-        // backgroundColor: "#0b1220", // your sidebar color
       }),
     },
   },
