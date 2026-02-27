@@ -63,6 +63,13 @@ export default function AppTheme(props: AppThemeProps) {
               height: "100vh",
               overflowY: "scroll",
             },
+            MuiTableCell: {
+              styleOverrides: {
+                root: ({ theme }) => ({
+                  color: theme.palette.text.secondary,
+                }),
+              },
+            },
           },
         },
         MuiTableCell: {
