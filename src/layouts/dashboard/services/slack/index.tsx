@@ -67,7 +67,7 @@ export default function Slack() {
     );
   };
 
-  const isDisabled = !channelID || !message || !!invalidChannelId;
+  const isDisabled = !channelID?.trim() || !message?.trim() || !!invalidChannelId;
 
   return (
     <div className="slack-container">
