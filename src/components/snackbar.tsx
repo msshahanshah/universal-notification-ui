@@ -24,7 +24,6 @@ const Snackbar = ({
 }: SnackbarProps) => {
   useEffect(() => {
     if (!open) return;
-
     const timer = setTimeout(onClose, duration);
     return () => clearTimeout(timer);
   }, [open, duration, onClose]);
@@ -36,32 +35,44 @@ const Snackbar = ({
       style={{
         position: "fixed",
         bottom: 40,
-        right: "0%",
+        right: 20,
         backgroundColor: bgColorMap[type],
         color: "#fff",
-        padding: "10px 16px",
-        borderRadius: 4,
-        boxShadow: "0px 3px 10px rgba(0,0,0,0.3)",
+        padding: "12px 16px",
+        borderRadius: 8,
+        boxShadow: "0px 4px 20px rgba(0,0,0,0.25)",
         zIndex: 9999,
-        textAlign: "left",
-        marginRight: 10,
-        minWidth: 320,
-        maxWidth: "calc(100vw - 32px)",
+
+        /* 🔥 Dynamic width */
+        width: "fit-content",
+        maxWidth: "90vw",
+
+        /* 🔥 Flex layout fix */
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
       }}
     >
-      {message}
+      {/* Message */}
+      <div
+        style={{
+          wordBreak: "break-word",
+          lineHeight: 1.4,
+          flex: 1,
+        }}
+      >
+        {message}
+      </div>
+
+      {/* Close Button */}
       <span
         onClick={onClose}
         style={{
-          marginLeft: 12,
           cursor: "pointer",
-          fontSize: 16,
-          fontWeight: "bold",
-          opacity: 0.8,
-          position: "absolute",
-          right: 15,
-          top: "50%",
-          transform: "translateY(-50%)",
+          fontSize: 18,
+          fontWeight: 600,
+          opacity: 0.85,
+          flexShrink: 0,
         }}
       >
         ×

@@ -106,13 +106,13 @@ export default function SMS() {
 
       <div
         className="sms-wrapper"
-        style={{ backgroundColor: theme.palette.background.paper }}
+        style={{ backgroundColor: theme.vars?.palette.background.paper }}
       >
         {/* Phone Numbers */}
         <label
           style={{
             fontSize: "12px",
-            color: theme.palette.text.secondary,
+            color: theme.vars?.palette.text.secondary,
           }}
         >
           Phone number
@@ -170,7 +170,7 @@ export default function SMS() {
             marginTop: 16,
             marginBottom: 4,
             fontSize: "12px",
-            color: theme.palette.text.secondary,
+            color: theme.vars?.palette.text.secondary,
           }}
         >
           Message

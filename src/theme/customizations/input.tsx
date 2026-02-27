@@ -20,7 +20,7 @@ export const inputsCustomizations: Components<Theme> = {
         boxSizing: 'border-box',
         transition: 'all 100ms ease-in',
         '&:focus-visible': {
-          outline: `3px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+          // outline: `3px solid ${alpha((theme?.vars || theme)?.palette?.primary?.main, 0.5)}`,
           outlineOffset: '2px',
         },
       }),
@@ -371,7 +371,7 @@ export const inputsCustomizations: Components<Theme> = {
       input: {
         '&::placeholder': {
           opacity: 0.7,
-          color: gray[500],
+          color: 'white',
         },
       },
     },

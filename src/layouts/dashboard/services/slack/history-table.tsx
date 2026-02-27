@@ -15,7 +15,7 @@ import {
   IconButton,
   useTheme,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
@@ -24,6 +24,7 @@ import { useDebounce } from "src/hooks/useDebounce";
 import { formatDateForTable, getStatusStyle } from "../../mui/utils";
 import COLORS from "src/utility/colors";
 import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
+import { useSnackbar } from "src/provider/snackbar";
 
 interface Log {
   id: number;
@@ -38,6 +39,7 @@ interface Log {
 type Order = "asc" | "desc" | "";
 
 export default function HistoryTable() {
+  const showSnackbar = useSnackbar();
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<string>("messageDate");
@@ -98,9 +100,16 @@ export default function HistoryTable() {
     };
   }, [page, pageSize, sort, order, debouncedFilters]);
 
-  const { data: response, isLoading } = useLogs(queryParams);
+  const { data: response, isLoading, isError, error } = useLogs(queryParams);
 
   const rows: Log[] = response?.data || [];
+
+  useEffect(() => {
+    if (isError) {
+      showSnackbar(error?.message || "Failed to fetch logs", "error");
+      return;
+    }
+  }, [isError, response?.data, error]);
 
   const renderCell = (value: any) => {
     return (
@@ -185,8 +194,8 @@ export default function HistoryTable() {
     <Paper
       sx={{
         p: 2,
-        backgroundColor: theme.palette.background.sidebar,
-        border: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.vars?.palette.background.paper,
+        border: `1px solid ${theme.vars?.palette.divider}`,
         width: "100%",
       }}
     >
@@ -239,7 +248,13 @@ export default function HistoryTable() {
         </Box>
 
         {/* Row 2 → Other Filters */}
-        <Box display="flex" gap={2} alignItems="center" flexWrap="wrap" marginTop={1}>
+        <Box
+          display="flex"
+          gap={2}
+          alignItems="center"
+          flexWrap="wrap"
+          marginTop={1}
+        >
           <TextField
             size="small"
             label="Status"
@@ -278,7 +293,7 @@ export default function HistoryTable() {
           minHeight: "20vh",
           maxHeight: "30vh", // control height here
           overflow: "auto",
-          border: `1px solid ${theme.palette.divider}`,
+          border: `1px solid ${theme.vars?.palette.divider}`,
           borderRadius: 1,
         }}
       >

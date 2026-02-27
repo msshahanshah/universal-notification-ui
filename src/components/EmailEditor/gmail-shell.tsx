@@ -47,8 +47,8 @@ export function GmailShell({
   const theme = useTheme();
 
   const inputStyle: React.CSSProperties = {
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.secondary,
+    backgroundColor: theme.vars?.palette.background.paper,
+    color: theme.vars?.palette.text.secondary,
     // background: "hsla(220, 35%, 3%, 0.4)",
   };
   const [errors, setErrors] = useState({

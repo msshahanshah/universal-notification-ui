@@ -9,6 +9,7 @@ export const useLogs = (params?: Record<string, any>) => {
     queryFn: () => fetchLogs(params),
     refetchOnWindowFocus: true,
     staleTime: 0,
+    keepPreviousData: true
   });
 };
 

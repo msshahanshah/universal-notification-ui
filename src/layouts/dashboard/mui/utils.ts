@@ -34,40 +34,35 @@ export const getStatusStyle = (status: string, theme: Theme) => {
   switch (status?.toLowerCase()) {
     case "sent":
       return {
-        // backgroundColor: theme.palette.success.light,
-        color:'#04b34f', // theme.palette.success.dark,
+        color: "#04b34f",
         px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "failed":
       return {
-        // backgroundColor: theme.palette.error.light,
-        color: '#BB2124', // theme.palette.error.dark,
+        color: "#BB2124",
         px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "pending":
       return {
-        // backgroundColor: theme.palette.error.light,
-        color: '#FFC107',
+        color: "#FFC107",
         px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "processing":
       return {
-        // backgroundColor: theme.palette.error.light,
-        color: "#17a2b8", // theme.palette.error.dark,
+        color: "#17a2b8",
         px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     default:
       return {
-        // backgroundColor: theme.palette.warning.light,
-        color: "#666", // theme.palette.warning.dark,
+        color: "#666",
         px: 1,
         py: 0.5,
         borderRadius: 1,

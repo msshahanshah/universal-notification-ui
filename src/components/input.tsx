@@ -43,13 +43,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             style={{
               marginBottom: 6,
               fontSize: 12,
-              color: theme.palette.text.secondary,
+              color: theme.vars?.palette.text.secondary,
               fontWeight: 500,
             }}
           >
             {label}
             {showAsteric && (
-              <span style={{ color: theme.palette.error.main, marginLeft: 2 }}>
+              <span style={{ color: theme.vars?.palette.error.main, marginLeft: 2 }}>
                 *
               </span>
             )}
@@ -74,16 +74,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             fontSize: 13,
 
             /* 🔥 THEME FIXES */
-            color: theme.palette.text.secondary,
+            color: theme.vars?.palette.text.secondary,
             border: `1px solid black`,
             transition: "all 0.2s ease",
             ...style,
           }}
           onFocus={(e) => {
-            e.currentTarget.style.border = `1px solid ${theme.palette.primary.main}`;
+            e.currentTarget.style.border = `1px solid ${theme.vars?.palette.primary.main}`;
           }}
           onBlur={(e) => {
-            e.currentTarget.style.border = `1px solid ${theme.palette.divider}`;
+            e.currentTarget.style.border = `1px solid ${theme.vars?.palette.divider}`;
           }}
         />
       </div>
