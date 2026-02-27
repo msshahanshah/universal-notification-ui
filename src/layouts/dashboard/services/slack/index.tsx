@@ -117,7 +117,7 @@ export default function Slack() {
         <ErrorText>{invalidChannelId}</ErrorText>
         <div className="sms-footer">
           <Button
-            disabled={!channelID?.trim() || !message?.trim()}
+            disabled={isDisabled}
             label="Send"
             className={isDisabled ? "button-disabled" : "sms-send-btn"}
             onClick={() => handleSend(channelID)}
