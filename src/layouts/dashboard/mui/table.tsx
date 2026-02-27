@@ -40,9 +40,9 @@ interface Log {
 
 type Order = "asc" | "desc" | "";
 
-export const getSortLabelStyles = (theme: any) => ({
+export const getSortLabelStyles = (theme: any, isActive: boolean) => ({
   "&.Mui-active": {
-    color: theme.vars?.palette.text.secondary, // active text color
+    color: isActive ? "#027AF2" : theme.vars?.palette.text.secondary,
     fontWeight: 600,
   },
   "& .MuiTableSortLabel-icon": {
@@ -50,7 +50,7 @@ export const getSortLabelStyles = (theme: any) => ({
     opacity: 1,
   },
   "&.Mui-active .MuiTableSortLabel-icon": {
-    color: theme.vars?.palette.text.secondary, // active arrow color
+    color: isActive ? "#027AF2" : theme.vars?.palette.text.secondary,
     opacity: 1,
   },
 });
@@ -89,12 +89,6 @@ export default function LogsTable() {
 
   const theme = useTheme();
 
-  const headerCellStyles = {
-    backgroundColor: theme.vars?.palette.background.paper,
-    color: theme.vars?.palette.text.primary,
-    fontWeight: 600,
-  };
-
   const buildUTCRange = (
     startDate?: string,
     startTime?: string,
@@ -130,8 +124,8 @@ export default function LogsTable() {
     return {
       page: page + 1,
       limit: pageSize,
-      // sort,
-      // order,
+      sort,
+      order,
       destination: debouncedFilters.destination || undefined,
       service: debouncedFilters.service || undefined,
       status: debouncedFilters.status || undefined,
@@ -250,7 +244,7 @@ export default function LogsTable() {
     <Paper
       sx={{
         p: 2,
-        backgroundColor: theme.vars?.palette.background.sidebar,
+        backgroundColor: theme.vars?.palette.background.paper,
         border: `1px solid ${theme.vars?.palette.divider}`,
       }}
     >
@@ -353,78 +347,80 @@ export default function LogsTable() {
       </Box>
 
       {/* Table */}
-      <TableContainer
-        sx={{
-          minHeight: "60vh",
-          maxHeight: "60vh", // control height here
+      <Box position="relative">
+        <TableContainer
+          sx={{
+            minHeight: "600px",
+            maxHeight: "600px", // control height here
+            border: `1px solid ${theme.vars?.palette.divider}`,
+            borderRadius: 1,
+            overflow: "auto",
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={getSortLabelStyles(theme, false)}>
+                  S. No
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "messageDate"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("messageDate")}
+                    sx={getSortLabelStyles(theme, sort === "messageDate")}
+                  >
+                    Date
+                  </TableSortLabel>
+                </TableCell>
 
-          border: `1px solid ${theme.vars?.palette.divider}`,
-          borderRadius: 1,
-          overflow: "auto"
-        }}
-      >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={getSortLabelStyles(theme)}>S. No</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "messageDate"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("messageDate")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Date
-                </TableSortLabel>
-              </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "service"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("service")}
+                    sx={getSortLabelStyles(theme, sort === "service")}
+                  >
+                    Service
+                  </TableSortLabel>
+                </TableCell>
 
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "service"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("service")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Service
-                </TableSortLabel>
-              </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "destination"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("destination")}
+                    sx={getSortLabelStyles(theme, sort === "destination")}
+                  >
+                    Destination
+                  </TableSortLabel>
+                </TableCell>
 
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "destination"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("destination")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Destination
-                </TableSortLabel>
-              </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "status"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("status")}
+                    sx={getSortLabelStyles(theme, sort === "status")}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
 
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "status"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("status")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "attempts"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("attempts")}
+                    sx={getSortLabelStyles(theme, sort === "attempts")}
+                  >
+                    Attempts
+                  </TableSortLabel>
+                </TableCell>
+              </TableRow>
+            </TableHead>
 
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "attempts"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("attempts")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Attempts
-                </TableSortLabel>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
+            {/* <TableBody>
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={6} align="center">
@@ -453,9 +449,50 @@ export default function LogsTable() {
                 </TableRow>
               ))
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </TableBody> */}
+            <TableBody>
+              {rows.length === 0 && !isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography>No Data Found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows.map((row, id) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{id + 1}</TableCell>
+                    <TableCell>
+                      {renderCell(formatDateForTable(row.messageDate))}
+                    </TableCell>
+                    <TableCell>{renderCell(row.service)}</TableCell>
+                    <TableCell>{renderCell(row.destination)}</TableCell>
+                    <TableCell>
+                      <StatusCell row={row} />
+                    </TableCell>
+                    <TableCell>{renderCell(row.attempts)}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {isLoading && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bgcolor="background.paper"
+            sx={{ opacity: 0.6 }}
+          >
+            <CircularProgress size={28} />
+          </Box>
+        )}
+      </Box>
 
       {/* Pagination */}
       <TablePagination

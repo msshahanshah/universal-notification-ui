@@ -13,6 +13,7 @@ import { dataDisplayCustomizations } from "./customizations/data-display";
 import { feedbackCustomizations } from "./customizations/feedback";
 import { navigationCustomizations } from "./customizations/navigation";
 import { surfacesCustomizations } from "./customizations/surfaces";
+import { paginationCustomizations } from "./customizations/pagination";
 import { ModeDebugger } from "./mode-debugger";
 import { colorSchemes, typography, shadows, shape } from "./theme-primitives";
 
@@ -47,6 +48,7 @@ export default function AppTheme(props: AppThemeProps) {
         ...navigationCustomizations,
         ...surfacesCustomizations,
         ...themeComponents,
+        ...paginationCustomizations,
         MuiAppBar: {
           styleOverrides: {
             root: {

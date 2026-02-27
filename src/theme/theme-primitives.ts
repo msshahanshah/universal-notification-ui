@@ -147,6 +147,7 @@ export const colorSchemes = {
         primary: "#000000", // used in values
         secondary:  "hsl(220, 15%, 30%)",
         warning: orange[400],
+        pagination:  "hsl(220, 15%, 30%)",
       },
       label: {
         primary: "blue",
@@ -210,6 +211,7 @@ export const colorSchemes = {
       text: {
         primary: gray[800], // "hsl(0, 0%, 100%)",
         secondary: "#fff",
+        pagination: "#fff",
       },
       action: {
         hover: alpha(gray[600], 0.2),

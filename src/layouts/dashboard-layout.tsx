@@ -41,7 +41,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: paddingStyle || 2,
+          p: '16px 40px',
           ml: isMobile
             ? 0
             : open

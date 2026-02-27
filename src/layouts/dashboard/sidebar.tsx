@@ -289,11 +289,11 @@ const Sidebar = ({
         variant="temporary"
         open={mobileOpen}
         onClose={onToggle}
-        ModalProps={{
-          BackdropProps: {
-            sx: { backgroundColor: theme.vars?.palette.background.paper },
-          },
-        }}
+        // ModalProps={{
+        //   BackdropProps: {
+        //     sx: { backgroundColor: theme.vars?.palette.background.paper },
+        //   },
+        // }}
       >
         {drawerContent}
       </Drawer>

@@ -185,7 +185,7 @@ export default function HistoryTable() {
     <Paper
       sx={{
         p: 2,
-        backgroundColor: theme.vars?.palette.background.sidebar,
+        backgroundColor: theme.vars?.palette.background.paper,
         border: `1px solid ${theme.vars?.palette.divider}`,
         width: "100%",
       }}

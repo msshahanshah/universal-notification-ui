@@ -371,7 +371,7 @@ export const inputsCustomizations: Components<Theme> = {
       input: {
         '&::placeholder': {
           opacity: 0.7,
-          color: gray[500],
+          color: 'white',
         },
       },
     },

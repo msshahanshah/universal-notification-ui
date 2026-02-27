@@ -37,12 +37,12 @@ export default function Slack() {
       .map((id) => id.trim())
       .filter(Boolean);
 
-    const hasInvalid = channelIds.some((id) => !slackRegex.test(id));
+    // const hasInvalid = channelIds.some((id) => !slackRegex.test(id));
 
-    if (hasInvalid) {
-      setInvalidChannelId("One or more Channel IDs are invalid");
-      return;
-    }
+    // if (hasInvalid) {
+    //   setInvalidChannelId("One or more Channel IDs are invalid");
+    //   return;
+    // }
 
     mutate(
       {
@@ -89,7 +89,8 @@ export default function Slack() {
             if (!!invalidChannelId) {
               setInvalidChannelId("");
             }
-            setChannelID(e.target.value);
+            const trimmedValue = e.target.value;
+            setChannelID(trimmedValue);
           }}
           showAsteric
           style={{ color: "#fff" }}
