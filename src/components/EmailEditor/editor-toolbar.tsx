@@ -12,12 +12,6 @@ export function EmailToolbar({ editor }: Props) {
 
   const getButtonStyle = (isActive: boolean): React.CSSProperties => ({
     ...buttonStyle,
-    // backgroundColor: isActive
-    //   ? (theme || theme?.vars)?.palette.primary.dark
-    //   : (theme || theme?.vars)?.palette.background.paper,
-    // color: isActive
-    //   ? theme.vars?.palette.primary.active
-    //   : theme.vars?.palette.primary.inactive,
     backgroundColor: isActive
       ? (theme || theme?.vars)?.palette.primary.dark
       : theme?.vars?.palette.background.paper,
