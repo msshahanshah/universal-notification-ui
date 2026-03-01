@@ -104,13 +104,12 @@ export function GmailShell({
     <div style={shellStyle}>
       {/* From */}
       <Input
-        label="From"
+        label="From (Optional)"
         id="from"
         value={from}
         onChange={(e) => handleFromChange(e.target.value)}
         placeholder="From"
         className="sms-input"
-        showAsteric={true}
         style={inputStyle}    
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}

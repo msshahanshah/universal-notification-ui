@@ -1,16 +1,27 @@
+import { useTheme } from "@mui/material";
 import { Editor, useEditorState } from "@tiptap/react";
+import COLORS from "src/utility/colors";
 
 type Props = { editor: Editor | null };
 
 export function EmailToolbar({ editor }: Props) {
+  const theme = useTheme();
   if (!editor) return null;
 
   const buttonStyle: React.CSSProperties = {};
 
   const getButtonStyle = (isActive: boolean): React.CSSProperties => ({
     ...buttonStyle,
-    background: isActive ? "rgba(48, 110, 232, 0.25)" : "rgb(18, 18, 18)",
-    color: isActive ? "#fff" : "#ccc",
+    // backgroundColor: isActive
+    //   ? (theme || theme?.vars)?.palette.primary.dark
+    //   : (theme || theme?.vars)?.palette.background.paper,
+    // color: isActive
+    //   ? theme.vars?.palette.primary.active
+    //   : theme.vars?.palette.primary.inactive,
+    backgroundColor: isActive
+      ? (theme || theme?.vars)?.palette.primary.dark
+      : theme?.vars?.palette.background.paper,
+    color: isActive ? COLORS.WHITE : theme.vars?.palette.text.secondary,
     fontWeight: isActive ? "bold" : "normal",
     cursor: "pointer",
     padding: "4px 8px",

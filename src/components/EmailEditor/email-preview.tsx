@@ -1,15 +1,19 @@
+import { useTheme } from "@mui/system";
+import COLORS from "src/utility/colors";
+
 import AttachmentSection from "src/layouts/dashboard/services/email/attachmentSection";
 import { GmailPreviewHeader } from "./gmail-preview-header";
-import { useTheme } from "@mui/system";
 
 type Props = {
   html: string;
-  from: string;
+  from?: string;
   to: string;
   subject: string;
   cc?: string;
   bcc?: string;
   attachments: Attachment[];
+  handleAttachmentChange: (files: FileList) => void;
+  removeAttachment: (id: string) => void;
 };
 
 type Attachment = {
@@ -28,10 +32,25 @@ export function EmailPreview({
   attachments,
   handleAttachmentChange,
   removeAttachment,
-}: Props) {
-  const theme = useTheme()
+}: any) {
+  const theme = useTheme();
+
+  const bgValue = COLORS.WHITE;
+
+  const textColor = "hsl(220, 15%, 30%)";
+
+  const cleanEmailHtml = html
+    .replace(/bgcolor=["']?#ffffff["']?/gi, "")
+    .replace(/background-color:\s*#ffffff;?/gi, "")
+    .replace(/background:\s*#ffffff;?/gi, "");
+
   return (
-    <div style={previewShell}>
+    <div
+      style={{
+        ...previewShell,
+        background: bgValue,
+      }}
+    >
       {/* Gmail-style header */}
       <GmailPreviewHeader
         from={from}
@@ -39,53 +58,58 @@ export function EmailPreview({
         subject={subject}
         cc={cc}
         bcc={bcc}
+        bgValue={bgValue}
+        textValue={textColor}
       />
 
       {/* Email body */}
       <iframe
+        key={theme.palette.mode}
         title="email-preview"
-        style={iframe}
+        style={{ ...iframe, background: bgValue }}
         srcDoc={`
-          <html>
+    <html>
       <head>
         <style>
+          html {
+            background-color: ${bgValue} !important;
+          }
+
           body {
+            background-color: ${bgValue} !important;
+            color: ${textColor};
+            margin: 0;
+            padding: 16px;
             font-family: "Inter", sans-serif;
             font-size: 14px;
             line-height: 1.6;
-            padding: 16px;
-            margin: 0;
+          }
 
-            /* 🌙 DARK MODE */
-            background: ${theme.vars?.palette.background.paper};
-            color: ${theme.vars?.palette.text.secondary};
+          /* REMOVE ALL background colors inside email */
+          * {
+            background-color: transparent !important;
           }
 
           a { color: #8ab4f8; }
-          hr { border-color: #3c4043; }
-          table { color: #e8eaed; }
-
-          /* Fix pasted email inline backgrounds */
-          [style*="background"],
-          [bgcolor] {
-            background: transparent !important;
-          }
-
-          /* Images don't look washed */
           img { max-width: 100%; }
         </style>
       </head>
       <body>
-        ${html}
+        <div style="max-width:600px;margin:auto">
+          ${cleanEmailHtml}
+        </div>
       </body>
     </html>
-        `}
+  `}
       />
       <AttachmentSection
         attachments={attachments}
         onAdd={handleAttachmentChange}
         onRemove={removeAttachment}
-        style={{ background: theme.vars?.palette.background.paper, marginTop: 0 }}
+        style={{
+          background: bgValue,
+          marginTop: 0,
+        }}
         hideBtn
       />
     </div>
@@ -99,11 +123,12 @@ const previewShell: React.CSSProperties = {
   border: "1px solid #dadce0",
   borderRadius: 8,
   overflow: "hidden",
-  background: (theme: any) => theme.vars?.palette.background.default,
+  minHeight: "600px",
+  // background: (theme: any) => theme.vars?.palette.background.default,
 };
 
 const iframe: React.CSSProperties = {
   flex: 1,
   border: "none",
-  background:'#202124'
+  background: "#202124",
 };

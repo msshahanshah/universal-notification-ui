@@ -70,13 +70,6 @@ export default function AppTheme(props: AppThemeProps) {
                 }),
               },
             },
-            MuiTableCell: {
-              styleOverrides: {
-                root: ({ theme }) => ({
-                  color: theme.palette.text.secondary,
-                }),
-              },
-            },
           },
         },
         MuiTableCell: {
