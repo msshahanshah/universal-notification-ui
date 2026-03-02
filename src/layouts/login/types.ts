@@ -14,7 +14,7 @@ export interface EmailPayload {
   destination: string;
   subject: string;
   body: string;
-  fromEmail: string;
+  fromEmail?: string;
   cc?: string;
   bcc?: string;
   attachments?: Array<string>;

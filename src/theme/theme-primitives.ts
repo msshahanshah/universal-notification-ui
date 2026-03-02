@@ -103,6 +103,8 @@ export const colorSchemes = {
         main: brand[400],
         dark: brand[700],
         contrastText: brand[50],
+        active: "#fff",
+        inactive:"#000000",
       },
       info: {
         light: brand[100],
@@ -145,9 +147,9 @@ export const colorSchemes = {
       },
       text: {
         primary: "#000000", // used in values
-        secondary:  "hsl(220, 15%, 30%)",
+        secondary: "hsl(220, 15%, 30%)",
         warning: orange[400],
-        pagination:  "hsl(220, 15%, 30%)",
+        pagination: "hsl(220, 15%, 30%)",
       },
       label: {
         primary: "blue",
@@ -163,10 +165,12 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        contrastText: brand[50],
+        contrastText: brand[700],
         light: brand[300],
         main: brand[400],
         dark: brand[700],
+        active: brand[50],
+        inactive: brand[700],
       },
       info: {
         contrastText: brand[300],
@@ -197,9 +201,9 @@ export const colorSchemes = {
         // default: "hsla(220, 35%, 3%, 0.4)",
         // paper: "hsl(220, 30%, 7%)",
         default: "#0b1c2d", // deep blue (NOT near black)
-        paper: '#0b1c2d', // also added in light???
+        paper: "#0b1c2d",
         sidebar: "hsl(220, 30%, 7%)",
-        defaultBg: '#0b1c2d',
+        defaultBg: "#0b1c2d",
         navbar: "#0b1c2d",
       },
       icons: {

@@ -79,7 +79,7 @@ export function EmailEditor({ value, onChange }: Props) {
         style={{
           marginBottom: 4,
           fontSize: "12px",
-          color: theme.vars?.palette.text.secondary,
+          color: theme?.vars?.palette.text.secondary,
         }}
       >
         Body
@@ -91,8 +91,7 @@ export function EmailEditor({ value, onChange }: Props) {
           className="editor-wrapper"
           sx={{
             backgroundColor: theme.vars?.palette.background.paper,
-            border: `1px solid ${theme.vars?.palette.divider}`,
-            borderRadius: 1,
+            border: `1px solid ${(theme || theme?.vars)?.palette.divider}`,
             p: 2,
 
             "& .ProseMirror": {

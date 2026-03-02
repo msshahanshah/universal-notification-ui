@@ -27,8 +27,14 @@ export function Toggle<T extends string>({
           style={{
             ...toggleButton,
             ...(value === opt.value ? activeButton : {}),
-            backgroundColor: theme.vars?.palette.primary.dark,
-            color: theme.vars?.palette.primary.contrastText,
+            backgroundColor:
+              value === opt.value
+                ? (theme || theme?.vars)?.palette.primary.dark
+                : theme?.vars?.palette.background.paper,
+            color:
+              value === opt.value
+                ? COLORS.WHITE
+                : theme.vars?.palette.text.secondary,
           }}
         >
           {opt.label}

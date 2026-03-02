@@ -105,12 +105,12 @@ export function GmailShell({
       {/* From */}
       <Input
         label="From"
+        subLabel="The email address field can be filled only if the 'From Email' option is enabled."
         id="from"
         value={from}
         onChange={(e) => handleFromChange(e.target.value)}
         placeholder="From"
         className="sms-input"
-        showAsteric={true}
         style={inputStyle}    
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}

@@ -241,11 +241,7 @@ export default function EmailComposer() {
   };
 
   const isDisabled =
-    !from?.trim() ||
-    !subject?.trim() ||
-    !to?.trim() ||
-    isBodyEmpty(body) ||
-    hasErrors;
+    !subject?.trim() || !to?.trim() || isBodyEmpty(body) || hasErrors;
 
   return (
     <div style={pageStyle}>
@@ -304,6 +300,8 @@ export default function EmailComposer() {
               bcc={bcc}
               subject={subject}
               attachments={attachments}
+              handleAttachmentChange={handleAttachmentChange}
+              removeAttachment={removeAttachment}
             />
           </div>
         )}
