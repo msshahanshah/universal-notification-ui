@@ -1,5 +1,6 @@
 import { useTheme } from "@mui/material";
 import { Editor, useEditorState } from "@tiptap/react";
+
 import COLORS from "src/utility/colors";
 
 type Props = { editor: Editor | null };

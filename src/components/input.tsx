@@ -10,6 +10,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   dataTestId?: string;
   showAsteric?: boolean;
   style?: React.CSSProperties;
+  subLabel?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -23,6 +24,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       autoComplete,
       dataTestId,
       style,
+      subLabel,
       ...props
     },
     ref,
@@ -52,6 +54,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <span style={{ color: theme.vars?.palette.error.main, marginLeft: 2 }}>
                 *
               </span>
+            )}
+            {subLabel && (
+              <div style={{ fontSize: 10, color: theme.vars?.palette.text.disabled }}>
+                ({subLabel})
+              </div>
             )}
           </label>
         )}

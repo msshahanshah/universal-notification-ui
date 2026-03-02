@@ -104,7 +104,8 @@ export function GmailShell({
     <div style={shellStyle}>
       {/* From */}
       <Input
-        label="From (Optional)"
+        label="From"
+        subLabel="The email address field can be filled only if the 'From Email' option is enabled."
         id="from"
         value={from}
         onChange={(e) => handleFromChange(e.target.value)}
