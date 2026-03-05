@@ -117,23 +117,6 @@ const LogsTable = () => {
       showSnackbar(error?.message || "Failed to fetch logs", "error");
       return;
     }
-
-    // !!!! Do not remove for web socket!!
-
-    // if (response?.data) {
-    //   setData((prev) => {
-    //     // keep websocket-updated rows if they exist
-    //     const map = new Map(prev.map((item) => [item.id, item]));
-
-    //     response.data.forEach((item: LogMessage) => {
-    //       if (!map.has(item.id)) {
-    //         map.set(item.id, item);
-    //       }
-    //     });
-
-    //     return Array.from(map.values());
-    //   });
-    // }
   }, [isError, response?.data, error]);
 
   const containerStyle = useMemo(

@@ -14,6 +14,12 @@ import {
   useGetWebhookDetails,
   useUpdateWebhookDetails,
 } from "src/hooks/useWebhook";
+import {
+  buildServiceTrigger,
+  buildSettings,
+  buildWebhookConfig,
+  transformServiceTriggerToStatuses,
+} from "src/utility/webhook";
 // import Button from "./components/button";
 
 type StatusType = "success" | "failure" | "both";
@@ -21,22 +27,73 @@ type StatusType = "success" | "failure" | "both";
 export default function WebhookConfigPage() {
   const [username, setUsername] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
-  const [authKey, setAuthKey] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [statusType, setStatusType] = useState<StatusType>("success");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<string[]>([]);
+  const [initialStatuses, setInitialStatuses] = useState<string[]>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isExistingConfig, setIsExistingConfig] = useState(false);
+  const selectedData = { enabled: [], disabled: [] };
+
+  console.log("isExistingConfig",isExistingConfig)
 
   const showSnackbar = useSnackbar();
   const clientId =
     typeof window !== "undefined" ? localStorage.getItem("clientId") : null;
 
-  const { data: queryData, isLoading: queryLoading } =
-    useGetWebhookDetails(clientId);
+  const {
+    data: getWebhookConfigurations,
+    isLoading: queryLoading,
+    error: webhookError,
+    isError,
+  } = useGetWebhookDetails(clientId);
+
+  useEffect(() => {
+    if (isError) {
+      showSnackbar(
+        webhookError?.message || "Failed to fetch webhook configurations",
+        "error",
+      );
+      return;
+    }
+  }, [isError, getWebhookConfigurations?.data, webhookError]);
+
+  console.log("getWebhookConfigurations", getWebhookConfigurations);
   const saveMutation = useSaveWebhookDetails();
   const updateMutation = useUpdateWebhookDetails();
+
+  const extractServiceTrigger = (status) => {
+    const newStatus = status.map((data) => {
+      return { [data.split("_")?.[0]]: !!data.split("_")?.[0] };
+    });
+
+    return newStatus;
+  };
+
+  const extractServiceName = (status) => {
+    return status.split("_")?.[0];
+  };
+
+  const applySavedConfig = (saved: any) => {
+    if (!saved) return;
+
+    if (saved.webhook_url) setWebhookUrl(saved.webhook_url);
+
+    if (saved.api_key) setApiKey(saved.api_key);
+
+    if (saved.service_trigger) {
+      const statuses = Object.entries(saved.service_trigger).flatMap(
+        ([service, triggers]) =>
+          (triggers || []).map((trigger) => `${service}_${trigger}`),
+      );
+
+      setStatus(statuses);
+      setSelectedStatuses(statuses);
+      setInitialStatuses(statuses);
+    }
+  };
 
   const handleSave = async () => {
     // clientId read from outer scope
@@ -47,51 +104,107 @@ export default function WebhookConfigPage() {
       return;
     }
 
+    // const { settings, service_trigger } = buildWebhookConfig(selectedStatuses);
+    // const newStatus = extractServiceTrigger(status);
+
+    const serviceTrigger = buildServiceTrigger(selectedStatuses);
+
+    const existingSettings = getWebhookConfigurations?.data?.settings || {};
+
+    const settings = buildSettings(existingSettings, serviceTrigger);
+
     const payload = {
       client_id: clientId,
       webhook_url: webhookUrl,
-      service_trigger: status,
-      auth_key: authKey,
       api_key: apiKey,
+      service_trigger: serviceTrigger,
+      settings: settings,
     };
 
     try {
       setLoading(true);
 
-      if (isExistingConfig) {
-        console.log(" c id", clientId);
-        const res = await updateMutation.mutateAsync(payload);
-        const saved = res?.data ?? res;
-        if (saved) {
-          if (saved.webhook_url) setWebhookUrl(saved.webhook_url);
-          if (saved.encrypted_key) setApiKey(saved.encrypted_key);
-          if (saved.auth_key) setAuthKey(saved.auth_key);
-          if (Array.isArray(saved.service_trigger))
-            setStatus(saved.service_trigger);
-        }
-        showSnackbar("Webhook configuration updated successfully", "success");
-      } else {
-        const res = await saveMutation.mutateAsync(payload as any);
-        const saved = res?.data ?? res;
-        if (saved) {
-          if (saved.webhook_url) setWebhookUrl(saved.webhook_url);
-          if (saved.encrypted_key) setApiKey(saved.encrypted_key);
-          if (saved.auth_key) setAuthKey(saved.auth_key);
-          if (Array.isArray(saved.service_trigger))
-            setStatus(saved.service_trigger);
-          setIsExistingConfig(true);
-        }
-        showSnackbar("Webhook configuration saved successfully", "success");
+      const res = isExistingConfig
+        ? await updateMutation.mutateAsync(payload)
+        : await saveMutation.mutateAsync(payload as any);
+
+      const saved = res?.data ?? res;
+
+      applySavedConfig(saved);
+
+      if (!isExistingConfig) {
+        setIsExistingConfig(true);
       }
+
+      showSnackbar(
+        isExistingConfig
+          ? "Webhook configuration updated successfully"
+          : "Webhook configuration saved successfully",
+        "success",
+      );
     } catch (err: any) {
-      const message = err?.response?.data?.message || "Something went wrong";
+      console.error(err);
+
+      const message =
+        err?.response?.data?.error || err?.message || "Something went wrong";
+
       showSnackbar(message, "error");
     } finally {
       setLoading(false);
     }
+
+    // try {
+    //   setLoading(true);
+
+    //   if (isExistingConfig) {
+    //     console.log(" c id", clientId);
+    //     const res = await updateMutation.mutateAsync(payload);
+    //     const saved = res?.data ?? res;
+    //     if (saved) {
+    //       if (saved.webhook_url) setWebhookUrl(saved.webhook_url);
+    //       if (saved.encrypted_key) setApiKey(saved.encrypted_key);
+    //       if (saved.service_trigger) {
+    //         const convertToArrayOfStrings = Object.entries(
+    //           saved.service_trigger,
+    //         ).flatMap(([key, values]) =>
+    //           values.map((value) => `${key}_${value}`),
+    //         );
+
+    //         setStatus(convertToArrayOfStrings);
+    //       }
+    //     }
+    //     showSnackbar("Webhook configuration updated successfully", "success");
+    //   } else {
+    //     const res = await saveMutation.mutateAsync(payload as any);
+    //     const saved = res?.data ?? res;
+    //     if (saved) {
+    //       if (saved.webhook_url) setWebhookUrl(saved.webhook_url);
+    //       if (saved.encrypted_key) setApiKey(saved.encrypted_key);
+    //       if (saved.service_trigger) {
+    //         const convertToArrayOfStrings = Object.entries(
+    //           saved.service_trigger,
+    //         ).flatMap(([key, values]) =>
+    //           values.map((value) => `${key}_${value}`),
+    //         );
+
+    //         setStatus(convertToArrayOfStrings);
+    //       }
+
+    //       setIsExistingConfig(true);
+    //     }
+    //     showSnackbar("Webhook configuration saved successfully", "success");
+    //   }
+    // } catch (err: any) {
+    //   console.log(" err?.response?.data", err);
+    //   // const message = error?.message || "Something went wrong";
+    //   // showSnackbar(message, "error");
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
-  const isDisabled = !webhookUrl || !authKey || !apiKey || status?.length === 0;
+  const isDisabled =
+    !webhookUrl?.trim() || !apiKey?.trim() || selectedStatuses?.length === 0;
 
   const emailStatusOptions = [
     { label: "Email Failed", value: "email_failed" },
@@ -103,23 +216,38 @@ export default function WebhookConfigPage() {
   ];
 
   useEffect(() => {
-    // populate fields from react-query fetched data when it arrives
-    if (!queryData) return;
+    if (!getWebhookConfigurations) return;
 
-    const payload = queryData?.data ? queryData.data : queryData;
-    console.log("payload", payload);
+    const payload = getWebhookConfigurations?.data ?? getWebhookConfigurations;
 
-    if (payload) {
-      if (payload.webhook_url) setWebhookUrl(payload.webhook_url);
-      if (payload.encrypted_key) setApiKey(payload.encrypted_key);
-      if (payload.auth_key) setAuthKey(payload.auth_key);
-      if (Array.isArray(payload.service_trigger))
-        setStatus(payload.service_trigger);
-      if (payload?.success && payload?.data) {
-        setIsExistingConfig(true);
-      }
+    if (!payload) return;
+
+    if (payload.webhook_url) {
+      setWebhookUrl(payload.webhook_url);
     }
-  }, [queryData]);
+
+    if (payload.api_key) {
+      setApiKey(payload.api_key);
+    }
+
+    if (payload.service_trigger) {
+      const statuses = transformServiceTriggerToStatuses(
+        payload.service_trigger,
+      );
+
+      setStatus(statuses);
+      setInitialStatuses(statuses);
+      setSelectedStatuses(statuses);
+    }
+
+    console.log("payload?.success && payload?.data",getWebhookConfigurations)
+
+    if (getWebhookConfigurations?.success && payload?.id) {
+      setIsExistingConfig(true);
+    }
+  }, [getWebhookConfigurations]);
+
+  console.log("status", status);
 
   return (
     <div
@@ -156,17 +284,6 @@ export default function WebhookConfigPage() {
         className="sms-input"
       />
 
-      <Input
-        id="authKey"
-        label="Auth Key"
-        value={authKey}
-        onChange={(e: ChangeEvent<HTMLInputElement>) =>
-          setAuthKey(e.target.value)
-        }
-        showAsteric
-        className="sms-input"
-      />
-
       {/* Radio Buttons */}
       <div style={{ marginTop: 15 }}>
         <label style={{ fontSize: 12, marginBottom: 6, display: "block" }}>
@@ -187,32 +304,23 @@ export default function WebhookConfigPage() {
             </label>
           ))} */}
           <Select
-            value={status}
-            onChange={setStatus}
+            // value={status}
+            // onChange={setStatus}
+            // initialValue={selectedData}
+            value={selectedStatuses}
+            onChange={(val) => setSelectedStatuses(val as string[])}
             options={emailStatusOptions}
             placeholder="Select Status"
             dataTestId="status-select"
             multiple
+            // callback={(data) => {
+            //   selectedData.enabled = data?.enabled || [];
+            //   selectedData.disabled = data?.disabled || [];
+            // }}
           />
           {/* <MultipleSelectChip data={status||[]} onChange={setStatus} options={emailStatusOptions}/> */}
         </div>
       </div>
-
-      {/* {error && (
-        <div style={{ color: "red", marginTop: 10, fontSize: 12 }}>{error}</div>
-      )} */}
-
-      {/* <button
-        onClick={handleSave}
-        disabled={loading}
-        style={{
-          marginTop: 20,
-          padding: "10px 16px",
-          cursor: loading ? "not-allowed" : "pointer",
-        }}
-      >
-        {loading ? "Saving..." : "Save"}
-      </button> */}
 
       <div className="sms-footer">
         <Button

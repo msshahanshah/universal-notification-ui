@@ -85,8 +85,6 @@ export function Select({
     return selected?.label || placeholder;
   };
 
-  const selectedOption = options.find((opt) => opt.value === value);
-
   return (
     <div className="country-select" data-testid={dataTestId} ref={containerRef}>
       <button
