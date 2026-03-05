@@ -19,7 +19,7 @@ import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon } from "lucide-react";
-import { useTheme, alpha, useColorScheme } from "@mui/material/styles";
+import { useTheme, useColorScheme } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
 
@@ -64,6 +64,8 @@ const Sidebar = ({
   const isActive = (path: string) => location.pathname.includes(path);
   const isServicesActive = isActive("/services");
 
+  const [servicesOpen, setServicesOpen] = useState(isServicesActive);
+
   const getItemStyles = (path: string) => {
     const active = isActive(path);
 
@@ -73,12 +75,8 @@ const Sidebar = ({
       mx: 1,
       mt: 1,
       px: 1.5,
-      // color: active
-      //   ? theme.vars?.palette.primary.main
-      //   : theme.vars?.palette.text.secondary,
       minHeight: 44,
       justifyContent: "center",
-      // color: COLORS.WHITE,
       bgcolor: active ? "primary.main" : "transparent",
 
       color: active ? COLORS.WHITE : "text.secondary",
@@ -86,12 +84,6 @@ const Sidebar = ({
       "&:hover": {
         bgcolor: active ? "primary.main" : "transparent",
       },
-      // bgColor: active
-      //   ? alpha("primary.main", 0.15)
-      //   : "transparent",
-      // "&:hover": {
-      //   bgColor: alpha("primary.main", 0.25),
-      // },
     };
   };
 
@@ -115,10 +107,6 @@ const Sidebar = ({
     ? sidebarItems
     : sidebarItems.filter((item) => item.label.toLowerCase().includes(q));
 
-  // console.log("MODE:", theme.vars?.palette.mode);
-  console.log("PAPER:", theme.vars?.palette.background.paper);
-  console.log("VARS", theme.vars?.palette.background.paper);
-
   const drawerContent = (
     <div
       style={{
@@ -128,15 +116,7 @@ const Sidebar = ({
         backgroundColor: theme.vars?.palette.background.paper,
         color: theme.vars?.palette.text.primary,
       }}
-      // sx={{
-      //   bgcolor: "background.paper",
-      // }}
     >
-      {/* <div>{mode} Mode Enabled </div>
-      <div onClick={() => setMode(mode === "dark" ? "light" : "dark")}>
-        Change Mode
-      </div> */}
-      {/* SEARCH BAR */}
       {open && (
         <Box
           sx={{
@@ -150,10 +130,6 @@ const Sidebar = ({
             gap: 1,
             borderRadius: 2,
             bgColor: "background.default",
-            // backgroundColor:
-            //   mode === "dark"
-            //     ? alpha(theme.vars?.palette?.common?.white, 0.05)
-            //     : alpha(theme.vars?.palette?.grey[300], 0.4),
             border: `1px solid ${theme.vars?.palette?.divider}`,
           }}
         >
@@ -205,7 +181,13 @@ const Sidebar = ({
         {/* Services Parent */}
         {showServicesParent && (
           <ListItemButton
-            onClick={() => navigate("/services/slack")}
+            onClick={() => {
+              // setServicesOpen((prev) => !prev);
+              if (!open) {
+                onToggle(); // expand sidebar
+              }
+              navigate("/services/slack");
+            }}
             sx={getItemStyles("/services")}
           >
             <ListItemIcon
@@ -226,7 +208,7 @@ const Sidebar = ({
         {/* Services Sub Tabs */}
         {open && (
           <Collapse
-            in={isServicesActive || (isSearching && matchesServiceItems)}
+            in={open && (isServicesActive || (isSearching && matchesServiceItems))}
             timeout="auto"
             unmountOnExit
           >
@@ -285,16 +267,7 @@ const Sidebar = ({
   /* Mobile */
   if (isMobile) {
     return (
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={onToggle}
-        // ModalProps={{
-        //   BackdropProps: {
-        //     sx: { backgroundColor: theme.vars?.palette.background.paper },
-        //   },
-        // }}
-      >
+      <Drawer variant="temporary" open={mobileOpen} onClose={onToggle}>
         {drawerContent}
       </Drawer>
     );
@@ -308,7 +281,6 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
-          // backgroundColor: theme.vars?.palette.background.paper,
           bgcolor: "background.paper",
           backdropFilter: "blur(12px)",
           borderRight: `1px solid ${theme.vars?.palette.divider}`,

@@ -1,7 +1,6 @@
 import {
   Box,
   CircularProgress,
-  MenuItem,
   Paper,
   Table,
   TableBody,
@@ -22,11 +21,9 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
-
-// import { getStatusStyle } from "./styles";
-import { formatDateForTable, getStatusStyle } from "./utils";
-import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
+
+import { formatDateForTable, getStatusStyle } from "./utils";
 
 interface Log {
   id: number;
@@ -308,9 +305,10 @@ export default function LogsTable() {
             size="small"
             label="Service"
             value={filters.service}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, service: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, service: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
 
@@ -318,9 +316,10 @@ export default function LogsTable() {
             size="small"
             label="Status"
             value={filters.status}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, status: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, status: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
 
@@ -328,9 +327,10 @@ export default function LogsTable() {
             size="small"
             label="Destination"
             value={filters.destination}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, destination: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, destination: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
 
@@ -338,9 +338,10 @@ export default function LogsTable() {
             size="small"
             label="Attempts"
             value={filters.attempts}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, attempts: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, attempts: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
         </Box>
@@ -419,37 +420,6 @@ export default function LogsTable() {
                 </TableCell>
               </TableRow>
             </TableHead>
-
-            {/* <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <CircularProgress size={24} />
-                </TableCell>
-              </TableRow>
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography>No Data Found</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row, id) => (
-                <TableRow key={row.id}>
-                  <TableCell>{id + 1}</TableCell>
-                  <TableCell>
-                    {renderCell(formatDateForTable(row.messageDate))}
-                  </TableCell>
-                  <TableCell>{renderCell(row.service)}</TableCell>
-                  <TableCell>{renderCell(row.destination)}</TableCell>
-                  <TableCell>
-                    <StatusCell row={row} />
-                  </TableCell>
-                  <TableCell>{renderCell(row.attempts)}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody> */}
             <TableBody>
               {rows.length === 0 && !isLoading ? (
                 <TableRow>
@@ -505,31 +475,6 @@ export default function LogsTable() {
           setPageSize(parseInt(e.target.value, 10));
           setPage(0);
         }}
-        // sx={{
-        //   backgroundColor: theme.vars?.palette.background.paper,
-        //   color: theme.vars?.palette.text.secondary,
-        //   borderTop: `1px solid ${theme.vars?.palette.divider}`,
-
-        //   "& .MuiTablePagination-toolbar": {
-        //     color: theme.vars?.palette.text.primary,
-        //   },
-
-        //   "& .MuiTablePagination-selectLabel": {
-        //     color: theme.vars?.palette.text.secondary,
-        //   },
-
-        //   "& .MuiTablePagination-displayedRows": {
-        //     color: theme.vars?.palette.text.secondary,
-        //   },
-
-        //   "& .MuiSelect-select": {
-        //     color: theme.vars?.palette.text.secondary,
-        //   },
-
-        //   "& .MuiSvgIcon-root": {
-        //     color: theme.vars?.palette.text.secondary,
-        //   },
-        // }}
       />
     </Paper>
   );

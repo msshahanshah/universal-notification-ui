@@ -259,9 +259,10 @@ export default function HistoryTable() {
             size="small"
             label="Status"
             value={filters.status}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, status: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, status: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
 
@@ -269,9 +270,10 @@ export default function HistoryTable() {
             size="small"
             label="Destination"
             value={filters.destination}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, destination: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, destination: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
 
@@ -279,9 +281,10 @@ export default function HistoryTable() {
             size="small"
             label="Attempts"
             value={filters.attempts}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, attempts: e.target.value }))
-            }
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, attempts: e.target.value }));
+            }}
             sx={textFieldTheme(theme)}
           />
         </Box>
