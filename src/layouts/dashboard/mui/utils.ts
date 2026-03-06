@@ -36,28 +36,24 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     case "sent":
       return {
         color: "#04b34f",
-        px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "failed":
       return {
         color: "#BB2124",
-        px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "pending":
       return {
         color: "#FFC107",
-        px: 1,
         py: 0.5,
         borderRadius: 1,
       };
     case "processing":
       return {
         color: "#17a2b8",
-        px: 1,
         py: 0.5,
         borderRadius: 1,
       };
