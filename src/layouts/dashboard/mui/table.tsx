@@ -160,7 +160,6 @@ export default function LogsTable() {
           display="flex"
           alignItems="center"
           gap={1}
-          // sx={getStatusStyle(latestStatus)}
         >
           <Typography>{value}</Typography>
         </Box>
@@ -237,6 +236,27 @@ export default function LogsTable() {
     });
   };
 
+  const handleDateBlur = (key, e) => {
+    const value = e.target.value; // always get latest value from DOM
+
+    if (!value) {
+      // reset invalid/partial input
+      e.target.value = "";
+      setFilters((prev) => ({
+        ...prev,
+        [key]: "",
+      }));
+      return;
+    }
+
+    // valid date
+    setFilters((prev) => {
+      const updated = { ...prev, [key]: value };
+
+      return updated;
+    });
+  };
+
   return (
     <Paper
       sx={{
@@ -251,12 +271,14 @@ export default function LogsTable() {
         {/* Row 1 → Date Time Range */}
         <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <TextField
+            key={filters.startDate || "empty-start-date"}
             type="date"
             size="small"
             label="Start Date"
             InputLabelProps={{ shrink: true }}
-            value={filters.startDate}
+            value={filters.startDate || ""}
             onChange={(e) => handleFilterChange("startDate", e.target.value)}
+            onBlur={(e) => handleDateBlur("startDate", e)}
             sx={textFieldTheme(theme)}
           />
 
@@ -269,6 +291,7 @@ export default function LogsTable() {
             value={filters.startTime}
             onChange={(e) => handleFilterChange("startTime", e.target.value)}
             sx={textFieldTheme(theme)}
+            onBlur={(e) => handleDateBlur("startTime", e)}
           />
 
           <TextField
@@ -279,6 +302,7 @@ export default function LogsTable() {
             value={filters.endDate}
             onChange={(e) => handleFilterChange("endDate", e.target.value)}
             sx={textFieldTheme(theme)}
+            onBlur={(e) => handleDateBlur("endDate", e)}
           />
 
           <TextField
@@ -290,6 +314,7 @@ export default function LogsTable() {
             value={filters.endTime}
             onChange={(e) => handleFilterChange("endTime", e.target.value)}
             sx={textFieldTheme(theme)}
+            onBlur={(e) => handleDateBlur("endTime", e)}
           />
         </Box>
 
