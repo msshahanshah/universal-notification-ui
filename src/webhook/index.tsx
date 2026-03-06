@@ -37,7 +37,7 @@ export default function WebhookConfigPage() {
   const [isExistingConfig, setIsExistingConfig] = useState(false);
   const selectedData = { enabled: [], disabled: [] };
 
-  console.log("isExistingConfig",isExistingConfig)
+  console.log("isExistingConfig", isExistingConfig);
 
   const showSnackbar = useSnackbar();
   const clientId =
@@ -118,7 +118,7 @@ export default function WebhookConfigPage() {
       webhook_url: webhookUrl,
       api_key: apiKey,
       service_trigger: serviceTrigger,
-      settings: settings,
+      // settings: settings,
     };
 
     try {
@@ -203,8 +203,7 @@ export default function WebhookConfigPage() {
     // }
   };
 
-  const isDisabled =
-    !webhookUrl?.trim() || !apiKey?.trim() || selectedStatuses?.length === 0;
+  const isDisabled = !webhookUrl?.trim() || !apiKey?.trim();
 
   const emailStatusOptions = [
     { label: "Email Failed", value: "email_failed" },
@@ -240,14 +239,10 @@ export default function WebhookConfigPage() {
       setSelectedStatuses(statuses);
     }
 
-    console.log("payload?.success && payload?.data",getWebhookConfigurations)
-
     if (getWebhookConfigurations?.success && payload?.id) {
       setIsExistingConfig(true);
     }
   }, [getWebhookConfigurations]);
-
-  console.log("status", status);
 
   return (
     <div
@@ -256,7 +251,11 @@ export default function WebhookConfigPage() {
         margin: "40px auto",
         padding: 20,
         borderRadius: 8,
-        border: "1px solid #ddd",
+        background: "hsla(220, 35%, 3%, 0.4)",
+        border: "1px solid rgba(255, 255, 255, 0.15)",
+        marginBottom: 20,
+        boxShadow:
+          "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
       }}
     >
       <h2 style={{ marginBottom: 20 }}>Webhook Configuration</h2>
