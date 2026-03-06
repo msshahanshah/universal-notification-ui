@@ -45,7 +45,11 @@ const getRefreshToken = async (originalRequest: any) => {
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    config.headers["X-Client-Id"] = "GKMIT";
+    const clientId = localStorage.getItem("clientId");
+    if (clientId) {
+      config.headers["X-Client-Id"] = clientId;
+    }
+
     config.headers["ngrok-skip-browser-warning"] = "true";
     const token = localStorage.getItem("accessToken");
     if (token && !config?.url?.includes("amazonaws.com"))
@@ -72,9 +76,13 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (error.response?.status === 401 && originalRequest?.url === "/refresh") {
+    if (
+      error.response?.status === 500 ||
+      ((error.response?.status === 401 || error.response?.status === 404) &&
+        originalRequest?.url === "/refresh")
+    ) {
       localStorage.clear();
-      window.location.href = "/";
+      window.location.replace("/");
       return;
     }
 

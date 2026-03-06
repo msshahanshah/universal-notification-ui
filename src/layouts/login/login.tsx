@@ -1,8 +1,5 @@
-// login
-
 import { ChangeEvent, useState } from "react";
 import {
-  // CssBaseline,
   styled,
   Typography,
   useColorScheme,
@@ -47,7 +44,6 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
 }));
 
 const Login = (props: { disableCustomTheme?: boolean }) => {
-  // const { setMode } = useColorScheme();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -61,11 +57,15 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
     username === "" || password === "" || isPending || hasApiError;
 
   const onSubmit = async ({ username, password }: any) => {
-    // setMode("dark");
     if (!usernameRegex.test(username) || !passwordRegex.test(password)) {
       setErrorMessage("Invalid username or password");
       setHasApiError(true);
       return;
+    }
+
+    const clientId = username?.split("@")?.[1];
+    if (clientId) {
+      localStorage.setItem("clientId", clientId?.toUpperCase());
     }
 
     try {
