@@ -114,10 +114,10 @@ export default function WebhookConfigPage() {
     const settings = buildSettings(existingSettings, serviceTrigger);
 
     const payload = {
-      client_id: clientId,
-      webhook_url: webhookUrl,
-      api_key: apiKey,
-      service_trigger: serviceTrigger,
+      clientId: clientId,
+      webhookUrl: webhookUrl,
+      apiKey: apiKey,
+      serviceTrigger: serviceTrigger,
       // settings: settings,
     };
 
