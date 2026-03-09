@@ -251,6 +251,7 @@ const Sidebar = ({
           onClick={() => {
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
+            localStorage.removeItem("clientId");
             window.location.href = "/";
           }}
           sx={getItemStyles("/logout")}
