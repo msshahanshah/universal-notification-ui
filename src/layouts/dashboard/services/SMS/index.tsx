@@ -12,6 +12,7 @@ import { CountryCodeSelect } from "./country-code-select";
 import "./sms-composer.css";
 
 interface Recipient {
+  id: string;
   countryCode: string;
   number: string;
 }
@@ -23,36 +24,36 @@ export default function SMS() {
   const { mutate } = useSmsService();
 
   const [recipients, setRecipients] = useState<Recipient[]>([
-    { countryCode: "+91", number: "" },
+    { id: crypto.randomUUID(), countryCode: "+91", number: "" },
   ]);
 
   const [message, setMessage] = useState("");
 
   /* -------------------- Handlers -------------------- */
 
-  const updateNumber = (index: number, value: string) => {
+  const updateNumber = (id: string, value: string) => {
     const clean = value.replace(/\D/g, "");
 
-    const updated = [...recipients];
-    updated[index].number = clean;
-
-    setRecipients(updated);
+    setRecipients((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, number: clean } : r)),
+    );
   };
 
-  const updateCountryCode = (index: number, code: string) => {
-    const updated = [...recipients];
-    updated[index].countryCode = code;
-
-    setRecipients(updated);
+  const updateCountryCode = (id: string, code: string) => {
+    setRecipients((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, countryCode: code } : r)),
+    );
   };
 
   const addRecipient = () => {
-    setRecipients([...recipients, { countryCode: "+91", number: "" }]);
+    setRecipients((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), countryCode: "+91", number: "" },
+    ]);
   };
 
-  const removeRecipient = (index: number) => {
-    const updated = recipients.filter((_, i) => i !== index);
-    setRecipients(updated);
+  const removeRecipient = (id: string) => {
+    setRecipients((prev) => prev.filter((r) => r.id !== id));
   };
 
   /* -------------------- Validation -------------------- */
@@ -85,7 +86,9 @@ export default function SMS() {
           });
 
           setMessage("");
-          setRecipients([{ countryCode: "+91", number: "" }]);
+          setRecipients([
+            { id: crypto.randomUUID(), countryCode: "+91", number: "" },
+          ]);
 
           showSnackbar(data?.message || "Message sent successfully", "info");
         },
@@ -95,8 +98,6 @@ export default function SMS() {
       },
     );
   };
-
-  /* -------------------- UI -------------------- */
 
   return (
     <div className="sms-container">
@@ -108,7 +109,6 @@ export default function SMS() {
         className="sms-wrapper"
         style={{ backgroundColor: theme.vars?.palette.background.paper }}
       >
-        {/* Phone Numbers */}
         <label
           style={{
             fontSize: "12px",
@@ -120,28 +120,28 @@ export default function SMS() {
         </label>
 
         <div>
-          {recipients.map((recipient, index) => (
-            <div key={index} className="sms-to-row">
+          {recipients.map((recipient) => (
+            <div key={recipient.id} className="sms-to-row">
               <CountryCodeSelect
                 value={recipient.countryCode}
-                onChange={(code) => updateCountryCode(index, code)}
+                onChange={(code) => updateCountryCode(recipient.id, code)}
               />
 
               <Input
                 type="tel"
-                id={`recipient-${index}`}
+                id={`recipient-${recipient.id}`}
                 placeholder="Enter receiver number"
                 value={recipient.number}
                 inputMode="numeric"
                 className="sms-input"
-                onChange={(e) => updateNumber(index, e.target.value)}
+                onChange={(e) => updateNumber(recipient.id, e.target.value)}
                 style={{ color: "#fff" }}
               />
 
               {recipients.length > 1 && (
                 <button
                   type="button"
-                  onClick={() => removeRecipient(index)}
+                  onClick={() => removeRecipient(recipient.id)}
                   style={{
                     marginLeft: 8,
                     cursor: "pointer",
