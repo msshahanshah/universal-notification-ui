@@ -23,6 +23,7 @@ export default function SMS() {
   const showSnackbar = useSnackbar();
   const { mutate } = useSmsService();
 
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [recipients, setRecipients] = useState<Recipient[]>([
     { id: crypto.randomUUID(), countryCode: "+91", number: "" },
   ]);
@@ -53,10 +54,9 @@ export default function SMS() {
   };
 
   const removeRecipient = (id: string) => {
+    setOpenDropdownId(null);
     setRecipients((prev) => prev.filter((r) => r.id !== id));
   };
-
-  /* -------------------- Validation -------------------- */
 
   const isValidRecipients =
     recipients.length > 0 &&
@@ -65,8 +65,6 @@ export default function SMS() {
     );
 
   const isDisabled = !message.trim() || !isValidRecipients;
-
-  /* -------------------- Submit -------------------- */
 
   const handleSend = () => {
     const destination = recipients
@@ -121,10 +119,17 @@ export default function SMS() {
 
         <div>
           {recipients.map((recipient) => (
-            <div key={recipient.id} className="sms-to-row">
+            <div
+              key={recipient.id}
+              className={`sms-to-row ${
+                openDropdownId === recipient.id ? "dropdown-open" : ""
+              }`}
+            >
               <CountryCodeSelect
                 value={recipient.countryCode}
                 onChange={(code) => updateCountryCode(recipient.id, code)}
+                onOpen={() => setOpenDropdownId(recipient.id)}
+                onClose={() => setOpenDropdownId(null)}
               />
 
               <Input
@@ -140,7 +145,6 @@ export default function SMS() {
 
               {recipients.length > 1 && (
                 <button
-                  type="button"
                   onClick={() => removeRecipient(recipient.id)}
                   style={{
                     marginLeft: 8,
