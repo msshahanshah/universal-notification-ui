@@ -96,12 +96,12 @@ export default function LogsTable() {
 
     if (startDate) {
       const start = new Date(`${startDate}T${startTime || "00:00"}:00`);
-      result["start-time"] = start.toISOString().substring(0, 16) + ":00Z";
+      result["from-date"] = start.toISOString().substring(0, 16) + ":00Z";
     }
 
     if (endDate) {
       const end = new Date(`${endDate}T${endTime || "23:59"}:00`);
-      result["end-time"] = end.toISOString().substring(0, 16) + ":00Z";
+      result["to-date"] = end.toISOString().substring(0, 16) + ":00Z";
     }
 
     return result;
