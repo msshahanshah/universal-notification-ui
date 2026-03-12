@@ -24,7 +24,7 @@ export const saveWebhookDetails = async (body) => {
 export const updateWebhookDetails = async (body) => {
   try {
     const res = await axios.patch(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.UPDATE(body?.client_id),
+      "http://localhost:3000" + ENDPOINTS.WEBHOOK.UPDATE(body),
       body,
       {
         // Remove after BE is completed
@@ -43,11 +43,44 @@ export const updateWebhookDetails = async (body) => {
 export const getWebhookDetails = async (clientId: string) => {
   try {
     const res = await axios.get(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.GET(clientId),
+      "http://localhost:3000" + ENDPOINTS.WEBHOOK.GET,
       {
         // Remove after BE is completed
         headers: {
           "X-Client-Id": clientId || "",
+        },
+      },
+    );
+    return res.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+};
+
+export const deleteWebhookConfig = async (webhookId: string) => {
+  try {
+    const res = await axios.delete(
+      "http://localhost:3000" + ENDPOINTS.WEBHOOK.DELETE(webhookId),
+      {
+        headers: {
+          "X-Client-Id": localStorage.getItem("clientId") || "",
+        },
+      },
+    );
+    return res.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+};
+
+export const toggleWebhookConfig = async (webhookId: string, payload) => {
+  try {
+    const res = await axios.patch(
+      "http://localhost:3000" + ENDPOINTS.WEBHOOK.TOGGLE(webhookId),
+      payload,
+      {
+        headers: {
+          "X-Client-Id": localStorage.getItem("clientId") || "",
         },
       },
     );

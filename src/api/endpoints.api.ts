@@ -8,8 +8,11 @@ export const ENDPOINTS = {
   },
   WEBHOOK: {
     SAVE: "/api/webhook/config",
-    GET: (clientId: string) => `/api/webhook/configs?client_id=${clientId}`,
-    UPDATE: (clientId: string) => `/api/webhook/config/${clientId}`,
+    GET:`/api/webhook/configs`,
+    UPDATE: ({ webhookId }: any) =>
+      `/api/webhook/${webhookId}`,
+    DELETE: (webhookId: string) => `/api/webhook/${webhookId}`,
+    TOGGLE: (webhookId: string) => `/api/webhook/${webhookId}`,
   },
   LOGS: {
     LIST: (params?: Record<string, any>) => {
