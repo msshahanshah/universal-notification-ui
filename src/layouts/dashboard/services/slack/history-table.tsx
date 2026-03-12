@@ -23,24 +23,7 @@ import { useDebounce } from "src/hooks/useDebounce";
 import { formatDateForTable, getStatusStyle } from "../../mui/utils";
 import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
-import { getSortLabelStyles } from "../../mui/table";
-
-export const textFieldTheme = (theme: any) => ({
-  "& .MuiInputLabel-root": {
-    color: theme.vars?.palette.text.secondary,
-  },
-  "& .MuiInputLabel-root.Mui-focused": {
-    color: theme.vars?.palette.text.secondary,
-    fontWeight: "bold",
-    marginTop: -1,
-  },
-  "& .MuiOutlinedInput-input": {
-    color: theme.vars?.palette.text.secondary,
-  },
-  "& .MuiPickersPopper-root": {
-    zIndex: 9999,
-  },
-});
+import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
 
 interface Log {
   id: number;
