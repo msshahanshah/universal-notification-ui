@@ -24,6 +24,7 @@ import { formatDateForTable, getStatusStyle } from "../../mui/utils";
 import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
 import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
+import { truncateString } from "src/utility/helper";
 
 interface Log {
   id: number;
@@ -117,15 +118,26 @@ export default function HistoryTable() {
     }
   }, [isError, response?.data, error]);
 
-  const renderCell = (value: any) => {
+  const renderCell = (fullValue: any, value?: any) => {
     return (
-      <Tooltip title={value} placement="bottom">
+      <Tooltip
+        title={fullValue}
+        componentsProps={{
+          tooltip: {
+            sx: {
+              backgroundColor: theme.vars?.palette.grey[900],
+              fontSize: 12,
+            },
+          },
+        }}
+      >
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography>{value}</Typography>
+          <Typography>{value || fullValue}</Typography>
         </Box>
       </Tooltip>
     );
   };
+
 
   const StatusCell = ({ row }: { row: Log }) => {
     const {
@@ -414,7 +426,12 @@ export default function HistoryTable() {
                     {renderCell(formatDateForTable(row.messageDate))}
                   </TableCell>
 
-                  <TableCell>{renderCell(row.destination)}</TableCell>
+                  <TableCell>
+                    {renderCell(
+                      row.destination,
+                      truncateString(row.destination, 30),
+                    )}
+                  </TableCell>
                   <TableCell>
                     <StatusCell row={row} />
                   </TableCell>

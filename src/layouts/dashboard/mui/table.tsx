@@ -22,6 +22,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
 import { useSnackbar } from "src/provider/snackbar";
+import { truncateString } from "src/utility/helper";
 
 import { formatDateForTable, getStatusStyle } from "./utils";
 
@@ -150,10 +151,10 @@ export default function LogsTable() {
     }
   }, [isError, response?.data, error]);
 
-  const renderCell = (value: any) => {
+  const renderCell = (fullValue: any, value?: any) => {
     return (
       <Tooltip
-        title={value}
+        title={fullValue}
         componentsProps={{
           tooltip: {
             sx: {
@@ -164,7 +165,7 @@ export default function LogsTable() {
         }}
       >
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography>{value}</Typography>
+          <Typography>{value || fullValue}</Typography>
         </Box>
       </Tooltip>
     );
@@ -475,7 +476,12 @@ export default function LogsTable() {
                       {renderCell(formatDateForTable(row.messageDate))}
                     </TableCell>
                     <TableCell>{renderCell(row.service)}</TableCell>
-                    <TableCell>{renderCell(row.destination)}</TableCell>
+                    <TableCell>
+                      {renderCell(
+                        row.destination,
+                        truncateString(row.destination, 30),
+                      )}
+                    </TableCell>
                     <TableCell>
                       <StatusCell row={row} />
                     </TableCell>
