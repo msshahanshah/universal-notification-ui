@@ -22,6 +22,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
 import { useSnackbar } from "src/provider/snackbar";
+import { truncateString } from "src/utility/helper";
 
 import { formatDateForTable, getStatusStyle } from "./utils";
 
@@ -110,13 +111,20 @@ export default function LogsTable() {
   const debouncedFilters = useDebounce(filters, 500);
   const showSnackbar = useSnackbar();
 
+  // Check if date filter is valid: both selected or both empty
+  const isDateFilterValid =
+    (debouncedFilters.startDate && debouncedFilters.endDate) ||
+    (!debouncedFilters.startDate && !debouncedFilters.endDate);
+
   const queryParams = useMemo(() => {
-    const timeRange = buildUTCRange(
-      debouncedFilters.startDate,
-      debouncedFilters.startTime,
-      debouncedFilters.endDate,
-      debouncedFilters.endTime,
-    );
+    const timeRange = isDateFilterValid
+      ? buildUTCRange(
+          debouncedFilters.startDate,
+          debouncedFilters.startTime,
+          debouncedFilters.endDate,
+          debouncedFilters.endTime,
+        )
+      : {};
 
     return {
       page: page + 1,
@@ -129,7 +137,7 @@ export default function LogsTable() {
       attempts: debouncedFilters.attempts || undefined,
       ...timeRange,
     };
-  }, [page, pageSize, sort, order, debouncedFilters]);
+  }, [page, pageSize, sort, order, debouncedFilters, isDateFilterValid]);
 
   const { data: response, isLoading, isError, error } = useLogs(queryParams);
 
@@ -143,10 +151,10 @@ export default function LogsTable() {
     }
   }, [isError, response?.data, error]);
 
-  const renderCell = (value: any) => {
+  const renderCell = (fullValue: any, value?: any) => {
     return (
       <Tooltip
-        title={value}
+        title={fullValue}
         componentsProps={{
           tooltip: {
             sx: {
@@ -156,12 +164,8 @@ export default function LogsTable() {
           },
         }}
       >
-        <Box
-          display="flex"
-          alignItems="center"
-          gap={1}
-        >
-          <Typography>{value}</Typography>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography>{value || fullValue}</Typography>
         </Box>
       </Tooltip>
     );
@@ -279,7 +283,13 @@ export default function LogsTable() {
             value={filters.startDate || ""}
             onChange={(e) => handleFilterChange("startDate", e.target.value)}
             onBlur={(e) => handleDateBlur("startDate", e)}
-            sx={textFieldTheme(theme)}
+            required
+            sx={{
+              ...textFieldTheme(theme),
+              "& .MuiFormLabel-asterisk": {
+                color: "red",
+              },
+            }}
           />
 
           <TextField
@@ -301,8 +311,14 @@ export default function LogsTable() {
             InputLabelProps={{ shrink: true }}
             value={filters.endDate}
             onChange={(e) => handleFilterChange("endDate", e.target.value)}
-            sx={textFieldTheme(theme)}
             onBlur={(e) => handleDateBlur("endDate", e)}
+            required
+            sx={{
+              ...textFieldTheme(theme),
+              "& .MuiFormLabel-asterisk": {
+                color: "red",
+              },
+            }}
           />
 
           <TextField
@@ -460,7 +476,12 @@ export default function LogsTable() {
                       {renderCell(formatDateForTable(row.messageDate))}
                     </TableCell>
                     <TableCell>{renderCell(row.service)}</TableCell>
-                    <TableCell>{renderCell(row.destination)}</TableCell>
+                    <TableCell>
+                      {renderCell(
+                        row.destination,
+                        truncateString(row.destination, 30),
+                      )}
+                    </TableCell>
                     <TableCell>
                       <StatusCell row={row} />
                     </TableCell>
