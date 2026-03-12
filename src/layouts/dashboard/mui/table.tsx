@@ -275,7 +275,6 @@ export default function LogsTable() {
         {/* Row 1 → Date Time Range */}
         <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
           <TextField
-            key={filters.startDate || "empty-start-date"}
             type="date"
             size="small"
             label="Start Date"
