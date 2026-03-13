@@ -43,7 +43,7 @@
   background: hsla(220, 35%, 3%, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: #fff;
-  font-size: 12px;
+  font-size: 13px;
   margin-top: 4px;
 }
 
@@ -116,16 +116,23 @@
   gap: 12px;
   align-items: flex-start;
   margin-top: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+sms-to-row.dropdown-open {
+  z-index: 2000;
 }
 
 .country-select {
   position: relative;
+  contain: layout;
 }
 
 .country-select-btn {
   height: 2.5rem;
   padding: 0 12px;
-  background: #0b1623;
+  background: hsla(220, 35%, 3%, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   border-radius: 8px;
@@ -134,20 +141,31 @@
   font-family: "Inter", sans-serif;
 }
 
+.sms-add-btn {
+  padding: 10px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .country-select-list {
-  position: absolute;
-  left: 0;
+  position: fixed;
   width: 180px;
   background: #0b1623;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  z-index: 20;
-  top: 40px;
   padding: 10px;
   font-size: 12px;
-  height: 200px;
-  overflow-y: scroll;
+  max-height: 200px;
+  overflow-y: auto;
   scrollbar-width: thin;
+  z-index: 9999;
 }
 
 .country-select-list li {
@@ -163,12 +181,19 @@
   font-size: 12px;
   padding: 10px;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.country-code-option:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .country-code-selected {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(37, 99, 235, 0.3);
   border-radius: 8px;
   padding: 10px;
+  color: #93c5fd;
+  font-weight: 500;
 }
 
 .caret {
