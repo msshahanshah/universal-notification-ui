@@ -8,6 +8,10 @@ export interface EmailNotification {
   subject: string;
   body: string;
   attachments?: string[];
+  uniqueKey?: string;
+  fromEmail?: string;
+  cc?: string;
+  bcc?: string;
 }
 
 export interface SlackNotification {
