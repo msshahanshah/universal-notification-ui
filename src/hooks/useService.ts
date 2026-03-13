@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { sendEmail, sendSlack, sendSms } from "src/api/service.api";
+import { sendEmail, sendSlack, sendSms, sendMultipleNotifications } from "src/api/service.api";
 
 export const useEmailService = () => {
   return useMutation({
@@ -19,6 +19,13 @@ export const useSlackService = () => {
 export const useSmsService = () => {
   return useMutation({
     mutationFn: sendSms,
+    retry: false,
+  });
+};
+
+export const useMultipleNotificationService = () => {
+  return useMutation({
+    mutationFn: sendMultipleNotifications,
     retry: false,
   });
 };

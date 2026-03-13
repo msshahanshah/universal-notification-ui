@@ -14,6 +14,9 @@ export const ENDPOINTS = {
     DELETE: (webhookId: string) => `/api/webhook/${webhookId}`,
     TOGGLE: (webhookId: string) => `/api/webhook/${webhookId}`,
   },
+  MULTIPLE_NOTIFICATION: {
+    SEND: "/v2/notify",
+  },
   LOGS: {
     LIST: (params?: Record<string, any>) => {
       if (!params || Object.keys(params).length === 0) {

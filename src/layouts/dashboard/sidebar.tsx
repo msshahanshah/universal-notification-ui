@@ -18,7 +18,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Mail, MessageSquare, SlackIcon } from "lucide-react";
+import { Mail, MessageSquare, SlackIcon, Send } from "lucide-react";
 
 import COLORS from "src/utility/colors";
 
@@ -39,6 +39,12 @@ const sidebarItems = [
     label: "SMS",
     path: "/services/sms",
     icon: MessageSquare,
+    isDisabled: false,
+  },
+  {
+    label: "Multiple Notification",
+    path: "/services/multiple-notification",
+    icon: Send,
     isDisabled: false,
   },
 ];

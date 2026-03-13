@@ -14,6 +14,7 @@ import Slack from "./layouts/dashboard/services/slack";
 import ServiceGuard from "./routes/service-guard";
 import EmailComposer from "./layouts/dashboard/services/email";
 import SMS from "./layouts/dashboard/services/SMS";
+import MultipleNotification from "./layouts/dashboard/services/multiple-notification";
 import WebhookConfigPage from "./webhook";
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/services/demo2" element={<ServicesAccordion />} />
         <Route path="/services/email-editor" element={<EmailComposer />} />
         <Route path="/services/sms" element={<SMS />} />
+        <Route path="/services/multiple-notification" element={<MultipleNotification />} />
         <Route element={<ServiceGuard service="slack" />}>
           <Route path="/services/slack" element={<Slack />} />
         </Route>

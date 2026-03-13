@@ -41,12 +41,22 @@
   font-size: 12px;
   font-family: "Inter", sans-serif;
   width: 100%;
+  transition: all 0.2s ease;
+}
+
+.country-select-btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.country-select-btn:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .country-select-list {
   position: absolute;
   left: 0;
-  width: 180px;
+  width: 100%;
   background: #0b1623;
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
