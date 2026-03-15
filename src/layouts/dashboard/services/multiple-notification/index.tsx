@@ -86,7 +86,7 @@ export default function MultipleNotification() {
         attachments: { fileName: string }[];
       }[];
     } | null;
-    slack: { destination: string[]; message: string[] } | null;
+    slack: { destination: string[]; message: string[]; sections: any[] } | null;
   }>({
     sms: null,
     email: null,
@@ -140,7 +140,7 @@ export default function MultipleNotification() {
   );
 
   const handleSlackValueChange = useCallback(
-    (values: { destination: string[]; message: string[] }) => {
+    (values: { destination: string[]; message: string[]; sections: any[] }) => {
       setWrapperValues((prev) => ({
         ...prev,
         slack: values,
@@ -148,35 +148,6 @@ export default function MultipleNotification() {
     },
     [],
   );
-
-  // Validate wrapper values
-  const areWrapperValuesValid = () => {
-    if (
-      selectedServices.includes("sms") &&
-      (!wrapperValues.sms?.destination.length ||
-        (separateMessages.sms && !wrapperValues.sms?.message))
-    ) {
-      return false;
-    }
-    if (selectedServices.includes("email")) {
-      const hasValidRecipients = wrapperValues.email?.recipients?.some(
-        (rec) =>
-          rec.to.trim() !== "" &&
-          (!separateMessages.email || rec.body.trim() !== ""),
-      );
-      if (!hasValidRecipients) {
-        return false;
-      }
-    }
-    if (
-      selectedServices.includes("slack") &&
-      (!wrapperValues.slack?.destination.length ||
-        (separateMessages.slack && !wrapperValues.slack?.message.length))
-    ) {
-      return false;
-    }
-    return true;
-  };
 
   const handleSendToAllServices = () => {
     const payload: MultipleNotificationPayload = {
@@ -187,10 +158,12 @@ export default function MultipleNotification() {
     if (selectedServices.includes("sms")) {
       // Use the new section-based structure from SMS wrapper
       if (wrapperValues.sms && wrapperValues.sms.sections) {
-        payload.sms = wrapperValues.sms.sections.map((section: any, index: number) => ({
-          destination: section.destination,
-          message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
-        }));
+        payload.sms = wrapperValues.sms.sections.map(
+          (section: any, index: number) => ({
+            destination: section.destination,
+            message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
+          }),
+        );
       }
     }
 
@@ -226,18 +199,23 @@ export default function MultipleNotification() {
 
     // Add Slack to payload if selected
     if (selectedServices.includes("slack")) {
-      payload.slack =
-        wrapperValues.slack?.destination.map((dest, index) => ({
-          destination: dest,
-          message: separateMessages.slack
-            ? wrapperValues.slack?.message[index] || ""
-            : commonMessage,
-        })) || [];
+      // Use the new section-based structure from Slack wrapper
+      if (wrapperValues?.slack?.sections) {
+        payload.slack = wrapperValues.slack.sections.map((section: any) => {
+          const slackSection: any = { destination: section.destination };
+
+          if (section.message) {
+            slackSection.message = section.message;
+          }
+
+          return slackSection;
+        });
+      }
     }
 
     console.log("payload", payload);
 
-    // Check if there are any attachments in the payload
+    // // Check if there are any attachments in the payload
     const hasAttachments =
       payload.email?.some(
         (email) => email.attachments && email.attachments.length > 0,
@@ -257,35 +235,35 @@ export default function MultipleNotification() {
       }
     });
 
-    console.log("payload", payload);
+    // console.log("payload", payload);
 
-    // sendNotifications(payload, {
-    //   onSuccess: async (data) => {
-    //     // Reset form
-    //     setCommonMessage("");
-    //     setSelectedServices([]);
-    //     setSeparateMessages({
-    //       sms: false,
-    //       email: false,
-    //       slack: false,
-    //     });
+    sendNotifications(payload, {
+      onSuccess: async (data) => {
+        // Reset form
+        setCommonMessage("");
+        setSelectedServices([]);
+        setSeparateMessages({
+          sms: false,
+          email: false,
+          slack: false,
+        });
 
-    //     if (!hasAttachments || allAttachments.length === 0) {
-    //       queryClient.invalidateQueries({
-    //         queryKey: logsKeys.all,
-    //       });
-    //       showSnackbar(data?.message || "Notifications sent successfully!", "success");
-    //     } else {
-    //       await uploadToS3FromAttachments(data?.success, allAttachments);
-    //     }
-    //   },
-    //   onError: (error: any) => {
-    //     showSnackbar(
-    //       error?.message || "Failed to send notifications",
-    //       "error"
-    //     );
-    //   },
-    // });
+        if (!hasAttachments || allAttachments.length === 0) {
+          queryClient.invalidateQueries({
+            queryKey: logsKeys.all,
+          });
+          showSnackbar(data?.message || "Notifications sent successfully!", "success");
+        } else {
+          await uploadToS3FromAttachments(data?.success, allAttachments);
+        }
+      },
+      onError: (error: any) => {
+        showSnackbar(
+          error?.message || "Failed to send notifications",
+          "error"
+        );
+      },
+    });
   };
 
   return (
@@ -372,36 +350,11 @@ export default function MultipleNotification() {
             >
               SMS
             </h3>
-            {/* {!separateMessages.sms && (
-              <div style={{ marginBottom: 16, padding: "12px", background: "rgba(255, 255, 255, 0.05)", borderRadius: "6px", fontSize: "12px", color: theme.vars?.palette.text.secondary }}>
-                Using common message for all SMS recipients
-              </div>
-            )} */}
             <SMSWrapper
               showMessage={separateMessages.sms}
               onValueChange={handleSMSValueChange}
               maxBlocks={5}
             />
-            {/* <button
-              onClick={() => toggleSeparateMessage("sms")}
-              style={{
-                padding: "6px 12px",
-                fontSize: "12px",
-                background: separateMessages.sms
-                  ? "rgba(76, 175, 80, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-                border: `1px solid ${separateMessages.sms ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                color: separateMessages.sms ? "#4CAF50" : "#fff",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                marginTop: 16,
-              }}
-            >
-              {separateMessages.sms
-                ? "✓ Using Separate Messages"
-                : "I want to send separate message"}
-            </button> */}
           </div>
         )}
 
@@ -472,11 +425,10 @@ export default function MultipleNotification() {
               Slack
             </h3>
             <SlackWrapper
-              showMessage={separateMessages.slack}
               onValueChange={handleSlackValueChange}
               maxBlocks={5}
             />
-            <button
+            {/* <button
               onClick={() => toggleSeparateMessage("slack")}
               style={{
                 padding: "6px 12px",
@@ -495,7 +447,7 @@ export default function MultipleNotification() {
               {separateMessages.slack
                 ? "✓ Using Separate Messages"
                 : "I want to send separate message"}
-            </button>
+            </button> */}
           </div>
         )}
 

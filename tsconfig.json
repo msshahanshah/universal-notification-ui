@@ -18,12 +18,19 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
+      "src/*": ["src/*"],
+      "@/*": ["src/*"],
       "src/components/*": ["src/components/*"],
       "src/pages/*": ["src/pages/*"],
       "src/routes/*": ["src/routes/*"],
       "src/utility/*": ["src/utility/*"],
       "src/assets/*": ["src/assets/*"],
-      "src/layouts/*": ["src/layouts/*"]
+      "src/layouts/*": ["src/layouts/*"],
+      "src/hooks/*": ["src/hooks/*"],
+      "src/provider/*": ["src/provider/*"],
+      "src/lib/*": ["src/lib/*"],
+      "src/api/*": ["src/api/*"],
+      "src/atoms/*": ["src/atoms/*"]
     }
   },
   "include": ["src"],

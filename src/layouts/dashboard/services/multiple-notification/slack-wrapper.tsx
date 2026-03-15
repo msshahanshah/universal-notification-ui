@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 
 import { useSlackService } from "src/hooks/useService";
 import Button from "src/components/button";
@@ -11,111 +12,121 @@ import ErrorText from "src/components/error-text";
 import { slackRegex } from "src/utility/constants";
 
 import "../slack/slack.css";
-
-interface SlackChannel {
-  id: string;
-  channelID: string;
-  message: string;
-}
+import {
+  slackSectionsAtom,
+  slackCallbackDataAtom,
+  type SlackChannel,
+} from "src/atoms/slackAtoms";
 
 interface SlackWrapperProps {
-  showMessage: boolean;
-  onValueChange?: (values: { destination: string[]; message: string[] }) => void;
+  onValueChange?: (values: {
+    destination: string[];
+    message: string[];
+    sections: any[];
+  }) => void;
+  maxBlocks?: number;
 }
 
-export function SlackWrapper({ showMessage, onValueChange }: SlackWrapperProps) {
-  const [channels, setChannels] = useState<SlackChannel[]>([
-    { id: "1", channelID: "", message: "" }
-  ]);
-  const [invalidChannelId, setInvalidChannelId] = useState("");
+export function SlackWrapper({
+  onValueChange,
+  maxBlocks = 5,
+}: SlackWrapperProps) {
+  // Replace local state with atoms
+  const [channels, setChannels] = useAtom(slackSectionsAtom);
+  const [callbackData] = useAtom(slackCallbackDataAtom);
+
+  console.log("channels", channels);
+
+  // Pass values to parent whenever they change (using computed atom)
+  useEffect(() => {
+    if (onValueChange) {
+      onValueChange(callbackData);
+    }
+  }, [callbackData, onValueChange]);
+
   const { mutate } = useSlackService();
   const showSnackbar = useSnackbar();
   const queryClient = useQueryClient();
+  const [invalidChannelId, setInvalidChannelId] = useState("");
 
-  // Create destination and message arrays from channels
-  const destinations = useMemo(() => 
-    channels
-      .filter((channel) => channel.channelID.trim() !== "")
-      .map((channel) => channel.channelID),
-    [channels]
-  );
-
-  const messages = useMemo(() => 
-    channels
-      .filter((channel) => channel.message.trim() !== "")
-      .map((channel) => channel.message),
-    [channels]
-  );
-
-  // Pass values to parent whenever they change
-  useEffect(() => {
-    if (onValueChange) {
-      onValueChange({
-        destination: destinations,
-        message: messages,
-      });
+  const addSection = () => {
+    if (channels.length >= maxBlocks) {
+      return; // Don't add more than maxBlocks
     }
-  }, [destinations, messages, onValueChange]);
-
-  const addChannel = () => {
-    const newId = (Math.max(...channels.map((c) => parseInt(c.id))) + 1).toString();
-    setChannels([...channels, { id: newId, channelID: "", message: "" }]);
+    const newId = (
+      Math.max(...channels.map((c) => parseInt(c.id))) + 1
+    ).toString();
+    setChannels([
+      ...channels,
+      { id: newId, channelID: "", message: "", separateMessage: false },
+    ]);
   };
 
-  const removeChannel = (id: string) => {
+  const removeSection = (id: string) => {
     if (channels.length > 1) {
       setChannels(channels.filter((channel) => channel.id !== id));
     }
   };
 
-  const updateChannel = (id: string, field: keyof SlackChannel, value: string) => {
-    setChannels(
-      channels.map((channel) => (channel.id === id ? { ...channel, [field]: value } : channel)),
+  const updateSection = (
+    id: string,
+    field: keyof SlackChannel,
+    value: string | boolean,
+  ) => {
+    const updatedChannel = channels.map((channel) =>
+      channel.id === id ? { ...channel, [field]: value } : channel,
     );
-  };
-
-  const handleSend = () => {
-    const validChannels = channels.filter(channel => 
-      channel.channelID.trim() !== "" && slackRegex.test(channel.channelID)
-    );
-
-    if (validChannels.length === 0) {
-      setInvalidChannelId("Please enter valid channel ID(s)");
-      return;
-    }
-
-    // Send to each channel
-    validChannels.forEach(channel => {
-      mutate(
-        {
-          service: "slack",
-          destination: channel.channelID,
-          message: showMessage ? channel.message : channels[0].message,
-        },
-        {
-          onSuccess: (data) => {
-            queryClient.invalidateQueries({
-              queryKey: logsKeys.all,
-            });
-            showSnackbar(data?.message || "Message sent successfully", "info");
-          },
-          onError: (error) => {
-            showSnackbar(error?.message || "Failed to send message", "error");
-          },
-        },
-      );
-    });
-
-    // Reset form
-    setChannels(channels.map(channel => ({ ...channel, message: "" })));
+    console.log("update sec", updatedChannel);
+    setChannels(updatedChannel);
   };
 
   return (
     <div className="sms-wrapper">
-      {channels.map((channel, index) => (
-        <div key={channel.id} style={{ marginBottom: 8 }}>
+      {channels.map((channel, sectionIndex) => (
+        <div
+          key={channel.id}
+          style={{
+            marginBottom: 16,
+            padding: "12px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "8px",
+          }}
+        >
+          {channels.length > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <span style={{ fontSize: "14px", fontWeight: "bold" }}>
+                Slack {sectionIndex + 1}
+              </span>
+              <button
+                onClick={() => removeSection(channel.id)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "red",
+                  fontSize: "16px",
+                  cursor: "pointer",
+                }}
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <label
+            style={{ fontSize: "12px", marginBottom: 8, display: "block" }}
+          >
+            Channel ID
+            <span style={{ color: "red", marginLeft: 2 }}>*</span>
+          </label>
+
           <Input
-            label={index === 0 ? "Channel ID" : ""}
             type="text"
             id={`slack-channel-${channel.id}`}
             className="sms-input"
@@ -125,39 +136,63 @@ export function SlackWrapper({ showMessage, onValueChange }: SlackWrapperProps) 
               if (!!invalidChannelId) {
                 setInvalidChannelId("");
               }
-              updateChannel(channel.id, "channelID", e.target.value);
+              updateSection(channel.id, "channelID", e.target.value);
             }}
             showAsteric
           />
-          {channels.length > 1 && (
-            <button
-              onClick={() => removeChannel(channel.id)}
-              style={{
-                marginLeft: 8,
-                background: 'transparent',
-                border: 'none',
-                color: '#ff4444',
-                cursor: 'pointer',
-                fontSize: '16px',
-                marginTop: index === 0 ? '20px' : '0'
-              }}
-            >
-              ×
-            </button>
-          )}
-          
-          {showMessage && (
+
+          {/* Separate Message Toggle for each Slack channel */}
+          <button
+            onClick={() =>
+              updateSection(
+                channel.id,
+                "separateMessage",
+                !channel.separateMessage,
+              )
+            }
+            style={{
+              padding: "4px 8px",
+              fontSize: "10px",
+              background: channel.separateMessage
+                ? "rgba(76, 175, 80, 0.2)"
+                : "rgba(255, 255, 255, 0.1)",
+              border: `1px solid ${channel.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
+              color: channel.separateMessage ? "#4CAF50" : "#fff",
+              borderRadius: "4px",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              marginTop: 8,
+              marginBottom: 8,
+              width: "100%",
+            }}
+          >
+            {channel.separateMessage
+              ? "✓ Using Separate Message"
+              : "I want to send separate message"}
+          </button>
+
+          {channel.separateMessage && (
             <>
-              <label style={{ marginBottom: 4, fontSize: "12px", marginTop: 8 }}>
-                Message {index > 0 && index + 1}
+              <label
+                style={{
+                  marginBottom: 4,
+                  fontSize: "12px",
+                  marginTop: 8,
+                  display: "block",
+                }}
+              >
+                Message {sectionIndex + 1}
                 <span style={{ color: "red", marginLeft: 2 }}>*</span>
               </label>
               <textarea
                 className="sms-textarea"
                 placeholder="Type your message..."
                 value={channel.message}
-                onChange={(e) => updateChannel(channel.id, "message", e.target.value)}
+                onChange={(e) =>
+                  updateSection(channel.id, "message", e.target.value)
+                }
                 rows={4}
+                style={{ width: "100%", marginBottom: 8 }}
               />
             </>
           )}
@@ -165,20 +200,26 @@ export function SlackWrapper({ showMessage, onValueChange }: SlackWrapperProps) 
       ))}
 
       <button
-        onClick={addChannel}
+        onClick={addSection}
+        disabled={channels.length >= maxBlocks}
         style={{
           padding: "6px 12px",
           fontSize: "12px",
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          color: "#fff",
+          background:
+            channels.length >= maxBlocks
+              ? "rgba(128, 128, 128, 0.2)"
+              : "rgba(255, 255, 255, 0.1)",
+          border: `1px solid ${channels.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
+          color: channels.length >= maxBlocks ? "#888" : "#fff",
           borderRadius: "6px",
-          cursor: "pointer",
+          cursor: channels.length >= maxBlocks ? "not-allowed" : "pointer",
           transition: "all 0.2s",
-          marginTop: 8
+          marginTop: 8,
         }}
       >
-        Add Another Channel
+        {channels.length >= maxBlocks
+          ? `Max ${maxBlocks} Slack sections reached`
+          : `Add Another Slack Section (${channels.length}/${maxBlocks})`}
       </button>
 
       {invalidChannelId && <ErrorText>{invalidChannelId}</ErrorText>}
