@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { Provider } from "jotai";
 
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
@@ -16,15 +17,17 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SnackbarProvider>
-          <AppLayout>
-            <App />
-          </AppLayout>
-        </SnackbarProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <Provider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SnackbarProvider>
+            <AppLayout>
+              <App />
+            </AppLayout>
+          </SnackbarProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
   </React.StrictMode>,
 );
 

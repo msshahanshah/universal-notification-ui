@@ -189,7 +189,7 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
               color: theme.vars?.palette.text.secondary,
-              backgroundColor: theme.vars?.palette.background.paper,
+              // backgroundColor: theme.vars?.palette.background.paper,
               border: `1px solid ${theme.vars?.palette.divider}`,
               width: "40%",
             }}
