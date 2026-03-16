@@ -17,6 +17,7 @@ import {
   slackCallbackDataAtom,
   type SlackChannel,
 } from "src/atoms/slackAtoms";
+import COLORS from "src/utility/colors";
 
 interface SlackWrapperProps {
   onValueChange?: (values: {
@@ -119,7 +120,7 @@ export function SlackWrapper({
           )}
 
           <label
-            style={{ fontSize: "12px", marginBottom: 8, display: "block" }}
+            style={{ fontSize: "12px", marginBottom: 8, display: "block", color: COLORS.WHITE }}
           >
             Channel ID
             <span style={{ color: "red", marginLeft: 2 }}>*</span>

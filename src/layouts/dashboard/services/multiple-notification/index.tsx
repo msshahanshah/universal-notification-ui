@@ -345,7 +345,7 @@ export default function MultipleNotification() {
             options={serviceOptions}
             placeholder="Select services..."
             multiple
-            style={{ width: "30%" }}
+            style={{color: 'text.secondary' }}
           />
         </div>
 
@@ -394,7 +394,7 @@ export default function MultipleNotification() {
             <h3
               style={{
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.primary,
+                color: theme.vars?.palette.text.secondary,
               }}
             >
               SMS
@@ -421,7 +421,7 @@ export default function MultipleNotification() {
             <h3
               style={{
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.primary,
+                color: theme.vars?.palette.text.secondary,
               }}
             >
               Email
@@ -477,26 +477,6 @@ export default function MultipleNotification() {
               onValueChange={handleSlackValueChange}
               maxBlocks={5}
             />
-            {/* <button
-              onClick={() => toggleSeparateMessage("slack")}
-              style={{
-                padding: "6px 12px",
-                fontSize: "12px",
-                background: separateMessages.slack
-                  ? "rgba(76, 175, 80, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-                border: `1px solid ${separateMessages.slack ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                color: separateMessages.slack ? "#4CAF50" : "#fff",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                marginTop: 16,
-              }}
-            >
-              {separateMessages.slack
-                ? "✓ Using Separate Messages"
-                : "I want to send separate message"}
-            </button> */}
           </div>
         )}
 

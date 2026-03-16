@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
+// import { useTheme } from "@mui/material/styles";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
@@ -11,11 +12,11 @@ import { logsKeys } from "src/api/queryKeys";
 
 import "../SMS/sms-composer.css";
 import { CountryCodeSelect } from "../SMS/country-code-select";
-import { 
-  smsSectionsAtom, 
+import {
+  smsSectionsAtom,
   smsCallbackDataAtom,
   type SMSNumber,
-  type SMSSection 
+  type SMSSection,
 } from "src/atoms/smsAtoms";
 
 interface SMSWrapperProps {
@@ -33,6 +34,7 @@ export function SMSWrapper({
   onValueChange,
   maxBlocks = 5,
 }: SMSWrapperProps) {
+  const theme = useTheme();
   // Replace local state with atoms
   const [sections, setSections] = useAtom(smsSectionsAtom);
   const [callbackData] = useAtom(smsCallbackDataAtom);
@@ -49,7 +51,6 @@ export function SMSWrapper({
   const { mutate } = useSmsService();
   const showSnackbar = useSnackbar();
   const queryClient = useQueryClient();
-
 
   // Section management functions
   const addSection = () => {
@@ -189,9 +190,12 @@ export function SMSWrapper({
           )}
 
           <label
-            style={{ fontSize: "12px", marginBottom: 8, display: "block" }}
+            style={{
+              fontSize: "12px",
+              color: theme.vars?.palette.text.secondary,
+            }}
           >
-            Phone Numbers
+            Phone number
             <span style={{ color: "red", marginLeft: 2 }}>*</span>
           </label>
 

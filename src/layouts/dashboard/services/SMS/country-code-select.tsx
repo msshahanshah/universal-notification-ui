@@ -93,6 +93,7 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
         ref={buttonRef}
         onClick={toggleDropdown}
         aria-haspopup="listbox"
+        style={{ background: theme.vars?.palette.background.paper }}
       >
         {value}
         <span className="caret">▼</span>

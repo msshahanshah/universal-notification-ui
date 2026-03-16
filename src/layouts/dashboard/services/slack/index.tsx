@@ -12,6 +12,7 @@ import ErrorText from "src/components/error-text";
 import { slackRegex } from "src/utility/constants";
 
 import "./slack.css";
+import COLORS from "src/utility/colors";
 
 const HistoryTable = lazy(() => import("./history-table"));
 
@@ -93,7 +94,7 @@ export default function Slack() {
             setChannelID(trimmedValue);
           }}
           showAsteric
-          style={{ color: "#fff" }}
+          style={{ color: COLORS.WHITE }}
         />
 
         {/* TODO make textarea reusable */}

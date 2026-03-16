@@ -25,13 +25,27 @@
   margin-top: 4px;
 }
 
-.country-select {
+.common-select {
   position: relative;
+  width: 30%;
 }
 
-@media screen and (max-width: 768px) {
-  .country-select {
+@media screen and (max-width: 1024px) {
+  .common-select {
+    width: 100%;
     min-width: 60%;
+  }
+}
+
+.country-select {
+  position: relative;
+  width: 10%;
+}
+
+@media screen and (max-width: 1024px) {
+  .country-select {
+    width: 15%;
+    min-width: 15%;
   }
 }
 
@@ -58,7 +72,7 @@
   border-color: rgba(255, 255, 255, 0.35);
 }
 
-.country-select-list {
+.select-list {
   position: absolute;
   left: 0;
   width: 100%;
@@ -72,14 +86,16 @@
   height: 200px;
   overflow-y: scroll;
   scrollbar-width: thin;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   /* width: 100%; */
 }
 
-.country-select-list li {
+.select-list li {
   padding: 10px;
 }
 
-.country-select-list li:hover {
+.select-list li:hover {
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
 }
@@ -99,4 +115,27 @@
 .caret {
   font-size: 10px;
   margin-left: 10px;
+}
+
+.country-select-list {
+  position: fixed;
+  width: 180px;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  z-index: 9999;
+}
+
+.country-select-list li {
+  padding: 10px;
+}
+
+.country-select-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
 }

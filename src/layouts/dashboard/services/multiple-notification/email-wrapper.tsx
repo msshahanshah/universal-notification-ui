@@ -229,6 +229,7 @@ export function EmailWrapper({
               </label> */}
               <Input
                 label="From"
+                subLabel="The email address field can be filled only if the 'From Email' option is enabled."
                 className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
@@ -239,18 +240,8 @@ export function EmailWrapper({
                 }
               />
 
-              <label
-                style={{
-                  marginBottom: 8,
-                  fontSize: "12px",
-                  display: "block",
-                  marginTop: 8,
-                }}
-              >
-                To
-                <span style={{ color: "red", marginLeft: 2 }}>*</span>
-              </label>
               <Input
+                label="To"
                 className="sms-input"
                 type="email"
                 id={`to-${recipient.id}`}
@@ -259,19 +250,11 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "to", e.target.value)
                 }
+                required
               />
 
-              <label
-                style={{
-                  marginBottom: 8,
-                  fontSize: "12px",
-                  display: "block",
-                  marginTop: 8,
-                }}
-              >
-                Cc
-              </label>
               <Input
+                label="Cc"
                 className="sms-input"
                 type="email"
                 id={`cc-${recipient.id}`}
@@ -282,17 +265,8 @@ export function EmailWrapper({
                 }
               />
 
-              <label
-                style={{
-                  marginBottom: 8,
-                  fontSize: "12px",
-                  display: "block",
-                  marginTop: 8,
-                }}
-              >
-                Bcc
-              </label>
               <Input
+                label="Bcc"
                 className="sms-input"
                 type="email"
                 id={`bcc-${recipient.id}`}
@@ -303,18 +277,8 @@ export function EmailWrapper({
                 }
               />
 
-              <label
-                style={{
-                  marginBottom: 8,
-                  fontSize: "12px",
-                  display: "block",
-                  marginTop: 8,
-                }}
-              >
-                Subject
-                <span style={{ color: "red", marginLeft: 2 }}>*</span>
-              </label>
               <Input
+                label="Subject"
                 className="sms-input"
                 type="text"
                 id={`subject-${recipient.id}`}
@@ -323,6 +287,7 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "subject", e.target.value)
                 }
+                required
               />
 
               {/* Separate Message Toggle for each Email section */}

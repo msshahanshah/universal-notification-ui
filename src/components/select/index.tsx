@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "@mui/material/styles";
 
 import "./select.css";
 
@@ -26,6 +27,7 @@ export function Select({
   multiple = false,
   style
 }: Props) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +103,7 @@ export function Select({
   };
 
   return (
-    <div className="country-select" style={style} data-testid={dataTestId} ref={containerRef}>
+    <div className="common-select" style={style} data-testid={dataTestId} ref={containerRef}>
       <button
         type="button"
         className="country-select-btn"
@@ -158,7 +160,7 @@ export function Select({
       </button>
 
       {open && (
-        <div className="country-select-list" role="listbox">
+        <div className="select-list" role="listbox">
           {options.map((option) => {
             const selected = isSelected(option.value);
 
@@ -170,7 +172,7 @@ export function Select({
                   selected ? "select-option selected" : "select-option"
                 }
                 onClick={() => handleSelect(option.value)}
-                style={{ display: "flex", alignItems: "center",padding: 10 }}
+                style={{ display: "flex", alignItems: "center",padding: 10, color:theme.vars?.palette.text.secondary }}
               >
                 {multiple && (
                   <input type="checkbox" checked={selected} readOnly />
