@@ -217,16 +217,6 @@ export function EmailWrapper({
                   </button>
                 </div>
               )}
-
-              {/* <label
-                style={{
-                  marginBottom: 8,
-                  fontSize: "12px",
-                  display: "block",
-                }}
-              >
-                From
-              </label> */}
               <Input
                 label="From"
                 subLabel="The email address field can be filled only if the 'From Email' option is enabled."

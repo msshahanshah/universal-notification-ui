@@ -14,7 +14,7 @@ type Props = {
 
 export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
   const [open, setOpen] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,9 +24,11 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
   const updateDropdownPos = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      // Use getBoundingClientRect which already accounts for scroll position
       setDropdownPos({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 4, // No need to add scrollY, getBoundingClientRect is relative to viewport
+        left: rect.left, // No need to add scrollX
+        width: rect.width, // Match button width
       });
     }
   };
@@ -70,14 +72,22 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
       }
     };
 
+    const handleResize = () => {
+      if (open) {
+        updateDropdownPos();
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", onEsc);
     window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", onEsc);
       window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleResize);
     };
   }, [open]);
 
@@ -106,11 +116,14 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
             className="country-select-list"
             role="listbox"
             style={{
+              position: 'fixed',
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
+              // width: `${dropdownPos.width}px`,
               color: theme.vars?.palette.text.secondary,
               backgroundColor: theme.vars?.palette.background.paper,
               border: `1px solid ${theme.vars?.palette.divider}`,
+              zIndex: 9999,
             }}
           >
           {" "}

@@ -171,7 +171,7 @@ export function SMSWrapper({
                 marginBottom: 12,
               }}
             >
-              <span style={{ fontSize: "14px", fontWeight: "bold" }}>
+              <span style={{ fontSize: "14px", fontWeight: "bold",color: theme.vars?.palette.text.secondary }}>
                 SMS {sectionIndex + 1}
               </span>
               <button
@@ -291,6 +291,7 @@ export function SMSWrapper({
                     marginBottom: 4,
                     fontSize: "12px",
                     display: "block",
+                    color: theme.vars?.palette.text.secondary
                   }}
                 >
                   Message {sectionIndex + 1}
