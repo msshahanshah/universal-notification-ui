@@ -7,7 +7,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import reportWebVitals from "./reportWebVitals";
 import { queryClient } from "./lib/queryClient";
-import AppLayout from "./theme/app-layout";
+
 import { SnackbarProvider } from "./provider/snackbar";
 import AppTheme from "./theme/app-theme";
 import App from "./App";
@@ -22,9 +22,9 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <SnackbarProvider>
-            <AppLayout>
+            <AppTheme>
               <App />
-            </AppLayout>
+            </AppTheme>
           </SnackbarProvider>
         </BrowserRouter>
       </QueryClientProvider>

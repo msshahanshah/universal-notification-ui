@@ -8,7 +8,6 @@ import Button from "src/components/button";
 import Input from "src/components/input";
 import { useSnackbar } from "src/provider/snackbar";
 import { logsKeys } from "src/api/queryKeys";
-// import { CountryCodeSelect } from "../sms/country-code-select";
 
 import "../SMS/sms-composer.css";
 import { CountryCodeSelect } from "../SMS/country-code-select";

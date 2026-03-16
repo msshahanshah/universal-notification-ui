@@ -37,7 +37,7 @@ export default function App() {
       </Route>
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/webhook-config" element={<WebhookConfigPage />} />
+        {/* <Route path="/webhook-config" element={<WebhookConfigPage />} /> */}
         <Route path="/services" element={<Services />} />
         <Route path="/services/demo1" element={<Services1 />} />
         <Route path="/services/demo2" element={<ServicesAccordion />} />

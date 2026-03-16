@@ -76,7 +76,6 @@ export function SlackWrapper({
     const updatedChannel = channels.map((channel) =>
       channel.id === id ? { ...channel, [field]: value } : channel,
     );
-    console.log("update sec", updatedChannel);
     setChannels(updatedChannel);
   };
 
