@@ -8,23 +8,23 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   TableSortLabel,
   TextField,
   Typography,
   Tooltip,
   IconButton,
-  useTheme,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
-import { formatDateForTable, getStatusStyle } from "../../mui/utils";
-import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
-import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
 import { truncateString } from "src/utility/helper";
+
+import { formatDateForTable, getStatusStyle } from "./utils";
 
 interface Log {
   id: number;
@@ -38,12 +38,42 @@ interface Log {
 
 type Order = "asc" | "desc" | "";
 
-export default function HistoryTable() {
-  const showSnackbar = useSnackbar();
+export const getSortLabelStyles = (theme: any, isActive: boolean) => ({
+  "&.Mui-active": {
+    color: isActive ? "#027AF2" : theme.vars?.palette.text.secondary,
+    fontWeight: 600,
+  },
+  "& .MuiTableSortLabel-icon": {
+    color: theme.vars?.palette.text.secondary,
+    opacity: 1,
+  },
+  "&.Mui-active .MuiTableSortLabel-icon": {
+    color: isActive ? "#027AF2" : theme.vars?.palette.text.secondary,
+    opacity: 1,
+  },
+});
+
+export const textFieldTheme = (theme: any) => ({
+  "& .MuiInputLabel-root": {
+    color: theme.vars?.palette.text.secondary, // default label color theme?.palette?.text?.secondary
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: theme.vars?.palette.text.secondary, // focused label color (blue)
+    fontWeight: "bold",
+    marginTop: -1,
+  },
+  "& .MuiOutlinedInput-input": {
+    color: theme.vars?.palette.text.secondary,
+  },
+});
+
+export default function LogsTable() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
   const [sort, setSort] = useState<string>("messageDate");
-  const [order, setOrder] = useState<Order>("");
+  const [order, setOrder] = useState<Order>("desc");
+
   const [filters, setFilters] = useState({
     startDate: "",
     startTime: "",
@@ -56,6 +86,7 @@ export default function HistoryTable() {
   });
 
   const theme = useTheme();
+
   const buildUTCRange = (
     startDate?: string,
     startTime?: string,
@@ -78,6 +109,7 @@ export default function HistoryTable() {
   };
 
   const debouncedFilters = useDebounce(filters, 500);
+  const showSnackbar = useSnackbar();
 
   // Check if date filter is valid: both selected or both empty
   const isDateFilterValid =
@@ -96,11 +128,11 @@ export default function HistoryTable() {
 
     return {
       page: page + 1,
-      limit: 10,
+      limit: pageSize,
       sort,
       order,
       destination: debouncedFilters.destination || undefined,
-      service: "slack",
+      service: debouncedFilters.service || undefined,
       status: debouncedFilters.status || undefined,
       attempts: debouncedFilters.attempts || undefined,
       ...timeRange,
@@ -110,6 +142,7 @@ export default function HistoryTable() {
   const { data: response, isLoading, isError, error } = useLogs(queryParams);
 
   const rows: Log[] = response?.data || [];
+  const pagination = response?.pagination;
 
   useEffect(() => {
     if (isError) {
@@ -138,7 +171,6 @@ export default function HistoryTable() {
     );
   };
 
-
   const StatusCell = ({ row }: { row: Log }) => {
     const {
       data: statusData,
@@ -155,7 +187,7 @@ export default function HistoryTable() {
     };
 
     return (
-      <Tooltip title={latestStatus} placement="bottom">
+      <Tooltip title={latestStatus}>
         <Box
           display="flex"
           alignItems="center"
@@ -235,7 +267,6 @@ export default function HistoryTable() {
         p: 2,
         backgroundColor: theme.vars?.palette.background.paper,
         border: `1px solid ${theme.vars?.palette.divider}`,
-        width: "100%",
       }}
     >
       {/* Filters */}
@@ -248,7 +279,7 @@ export default function HistoryTable() {
             size="small"
             label="Start Date"
             InputLabelProps={{ shrink: true }}
-            value={filters.startDate}
+            value={filters.startDate || ""}
             onChange={(e) => handleFilterChange("startDate", e.target.value)}
             onBlur={(e) => handleDateBlur("startDate", e)}
             required
@@ -312,6 +343,17 @@ export default function HistoryTable() {
         >
           <TextField
             size="small"
+            label="Service"
+            value={filters.service}
+            onChange={(e) => {
+              setPage(0);
+              setFilters((prev) => ({ ...prev, service: e.target.value }));
+            }}
+            sx={textFieldTheme(theme)}
+          />
+
+          <TextField
+            size="small"
             label="Status"
             value={filters.status}
             onChange={(e) => {
@@ -346,102 +388,139 @@ export default function HistoryTable() {
       </Box>
 
       {/* Table */}
-      <TableContainer
-        sx={{
-          minHeight: "20vh",
-          maxHeight: "30vh", // control height here
-          overflow: "auto",
-          border: `1px solid ${theme.vars?.palette.divider}`,
-          borderRadius: 1,
-        }}
-      >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell sx={getSortLabelStyles(theme)}>S. No</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "messageDate"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("messageDate")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Date
-                </TableSortLabel>
-              </TableCell>
-
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "destination"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("destination")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Destination
-                </TableSortLabel>
-              </TableCell>
-
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "status"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("status")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Status
-                </TableSortLabel>
-              </TableCell>
-
-              <TableCell>
-                <TableSortLabel
-                  active={sort === "attempts"}
-                  direction={order as "asc" | "desc"}
-                  onClick={() => handleSort("attempts")}
-                  sx={getSortLabelStyles(theme)}
-                >
-                  Attempts
-                </TableSortLabel>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {isLoading ? (
+      <Box position="relative">
+        <TableContainer
+          sx={{
+            minHeight: "600px",
+            maxHeight: "600px", // control height here
+            border: `1px solid ${theme.vars?.palette.divider}`,
+            borderRadius: 1,
+            overflow: "auto",
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <CircularProgress size={24} />
+                <TableCell sx={getSortLabelStyles(theme, false)}>
+                  S. No
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "messageDate"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("messageDate")}
+                    sx={getSortLabelStyles(theme, sort === "messageDate")}
+                  >
+                    Date
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "service"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("service")}
+                    sx={getSortLabelStyles(theme, sort === "service")}
+                  >
+                    Service
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "destination"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("destination")}
+                    sx={getSortLabelStyles(theme, sort === "destination")}
+                  >
+                    Destination
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "status"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("status")}
+                    sx={getSortLabelStyles(theme, sort === "status")}
+                  >
+                    Status
+                  </TableSortLabel>
+                </TableCell>
+
+                <TableCell>
+                  <TableSortLabel
+                    active={sort === "attempts"}
+                    direction={order as "asc" | "desc"}
+                    onClick={() => handleSort("attempts")}
+                    sx={getSortLabelStyles(theme, sort === "attempts")}
+                  >
+                    Attempts
+                  </TableSortLabel>
                 </TableCell>
               </TableRow>
-            ) : rows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography>No Data Found</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row, id) => (
-                <TableRow key={row.id}>
-                  <TableCell>{id + 1}</TableCell>
-                  <TableCell>
-                    {renderCell(formatDateForTable(row.messageDate))}
+            </TableHead>
+            <TableBody>
+              {rows.length === 0 && !isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography>No Data Found</Typography>
                   </TableCell>
-
-                  <TableCell>
-                    {renderCell(
-                      row.destination,
-                      truncateString(row.destination, 30),
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <StatusCell row={row} />
-                  </TableCell>
-                  <TableCell>{renderCell(row.attempts)}</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ) : (
+                rows.map((row, id) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{id + 1}</TableCell>
+                    <TableCell>
+                      {renderCell(formatDateForTable(row.messageDate))}
+                    </TableCell>
+                    <TableCell>{renderCell(row.service)}</TableCell>
+                    <TableCell>
+                      {renderCell(
+                        row.destination,
+                        truncateString(row.destination, 30),
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <StatusCell row={row} />
+                    </TableCell>
+                    <TableCell>{renderCell(row.attempts)}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        {isLoading && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            bgcolor="background.paper"
+            sx={{ opacity: 0.6 }}
+          >
+            <CircularProgress size={28} />
+          </Box>
+        )}
+      </Box>
+
+      {/* Pagination */}
+      <TablePagination
+        component="div"
+        count={(pagination?.totalPages || 0) * pageSize}
+        page={page}
+        onPageChange={(_, newPage) => setPage(newPage)}
+        rowsPerPage={pageSize}
+        onRowsPerPageChange={(e) => {
+          setPageSize(parseInt(e.target.value, 10));
+          setPage(0);
+        }}
+      />
     </Paper>
   );
 }

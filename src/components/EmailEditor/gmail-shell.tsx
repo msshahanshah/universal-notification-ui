@@ -6,6 +6,7 @@ import {
 } from "src/utility/helper";
 
 import Input from "../input";
+import { useTheme } from "@mui/material";
 
 type Props = {
   from: string;
@@ -40,8 +41,15 @@ export function GmailShell({
   setCc,
   setBcc,
   setSubject,
-  onValidationChange
+  onValidationChange,
 }: Props) {
+  const theme = useTheme();
+
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: theme.vars?.palette.background.paper,
+    color: theme.vars?.palette.text.secondary,
+    // background: "hsla(220, 35%, 3%, 0.4)",
+  };
   const [errors, setErrors] = useState({
     from: "",
     to: "",
@@ -49,10 +57,12 @@ export function GmailShell({
     bcc: "",
   });
 
+  const [subjectError, setSubjectError] = useState("");
+
   useEffect(() => {
-    const hasErrors = Object.values(errors).some(Boolean);
+    const hasErrors = Object.values(errors).some(Boolean) || !!subjectError;
     onValidationChange(hasErrors);
-  }, [errors, onValidationChange]);
+  }, [errors, onValidationChange, subjectError]);
 
   const handleFromChange = (val: string) => {
     setFrom(val);
@@ -94,12 +104,13 @@ export function GmailShell({
       {/* From */}
       <Input
         label="From"
+        subLabel="The email address field can be filled only if the 'From Email' option is enabled."
         id="from"
         value={from}
         onChange={(e) => handleFromChange(e.target.value)}
         placeholder="From"
         className="sms-input"
-        showAsteric={true}
+        style={inputStyle}    
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}
 
@@ -107,10 +118,11 @@ export function GmailShell({
         label="To"
         id="to"
         value={to}
-        onChange={(e) => handleMultiChange(e.target.value, "to", setTo)}
+        onChange={(e) => handleMultiChange(e?.target?.value, "to", setTo)}
         placeholder="To"
         className="sms-input"
         showAsteric={true}
+        style={inputStyle}
       />
       {errors.to && <ErrorText>{errors.to}</ErrorText>}
       <Input
@@ -120,7 +132,8 @@ export function GmailShell({
         onChange={(v) => handleMultiChange(v.target.value, "cc", setCc)}
         placeholder="Cc"
         className="sms-input"
-      />
+        style={inputStyle}
+        />
       {errors.cc && <ErrorText>{errors.cc}</ErrorText>}
       <Input
         label="Bcc"
@@ -129,17 +142,30 @@ export function GmailShell({
         onChange={(v) => handleMultiChange(v.target.value, "bcc", setBcc)}
         placeholder="Bcc"
         className="sms-input"
+        style={inputStyle}
       />
       {errors.bcc && <ErrorText>{errors.bcc}</ErrorText>}
       <Input
         label="Subject"
         id="subject"
         value={subject}
-        onChange={(e) => setSubject(e.target.value)}
+        onChange={(e) => {
+          const value = e.target.value.trim();
+          if (value?.length > 255) {
+            setSubjectError("Subject must not exceed 255 characters.");
+          } else {
+            if (!!subjectError) {
+              setSubjectError("");
+            }
+          }
+          setSubject(e.target.value);
+        }}
         placeholder="Subject"
         className="sms-input"
         showAsteric
+        style={inputStyle}
       />
+      {subjectError && <ErrorText>{subjectError}</ErrorText>}
     </div>
   );
 }

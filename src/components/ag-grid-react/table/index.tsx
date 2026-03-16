@@ -12,12 +12,16 @@ export const Table = ({
   defaultColDef,
   logsData,
   onPaginationChanged,
-  onFilterChanged,
   gridApiRef,
   paginationPageSize,
   paginationPageSizeSelector,
   shouldPaginate,
-  enableBrowserTooltips
+  enableBrowserTooltips,
+  onFilterChanged,
+  onSortChanged,
+  onFirstDataRendered,
+  datasource,
+  // onSortModelChange
 }: any) => {
   const wValue = "100%";
   const hValue = "100%";
@@ -42,6 +46,8 @@ export const Table = ({
   );
 
   const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
+
+  console.log("logsData", logsData?.length);
 
   return (
     <div style={containerStyle} className="ag-theme-quartz grid-12-font">
@@ -73,6 +79,11 @@ export const Table = ({
           onFilterChanged={onFilterChanged}
           enableBrowserTooltips={enableBrowserTooltips}
           tooltipShowDelay={500}
+          onSortChanged={onSortChanged}
+          onFirstDataRendered={onFirstDataRendered}
+          rowModelType="infinite"
+          // datasource={datasource}
+          // onSortModelChange={onSortModelChange}
         />
       </div>
     </div>

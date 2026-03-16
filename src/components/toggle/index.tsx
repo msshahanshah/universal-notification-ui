@@ -1,3 +1,6 @@
+import { useTheme } from "@mui/material";
+import COLORS from "src/utility/colors";
+
 type ToggleOption<T extends string> = {
   label: string;
   value: T;
@@ -14,6 +17,7 @@ export function Toggle<T extends string>({
   options,
   onChange,
 }: ToggleProps<T>) {
+  const theme = useTheme();
   return (
     <div style={toggleContainer}>
       {options.map((opt) => (
@@ -23,6 +27,14 @@ export function Toggle<T extends string>({
           style={{
             ...toggleButton,
             ...(value === opt.value ? activeButton : {}),
+            backgroundColor:
+              value === opt.value
+                ? (theme || theme?.vars)?.palette.primary.dark
+                : theme?.vars?.palette.background.paper,
+            color:
+              value === opt.value
+                ? COLORS.WHITE
+                : theme.vars?.palette.text.secondary,
           }}
         >
           {opt.label}
@@ -45,13 +57,13 @@ const toggleButton: React.CSSProperties = {
   padding: "6px 12px",
   cursor: "pointer",
   border: "none",
-  backgroundColor: "#121212",
+  backgroundColor: (theme) => theme.vars?.palette.background.paper,
   fontSize: 14,
 };
 
 const activeButton: React.CSSProperties = {
-  backgroundColor: "hsla(220, 80%, 55%, 0.25)",
-  color: "#fff",
+  backgroundColor: (theme) => theme.vars?.palette.primary.main,
+  color: COLORS.WHITE,
   fontWeight: "bold",
   fontSize: 14,
 };

@@ -1,4 +1,6 @@
+import { useTheme } from "@mui/material";
 import "./attachmentSection.css";
+import COLORS from "src/utility/colors";
 
 function AttachmentSection({
   attachments,
@@ -7,6 +9,7 @@ function AttachmentSection({
   style,
   hideBtn,
 }: any) {
+  const theme = useTheme();
   const getFileIcon = (type: string, name: string) => {
     if (type.startsWith("image/")) return "🖼️";
     if (type.includes("pdf")) return "📕";
@@ -28,7 +31,13 @@ function AttachmentSection({
   return (
     <div className="attach-wrapper" style={style}>
       {hideBtn ? null : (
-        <label className="attach-btn">
+        <label
+          className="attach-btn"
+          style={{
+            backgroundColor: (theme || theme?.vars)?.palette.primary.dark,
+            color: COLORS.WHITE,
+          }}
+        >
           📎 Attach Files
           <input type="file" multiple onChange={onAdd} hidden />
         </label>

@@ -1,6 +1,11 @@
 import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
-import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import {
+  ModuleRegistry,
+  AllCommunityModule,
+  PaginationModule,
+  ClientSideRowModelModule,
+} from "ag-grid-community";
 import { TooltipModule } from "ag-grid-community";
 
 import Login from "./layouts/login/login";
@@ -18,7 +23,12 @@ import MultipleNotification from "./layouts/dashboard/services/multiple-notifica
 import WebhookConfigPage from "./webhook";
 
 export default function App() {
-  ModuleRegistry.registerModules([AllCommunityModule, TooltipModule]);
+  ModuleRegistry.registerModules([
+    AllCommunityModule,
+    TooltipModule,
+    PaginationModule,
+    ClientSideRowModelModule,
+  ]);
 
   return (
     <Routes>

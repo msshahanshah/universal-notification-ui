@@ -19,6 +19,7 @@ import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Mail, MessageSquare, SlackIcon, Send } from "lucide-react";
+import { useTheme, useColorScheme } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
 
@@ -58,6 +59,8 @@ const Sidebar = ({
   onToggle: () => void;
   mobileOpen: boolean;
 }) => {
+  const { mode, setMode } = useColorScheme();
+  const theme = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -67,22 +70,28 @@ const Sidebar = ({
   const isActive = (path: string) => location.pathname.includes(path);
   const isServicesActive = isActive("/services");
 
-  const getItemStyles = (path: string) => ({
-    gap: 1.5,
-    borderRadius: 2,
-    mx: 1,
-    mt: 1,
-    px: 1.5,
-    color: COLORS.WHITE,
-    minHeight: 44,
-    justifyContent: "center",
-    backgroundColor: isActive(path)
-      ? "hsla(220, 80%, 55%, 0.25)"
-      : "transparent",
-    "&:hover": {
-      backgroundColor: "hsla(220, 80%, 55%, 0.35)",
-    },
-  });
+  const [servicesOpen, setServicesOpen] = useState(isServicesActive);
+
+  const getItemStyles = (path: string) => {
+    const active = isActive(path);
+
+    return {
+      gap: 1.5,
+      borderRadius: 2,
+      mx: 1,
+      mt: 1,
+      px: 1.5,
+      minHeight: 44,
+      justifyContent: "center",
+      bgcolor: active ? "primary.main" : "transparent",
+
+      color: active ? COLORS.WHITE : "text.secondary",
+
+      "&:hover": {
+        bgcolor: active ? "primary.main" : "transparent",
+      },
+    };
+  };
 
   const q = search.trim().toLowerCase();
 
@@ -110,10 +119,10 @@ const Sidebar = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        backgroundColor: "hsla(220, 35%, 3%, 0.4)",
+        backgroundColor: theme.vars?.palette.background.paper,
+        color: theme.vars?.palette.text.primary,
       }}
     >
-      {/* SEARCH BAR */}
       {open && (
         <Box
           sx={{
@@ -126,18 +135,30 @@ const Sidebar = ({
             alignItems: "center",
             gap: 1,
             borderRadius: 2,
-            backgroundColor: "rgba(255,255,255,0.06)",
+            bgColor: "background.default",
+            border: `1px solid ${theme.vars?.palette?.divider}`,
           }}
         >
-          <SearchIcon sx={{ fontSize: 18, color: "rgba(255,255,255,0.6)" }} />
+          <SearchIcon
+            sx={{ fontSize: 18, color: theme.vars?.palette.text.secondary }}
+          />
           <InputBase
             placeholder="Search…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             sx={{
-              color: COLORS.WHITE,
+              color: theme.vars?.palette.text.secondary,
               fontSize: 14,
               width: "100%",
+              "&::placeholder": {
+                color: theme.vars?.palette.text.secondary,
+                opacity: 1, // important (default is 0.5 in some browsers)
+              },
+
+              "& input::placeholder": {
+                color: theme.vars?.palette.text.secondary,
+                opacity: 1,
+              },
             }}
           />
         </Box>
@@ -155,45 +176,36 @@ const Sidebar = ({
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isActive("/dashboard") ? COLORS.LIGHT_BLUE : COLORS.WHITE,
               }}
             >
-              <HomeRoundedIcon fontSize="small" />
+              <HomeRoundedIcon fontSize="small" className="service-icon" />
             </ListItemIcon>
             {open && <ListItemText primary="Dashboard" />}
           </ListItemButton>
         )}
 
-        <ListItemButton
-          onClick={() => navigate("/webhook-config")}
-          sx={getItemStyles("/webhook-config")}
-        >
-          <ListItemIcon
-            sx={{
-              minWidth: 0,
-              justifyContent: "center",
-              color: isActive("/webhook-config") ? COLORS.LIGHT_BLUE : COLORS.WHITE,
-            }}
-          >
-            <HomeRoundedIcon fontSize="small" />
-          </ListItemIcon>
-          {open && <ListItemText primary="Webhook Config" />}
-        </ListItemButton>
-
         {/* Services Parent */}
         {showServicesParent && (
           <ListItemButton
-            onClick={() => navigate("/services/slack")}
+            onClick={() => {
+              // setServicesOpen((prev) => !prev);
+              if (!open) {
+                onToggle(); // expand sidebar
+              }
+              navigate("/services/slack");
+            }}
             sx={getItemStyles("/services")}
           >
             <ListItemIcon
               sx={{
                 minWidth: 0,
                 justifyContent: "center",
-                color: isServicesActive ? COLORS.LIGHT_BLUE : COLORS.WHITE,
               }}
             >
-              <MiscellaneousServicesIcon fontSize="small" />
+              <MiscellaneousServicesIcon
+                fontSize="small"
+                className="service-icon"
+              />
             </ListItemIcon>
             {open && <ListItemText primary="Services" />}
           </ListItemButton>
@@ -202,7 +214,7 @@ const Sidebar = ({
         {/* Services Sub Tabs */}
         {open && (
           <Collapse
-            in={isServicesActive || (isSearching && matchesServiceItems)}
+            in={open && (isServicesActive || (isSearching && matchesServiceItems))}
             timeout="auto"
             unmountOnExit
           >
@@ -215,25 +227,12 @@ const Sidebar = ({
                     key={item.path}
                     onClick={() => !isDisabled && navigate(item.path)}
                     sx={{
+                      ...getItemStyles(item.path),
                       ml: 4,
                       mr: 1,
                       mt: 0.5,
                       minHeight: 36,
                       borderRadius: 2,
-                      color: COLORS.WHITE,
-                      backgroundColor: isDisabled
-                        ? "rgba(255, 0, 0, 0.06)" // 👈 ultra-light red
-                        : isActive(item.path)
-                          ? "hsla(220, 80%, 55%, 0.25)"
-                          : "transparent",
-
-                      cursor: isDisabled ? "not-allowed" : "pointer",
-
-                      "&:hover": {
-                        backgroundColor: isDisabled
-                          ? "rgba(255, 0, 0, 0.08)" // tiny hover change
-                          : "hsla(220, 80%, 55%, 0.35)",
-                      },
                     }}
                   >
                     <Icon size={18} className="service-icon" />
@@ -256,12 +255,14 @@ const Sidebar = ({
       <List sx={{ mt: "auto" }}>
         <ListItemButton
           onClick={() => {
-            localStorage.clear();
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("clientId");
             window.location.href = "/";
           }}
           sx={getItemStyles("/logout")}
         >
-          <ListItemIcon sx={{ color: COLORS.WHITE }}>
+          <ListItemIcon sx={{ color: "text.secondary" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           {open && <ListItemText primary="Logout" />}
@@ -273,16 +274,7 @@ const Sidebar = ({
   /* Mobile */
   if (isMobile) {
     return (
-      <Drawer
-        variant="temporary"
-        open={mobileOpen}
-        onClose={onToggle}
-        ModalProps={{
-          BackdropProps: {
-            sx: { backgroundColor: "rgba(0,0,0,0.15)" },
-          },
-        }}
-      >
+      <Drawer variant="temporary" open={mobileOpen} onClose={onToggle}>
         {drawerContent}
       </Drawer>
     );
@@ -296,7 +288,9 @@ const Sidebar = ({
         flexShrink: 0,
         "& .MuiDrawer-paper": {
           overflowX: "hidden",
-          backgroundColor: COLORS.SIDEBAR_BG_COLOR,
+          bgcolor: "background.paper",
+          backdropFilter: "blur(12px)",
+          borderRight: `1px solid ${theme.vars?.palette.divider}`,
           transition: (theme) =>
             theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
@@ -317,13 +311,17 @@ const Sidebar = ({
         }}
       >
         {open && (
-          <Typography sx={{ color: COLORS.WHITE, fontSize: 18 }}>
+          <Typography sx={{ color: "text.secondary", fontSize: 18 }}>
             Universal Notifier
           </Typography>
         )}
         <IconButton
           onClick={onToggle}
-          sx={{ color: COLORS.WHITE, border: "none" }}
+          sx={{
+            color: "text.secondary",
+            border: "none",
+            background: "transparent",
+          }}
         >
           <MenuIcon />
         </IconButton>

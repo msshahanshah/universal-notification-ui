@@ -30,8 +30,8 @@ const getRefreshToken = async (originalRequest: any) => {
   }
   const refreshTokenData = await fetchRefreshToken({ refreshToken });
 
-  if (!!refreshTokenData?.data?.accessToken) {
-    localStorage.setItem("accessToken", refreshTokenData?.data?.accessToken);
+  localStorage.setItem("accessToken", refreshTokenData?.data?.accessToken);
+  if (refreshTokenData?.data?.accessToken) {
     api.defaults.headers.Authorization = `Bearer ${refreshTokenData?.data?.accessToken}`;
     originalRequest.headers["Authorization"] =
       `Bearer ${refreshTokenData?.data?.accessToken}`;
@@ -64,16 +64,25 @@ api.interceptors.response.use(
   (response) => response, // return only data
   async (error) => {
     const originalRequest = error.config;
+
+    if (error?.success === false) {
+      return Promise.reject({
+        ...error.data,
+        message: error.message,
+      });
+    }
+
     if (originalRequest.url?.includes("/login")) {
       return Promise.reject(error);
     }
 
     if (
       error.response?.status === 500 ||
-      (error.response?.status === 401 && originalRequest?.url === "/refresh")
+      ((error.response?.status === 401 || error.response?.status === 404) &&
+        originalRequest?.url === "/refresh")
     ) {
       localStorage.clear();
-      window.location.href = "/";
+      window.location.replace("/");
       return;
     }
 
@@ -105,6 +114,8 @@ api.interceptors.response.use(
         }
       });
     }
+
+    return Promise.reject(error);
   },
 );
 

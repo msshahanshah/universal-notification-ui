@@ -45,6 +45,31 @@
 .status-pending { color: #FFC107; }
 .status-processing { color: #17a2b8; }
 
-/* .ag-header-cell-label{
-  justify-content: flex-end;
-} */
+.custom-tooltip {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  background-color: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  border-radius: 4px;
+  max-width: 300px;
+  word-wrap: break-word;
+}
+.custom-tooltip div {
+  margin: 3px 0;
+  line-height: 1.4;
+}
+.custom-tooltip strong {
+  color: #666;
+  margin-right: 5px;
+}
+
+.ag-theme-alpine .ag-center-cols-container {
+  will-change: transform;
+}
+.ag-theme-alpine .ag-row {
+  position: absolute;
+  width: 100% !important;
+}

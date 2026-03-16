@@ -9,10 +9,11 @@ export const useLogs = (params?: Record<string, any>) => {
     queryFn: () => fetchLogs(params),
     refetchOnWindowFocus: true,
     staleTime: 0,
+    keepPreviousData: true
   });
 };
 
-export const useLogStatus = (id: number) => {
+export const useLogStatus = (id: string) => {
   return useQuery({
     queryKey: ["logs", "status", id],
     queryFn: () => fetchLogStatus(id),

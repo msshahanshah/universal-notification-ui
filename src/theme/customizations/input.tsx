@@ -20,7 +20,7 @@ export const inputsCustomizations: Components<Theme> = {
         boxSizing: 'border-box',
         transition: 'all 100ms ease-in',
         '&:focus-visible': {
-          outline: `3px solid ${alpha(theme.palette.primary.main, 0.5)}`,
+          // outline: `3px solid ${alpha((theme?.vars || theme)?.palette?.primary?.main, 0.5)}`,
           outlineOffset: '2px',
         },
       }),
@@ -371,7 +371,7 @@ export const inputsCustomizations: Components<Theme> = {
       input: {
         '&::placeholder': {
           opacity: 0.7,
-          color: gray[500],
+          color: 'white',
         },
       },
     },
@@ -386,7 +386,7 @@ export const inputsCustomizations: Components<Theme> = {
         color: (theme.vars || theme).palette.text.primary,
         borderRadius: (theme.vars || theme).shape.borderRadius,
         border: `1px solid ${(theme.vars || theme).palette.divider}`,
-        backgroundColor: (theme.vars || theme).palette.background.default,
+        backgroundColor: (theme.vars || theme).palette.background.defaultBg, // previously default
         transition: 'border 120ms ease-in',
         '&:hover': {
           borderColor: gray[400],

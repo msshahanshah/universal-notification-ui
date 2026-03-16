@@ -2,12 +2,14 @@ import { emailRegex } from "./constants";
 
 const validateSingleEmail = (email: string) => emailRegex.test(email.trim());
 
-const validateMultipleEmails = (value: string) =>
-  value
+const validateMultipleEmails = (value: string) => {
+  const trimmedValue = value?.trim();
+  return trimmedValue
     .split(",")
     .map((e) => e.trim())
     .filter(Boolean)
     .every(validateSingleEmail);
+};
 
 function isBodyEmpty(html: any) {
   if (!html) return true;
@@ -19,4 +21,15 @@ function isBodyEmpty(html: any) {
   return div.textContent.trim().length === 0;
 }
 
-export { validateMultipleEmails, validateSingleEmail, isBodyEmpty };
+const truncateString = (value: string, maxLength: number) => {
+  if (!value) return "";
+  if (value.length <= maxLength) return value;
+  return value.slice(0, maxLength) + "...";
+};
+
+export {
+  validateMultipleEmails,
+  validateSingleEmail,
+  truncateString,
+  isBodyEmpty,
+};

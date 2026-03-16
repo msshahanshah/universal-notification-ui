@@ -8,29 +8,36 @@ import api from "src/lib/axios";
 
 import { ENDPOINTS } from "./endpoints.api";
 
-export const sendEmail = async (payload: EmailPayload) => {
-  const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
-  return response.data;
-};
-
 export const sendSms = async (payload: SMSPayload) => {
-  const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
-  return response.data;
+  try {
+    const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
 };
 
-export const sendSlack = async (payload: SlackPayload) => {
-  const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
+export const sendEmail = async (payload: EmailPayload) => {
+    const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
   return response.data;
 };
 
 export const sendMultipleNotifications = async (
   payload: MultipleNotificationPayload,
 ) => {
+   try {
+    const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
+
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+};
+
+
+export const sendSlack = async (payload: SlackPayload) => {
   try {
-    const response = await api.post(
-      ENDPOINTS.MULTIPLE_NOTIFICATION.SEND,
-      payload,
-    );
+    const response = await api.post(ENDPOINTS.SERVICES.NOTIFY, payload);
     return response.data;
   } catch (error: any) {
     throw error?.response?.data;
