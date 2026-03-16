@@ -167,8 +167,8 @@ export function SlackWrapper({
             }}
           >
             {channel.separateMessage
-              ? "✓ Using Separate Message"
-              : "I want to send separate message"}
+              ? "Use common message"
+              : "Send separate message"}
           </button>
 
           {channel.separateMessage && (

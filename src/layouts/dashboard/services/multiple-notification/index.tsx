@@ -449,7 +449,7 @@ export default function MultipleNotification() {
             >
               {separateMessages.email
                 ? "✓ Using Separate Messages"
-                : "I want to send separate message"}
+                : "Send separate message"}
             </button>
           </div>
         )}

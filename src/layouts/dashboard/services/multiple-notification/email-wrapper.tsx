@@ -316,8 +316,8 @@ export function EmailWrapper({
                 }}
               >
                 {recipient.separateMessage
-                  ? "✓ Using Separate Message"
-                  : "I want to send separate message"}
+                  ? "Use common message"
+                  : "Send separate message"}
               </button>
 
               {recipient.separateMessage && (

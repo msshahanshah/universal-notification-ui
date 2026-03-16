@@ -245,24 +245,12 @@ export function SMSWrapper({
               )}
             </div>
           ))}
-
-          <button
+          <Button
+            label="Add Another Number"
             onClick={() => addNumberToSection(section.id)}
-            style={{
-              padding: "4px 8px",
-              fontSize: "10px",
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "#fff",
-              borderRadius: "4px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              marginTop: 4,
-              marginBottom: 8,
-            }}
-          >
-            Add Another Number
-          </button>
+            className="sms-add-btn"
+            style={{ background: theme.vars?.palette.background.paper }}
+          />
 
           {/* Separate Message Toggle for each SMS section */}
           {/* {showMessage && ( */}
@@ -292,8 +280,8 @@ export function SMSWrapper({
               }}
             >
               {section.separateMessage
-                ? "✓ Using Separate Message"
-                : "I want to send separate message"}
+                ? "Use common message"
+                : "Send separate message"}
             </button>
 
             {section.separateMessage && (
