@@ -24,8 +24,15 @@ export const sendSlack = async (payload: SlackPayload) => {
 };
 
 export const sendMultipleNotifications = async (
-  payload: MultipleNotificationPayload
+  payload: MultipleNotificationPayload,
 ) => {
-  const response = await api.post(ENDPOINTS.MULTIPLE_NOTIFICATION.SEND, payload);
-  return response.data;
+  try {
+    const response = await api.post(
+      ENDPOINTS.MULTIPLE_NOTIFICATION.SEND,
+      payload,
+    );
+    return response.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
 };

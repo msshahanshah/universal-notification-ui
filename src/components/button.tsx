@@ -2,7 +2,6 @@ import { ButtonHTMLAttributes } from "react";
 import Loader from "./loader";
 import "./button.css";
 
-// TODO: move types to different folder
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   label: string;
   className?: string;

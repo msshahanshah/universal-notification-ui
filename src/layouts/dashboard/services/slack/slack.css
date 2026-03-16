@@ -11,14 +11,14 @@
 
 .sms-input {
   width: 100%;
-  height: 42px;
+  height: 2.5rem;
   margin-bottom: 12px;
   padding: 0 12px;
   border-radius: 6px;
   background: hsla(220, 35%, 3%, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .sms-input::placeholder {
