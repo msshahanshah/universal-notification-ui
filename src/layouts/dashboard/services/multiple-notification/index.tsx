@@ -14,6 +14,7 @@ import { SlackWrapper } from "./slack-wrapper";
 import { ServiceType, MultipleNotificationPayload } from "./types";
 
 import "./index.css";
+import { isBodyEmpty } from "src/utility/helper";
 
 export default function MultipleNotification() {
   const theme = useTheme();
@@ -23,37 +24,53 @@ export default function MultipleNotification() {
   const showSnackbar = useSnackbar();
 
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
-    if (!data?.preSignedUrls?.length) return;
+    const preSignedUrls = data?.email?.preSignedUrls;
+    if (!preSignedUrls?.length) return;
 
-    for (let i = 0; i < data.preSignedUrls.length; i++) {
-      const presigned = data.preSignedUrls[i];
-      const fileObj = attachmentsCopy[i]?.file;
+    for (let i = 0; i < preSignedUrls.length; i++) {
+      const presigned = preSignedUrls[i];
+      console.log("presigned", presigned);
+      const urls = presigned?.urls;
 
-      if (!fileObj) continue;
+      if (!urls?.length) continue;
+      console.log("urls found,", urls);
 
-      const formData = new FormData();
+      for (let j = 0; j < urls.length; j++) {
+        const urlEntry = urls[j];
+        const fileObj = attachmentsCopy[i];
+        console.log("file found", fileObj);
 
-      // Append S3 fields
-      Object.entries(presigned.s3.fields).forEach(([key, value]) => {
-        formData.append(key, value as string);
-      });
+        if (!fileObj) continue;
 
-      // File MUST be last
-      formData.append("file", fileObj);
+        const formData = new FormData();
 
-      try {
-        await api.post(presigned.s3.url, formData, {
-          headers: { "Content-Type": "multipart/form-data", Authorization: `` },
+        // Append S3 fields
+        Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
+          console.log("key", key, "value", value);
+          formData.append(key, value as string);
         });
 
-        showSnackbar("Notification request accepted and queued.", "success");
-        queryClient.invalidateQueries({
-          queryKey: logsKeys.all,
-        });
-      } catch (err) {
-        console.error("❌ Upload failed:", fileObj.name, err);
-        showSnackbar("Failed to upload attachments", "error");
-        throw err;
+        console.log("urlEntry.s3.url", urlEntry.s3.url);
+        // File MUST be last
+        formData.append("file", fileObj);
+
+        try {
+          await api.post(urlEntry.s3.url, formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: ``,
+            },
+          });
+
+          showSnackbar("Notification request accepted and queued.", "success");
+          queryClient.invalidateQueries({
+            queryKey: logsKeys.all,
+          });
+        } catch (err) {
+          console.error("❌ Upload failed:", fileObj.name, err);
+          showSnackbar("Failed to upload attachments", "error");
+          throw err;
+        }
       }
     }
   };
@@ -169,12 +186,15 @@ export default function MultipleNotification() {
 
     // Add Email to payload if selected
     if (selectedServices.includes("email")) {
-      payload.email =
-        wrapperValues.email?.recipients
-          .filter((rec) => rec.to.trim() !== "")
-          .map((rec, index) => {
+      // Use the new section-based structure from Email wrapper
+      if (wrapperValues.email && wrapperValues.email.recipients) {
+        console.log("wrapperValues.email", wrapperValues.email);
+        payload.email = wrapperValues.email.recipients
+          .filter((rec: any) => rec?.destination?.trim() !== "")
+          .map((rec: any, index: number) => {
+            console.log("rec", rec);
             // Generate unique key for each recipient
-            const emailId = rec.to
+            const emailId = rec.destination
               .split("@")[0]
               .toLowerCase()
               .replace(/[^a-z0-9]/g, "");
@@ -184,17 +204,32 @@ export default function MultipleNotification() {
               .replace(/\s+/g, "-");
             const uniqueKey = `${cleanSubject}-${emailId}-${index + 1}`;
 
-            return {
-              destination: rec.to,
+            const emailSection: any = {
+              destination: rec.destination,
               subject: rec.subject,
-              body: separateMessages.email ? rec.body : commonMessage,
-              attachments: rec.attachments.map((att) => att.file.name),
-              fromEmail: rec.from,
+              fromEmail: rec.fromEmail,
               uniqueKey,
               cc: rec.cc,
               bcc: rec.bcc,
+              attachments:
+                rec.attachments?.map(
+                  (att: any) => typeof att === "string" && att,
+                ) || [],
             };
-          }) || [];
+
+            // Always include body key if separateMessage is true (even if empty)
+
+            if (isBodyEmpty(rec.body)) {
+              emailSection.body = "";
+            } else {
+              emailSection.body = rec.body;
+            }
+
+            // If separateMessage is false and no common message, don't include body key
+
+            return emailSection;
+          });
+      }
     }
 
     // Add Slack to payload if selected
@@ -227,18 +262,19 @@ export default function MultipleNotification() {
       if (email.attachments && email.attachments.length > 0) {
         // Find the corresponding recipient to get the actual file objects
         const recipient = wrapperValues.email?.recipients.find(
-          (rec) => rec.to === email.destination,
+          (rec) =>
+            rec.to === email.destination ||
+            rec.destination === email.destination,
         );
         if (recipient) {
+          console.log("recipient", recipient);
           allAttachments.push(...recipient.attachments);
         }
       }
     });
 
-    // console.log("payload", payload);
-
     sendNotifications(payload, {
-      onSuccess: async (data) => {
+      onSuccess: async ({ data }) => {
         // Reset form
         setCommonMessage("");
         setSelectedServices([]);
@@ -252,16 +288,30 @@ export default function MultipleNotification() {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
-          showSnackbar(data?.message || "Notifications sent successfully!", "success");
-        } else {
-          await uploadToS3FromAttachments(data?.success, allAttachments);
+          showSnackbar(
+            data?.email?.message || "Notification request accepted and queued.",
+            "success",
+          );
+        } else if (data?.email?.success) {
+          await uploadToS3FromAttachments(data, allAttachments);
         }
       },
       onError: (error: any) => {
-        showSnackbar(
-          error?.message || "Failed to send notifications",
-          "error"
+        console.info(
+          "error",
+          error?.data?.email,
+          "error?.response?.data",
+          error?.response?.data,
+          "error?.message",
+          error?.message,
         );
+        if (
+          error?.data?.email?.success === false ||
+          error?.data?.email?.slack === false ||
+          error?.data?.email?.sms === false
+        ) {
+          showSnackbar("Some notifications got failed", "error");
+        }
       },
     });
   };
@@ -310,7 +360,6 @@ export default function MultipleNotification() {
             }}
           >
             Common message
-            <span style={{ color: "red", marginLeft: 2 }}>*</span>
           </label>
           <textarea
             value={commonMessage}

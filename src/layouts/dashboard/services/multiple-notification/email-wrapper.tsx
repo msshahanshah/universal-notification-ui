@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 
 import { useEmailService } from "src/hooks/useService";
 import Button from "src/components/button";
@@ -12,6 +13,11 @@ import { Toggle } from "src/components/toggle";
 import AttachmentSection from "../email/attachmentSection";
 
 import "../SMS/sms-composer.css";
+import {
+  emailSectionsAtom,
+  emailCallbackDataAtom,
+  type EmailRecipient as EmailRecipientType,
+} from "src/atoms/emailAtoms";
 
 type ViewMode = "editor" | "preview";
 
@@ -21,40 +27,38 @@ type Attachment = {
   previewUrl?: string;
 };
 
-type EmailRecipient = {
-  id: string;
-  from: string;
-  to: string;
-  cc: string;
-  bcc: string;
-  subject: string;
-  body: string;
-  attachments: Attachment[];
-  separateMessage: boolean;
-};
-
 interface EmailWrapperProps {
   showBody: boolean;
   onValueChange?: (values: {
     from: string;
-    recipients: EmailRecipient[];
+    recipients: EmailRecipientType[];
   }) => void;
   maxBlocks?: number;
 }
 
-export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWrapperProps) {
+export function EmailWrapper({
+  showBody,
+  onValueChange,
+  maxBlocks = 5,
+}: EmailWrapperProps) {
+  // Replace local state with atoms
+  const [recipients, setRecipients] = useAtom(emailSectionsAtom);
+  const [callbackData] = useAtom(emailCallbackDataAtom);
   const [view, setView] = useState<ViewMode>("editor");
-  const [recipients, setRecipients] = useState<EmailRecipient[]>([
-    { id: "1", from: "", to: "", cc: "", bcc: "", subject: "", body: "", attachments: [], separateMessage: false }
-  ]);
 
   // Generate unique key for each recipient
-  const generateUniqueKey = (recipient: EmailRecipient, index: number) => {
+  const generateUniqueKey = (recipient: EmailRecipientType, index: number) => {
     if (recipient.to && recipient.subject) {
       // Extract email ID before @
-      const emailId = recipient.to.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+      const emailId = recipient.to
+        .split("@")[0]
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
       // Clean subject (remove special chars, replace spaces with hyphens)
-      const cleanSubject = recipient.subject.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-');
+      const cleanSubject = recipient.subject
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, "-");
       // Generate sequence number based on index + 1
       const sequence = index + 1;
       return `${cleanSubject}-${emailId}-${sequence}`;
@@ -66,15 +70,12 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
   const { mutate } = useEmailService();
   const showSnackbar = useSnackbar();
 
-  // Pass values to parent whenever they change
+  // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
     if (onValueChange) {
-      onValueChange({
-        from: recipients[0]?.from || "",
-        recipients,
-      });
+      onValueChange(callbackData);
     }
-  }, [recipients, onValueChange]);
+  }, [callbackData, onValueChange]);
 
   function isBodyEmpty(html: any) {
     if (!html) return true;
@@ -83,66 +84,51 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
     return div.textContent.trim().length === 0;
   }
 
-  //   const handleSend = async () => {
-  //     if (!to.trim()) {
-  //       showSnackbar("Please enter recipient email", "error");
-  //       return;
-  //     }
-
-  //     if (showBody && isBodyEmpty(body)) {
-  //       showSnackbar("Please enter email body", "error");
-  //       return;
-  //     }
-
-  //     mutate(
-  //       {
-  //         service: "email",
-  //         destination: to,
-  //         fromEmail: from,
-  //         subject: subject || "No Subject",
-  //         body: body || "No Body",
-  //         attachments: [],
-  //       },
-  //       {
-  //         onSuccess: (data) => {
-  //           queryClient.invalidateQueries({
-  //             queryKey: logsKeys.all,
-  //           });
-  //           setTo("");
-  //           setSubject("");
-  //           setBody("");
-  //           showSnackbar(data?.message || "Email sent successfully", "info");
-  //         },
-  //         onError: (error) => {
-  //           showSnackbar(error?.message || "Failed to send email", "error");
-  //         },
-  //       },
-  //     );
-  //   };
-
-  //   const isDisabled = !to || (showBody && isBodyEmpty(body));
-
-  const addRecipient = () => {
+  const addSection = () => {
     if (recipients.length >= maxBlocks) {
       return; // Don't add more than maxBlocks
     }
-    const newId = (Math.max(...recipients.map((r) => parseInt(r.id))) + 1).toString();
-    setRecipients([...recipients, { id: newId, from: "", to: "", cc: "", bcc: "", subject: "", body: "", attachments: [], separateMessage: false }]);
+    const newId = (
+      Math.max(...recipients.map((r) => parseInt(r.id))) + 1
+    ).toString();
+    setRecipients([
+      ...recipients,
+      {
+        id: newId,
+        from: "",
+        to: "",
+        cc: "",
+        bcc: "",
+        subject: "",
+        body: "",
+        attachments: [],
+        separateMessage: false,
+      },
+    ]);
   };
 
-  const removeRecipient = (id: string) => {
+  const removeSection = (id: string) => {
     if (recipients.length > 1) {
       setRecipients(recipients.filter((recipient) => recipient.id !== id));
     }
   };
 
-  const updateRecipient = (id: string, field: keyof EmailRecipient, value: any) => {
+  const updateSection = (
+    id: string,
+    field: keyof EmailRecipientType,
+    value: any,
+  ) => {
     setRecipients(
-      recipients.map((recipient) => (recipient.id === id ? { ...recipient, [field]: value } : recipient)),
+      recipients.map((recipient) =>
+        recipient.id === id ? { ...recipient, [field]: value } : recipient,
+      ),
     );
   };
 
-  const handleAttachmentChange = (recipientId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAttachmentChange = (
+    recipientId: string,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const files = Array.from(e.target.files || []);
 
     if (!files.length) return;
@@ -160,16 +146,23 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
       };
     });
 
-    updateRecipient(recipientId, 'attachments', [...recipients.find(r => r.id === recipientId)?.attachments || [], ...newAttachments]);
+    updateSection(recipientId, "attachments", [
+      ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
+      ...newAttachments,
+    ]);
 
     // allow re-selecting same file again
     e.target.value = "";
   };
 
   const removeAttachment = (recipientId: string, attachmentId: string) => {
-    const recipient = recipients.find(r => r.id === recipientId);
+    const recipient = recipients.find((r) => r.id === recipientId);
     if (recipient) {
-      updateRecipient(recipientId, 'attachments', recipient.attachments.filter(a => a.id !== attachmentId));
+      updateSection(
+        recipientId,
+        "attachments",
+        recipient.attachments.filter((a) => a.id !== attachmentId),
+      );
     }
   };
 
@@ -185,30 +178,47 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
           onChange={(value) => setView(value as ViewMode)}
         />
       </div>
-      
+
       {view === "editor" && (
         <>
           {recipients.map((recipient, index) => (
-            <div key={recipient.id} style={{ marginBottom: 16, padding: "12px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}>
+            <div
+              key={recipient.id}
+              style={{
+                marginBottom: 16,
+                padding: "12px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "8px",
+              }}
+            >
               {recipients.length > 1 && (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <span style={{ fontSize: "14px", fontWeight: "bold" }}>Email {index + 1}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <span style={{ fontSize: "14px", fontWeight: "bold" }}>
+                    Email {index + 1}
+                  </span>
                   <button
-                    onClick={() => removeRecipient(recipient.id)}
+                    onClick={() => removeSection(recipient.id)}
                     style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#ff4444',
-                      cursor: 'pointer',
-                      fontSize: '16px'
+                      background: "transparent",
+                      border: "none",
+                      color: "#ff4444",
+                      cursor: "pointer",
+                      fontSize: "16px",
                     }}
                   >
                     ×
                   </button>
                 </div>
               )}
-              
-              <label
+
+              {/* <label
                 style={{
                   marginBottom: 8,
                   fontSize: "12px",
@@ -216,15 +226,17 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
                 }}
               >
                 From
-                <span style={{ color: "red", marginLeft: 2 }}>*</span>
-              </label>
+              </label> */}
               <Input
+                label="From"
                 className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
-                placeholder="sender@example.com"
+                placeholder="from"
                 value={recipient.from}
-                onChange={(e) => updateRecipient(recipient.id, 'from', e.target.value)}
+                onChange={(e) =>
+                  updateSection(recipient.id, "from", e.target.value)
+                }
               />
 
               <label
@@ -242,9 +254,11 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
                 className="sms-input"
                 type="email"
                 id={`to-${recipient.id}`}
-                placeholder="recipient@example.com"
+                placeholder="to"
                 value={recipient.to}
-                onChange={(e) => updateRecipient(recipient.id, 'to', e.target.value)}
+                onChange={(e) =>
+                  updateSection(recipient.id, "to", e.target.value)
+                }
               />
 
               <label
@@ -263,7 +277,9 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
                 id={`cc-${recipient.id}`}
                 placeholder="Cc"
                 value={recipient.cc}
-                onChange={(e) => updateRecipient(recipient.id, 'cc', e.target.value)}
+                onChange={(e) =>
+                  updateSection(recipient.id, "cc", e.target.value)
+                }
               />
 
               <label
@@ -282,7 +298,9 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
                 id={`bcc-${recipient.id}`}
                 placeholder="Bcc"
                 value={recipient.bcc}
-                onChange={(e) => updateRecipient(recipient.id, 'bcc', e.target.value)}
+                onChange={(e) =>
+                  updateSection(recipient.id, "bcc", e.target.value)
+                }
               />
 
               <label
@@ -302,37 +320,50 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
                 id={`subject-${recipient.id}`}
                 placeholder="Email subject"
                 value={recipient.subject}
-                onChange={(e) => updateRecipient(recipient.id, 'subject', e.target.value)}
+                onChange={(e) =>
+                  updateSection(recipient.id, "subject", e.target.value)
+                }
               />
 
-              {showBody && (
+              {/* Separate Message Toggle for each Email section */}
+              <button
+                onClick={() =>
+                  updateSection(
+                    recipient.id,
+                    "separateMessage",
+                    !recipient.separateMessage,
+                  )
+                }
+                style={{
+                  padding: "4px 8px",
+                  fontSize: "10px",
+                  background: recipient.separateMessage
+                    ? "rgba(76, 175, 80, 0.2)"
+                    : "rgba(255, 255, 255, 0.1)",
+                  border: `1px solid ${recipient.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
+                  color: recipient.separateMessage ? "#4CAF50" : "#fff",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  marginTop: 8,
+                  marginBottom: 8,
+                  width: "100%",
+                }}
+              >
+                {recipient.separateMessage
+                  ? "✓ Using Separate Message"
+                  : "I want to send separate message"}
+              </button>
+
+              {recipient.separateMessage && (
                 <div style={{ marginTop: 12 }}>
-                  <EmailEditor 
-                    value={recipient.body} 
-                    onChange={(value) => updateRecipient(recipient.id, 'body', value)} 
+                  <EmailEditor
+                    value={recipient.body}
+                    onChange={(value) =>
+                      updateSection(recipient.id, "body", value)
+                    }
                   />
                 </div>
-              )}
-
-              {/* Separate Message Toggle */}
-              {showBody && (
-                <button
-                  onClick={() => updateRecipient(recipient.id, 'separateMessage', !recipient.separateMessage)}
-                  style={{
-                    padding: "4px 8px",
-                    fontSize: "10px",
-                    background: recipient.separateMessage ? "rgba(76, 175, 80, 0.2)" : "rgba(255, 255, 255, 0.1)",
-                    border: `1px solid ${recipient.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                    color: recipient.separateMessage ? "#4CAF50" : "#fff",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    marginTop: 8,
-                    marginBottom: 8
-                  }}
-                >
-                  {recipient.separateMessage ? "✓ Using Separate Message" : "I want to send separate message"}
-                </button>
               )}
 
               {/* Attachments Section */}
@@ -347,21 +378,27 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
           ))}
 
           <button
-            onClick={addRecipient}
+            onClick={addSection}
             disabled={recipients.length >= maxBlocks}
             style={{
               padding: "6px 12px",
               fontSize: "12px",
-              background: recipients.length >= maxBlocks ? "rgba(128, 128, 128, 0.2)" : "rgba(255, 255, 255, 0.1)",
+              background:
+                recipients.length >= maxBlocks
+                  ? "rgba(128, 128, 128, 0.2)"
+                  : "rgba(255, 255, 255, 0.1)",
               border: `1px solid ${recipients.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
               color: recipients.length >= maxBlocks ? "#888" : "#fff",
               borderRadius: "6px",
-              cursor: recipients.length >= maxBlocks ? "not-allowed" : "pointer",
+              cursor:
+                recipients.length >= maxBlocks ? "not-allowed" : "pointer",
               transition: "all 0.2s",
-              marginTop: 8
+              marginTop: 8,
             }}
           >
-            {recipients.length >= maxBlocks ? `Max ${maxBlocks} emails reached` : `Add Another Email (${recipients.length}/${maxBlocks})`}
+            {recipients.length >= maxBlocks
+              ? `Max ${maxBlocks} emails reached`
+              : `Add Another Email (${recipients.length}/${maxBlocks})`}
           </button>
         </>
       )}
@@ -369,8 +406,20 @@ export function EmailWrapper({ showBody, onValueChange, maxBlocks = 5 }: EmailWr
       {view === "preview" && (
         <div>
           {recipients.map((recipient, index) => (
-            <div key={recipient.id} style={{ marginBottom: 24, padding: "12px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px" }}>
-              <h4 style={{ margin: "0 0 12px 0", color: "rgba(255,255,255,0.8)" }}>Email {index + 1}</h4>
+            <div
+              key={recipient.id}
+              style={{
+                marginBottom: 24,
+                padding: "12px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "8px",
+              }}
+            >
+              <h4
+                style={{ margin: "0 0 12px 0", color: "rgba(255,255,255,0.8)" }}
+              >
+                Email {index + 1}
+              </h4>
               <EmailPreview
                 html={recipient.body}
                 from={recipient.from}

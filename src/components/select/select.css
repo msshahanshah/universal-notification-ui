@@ -27,7 +27,12 @@
 
 .country-select {
   position: relative;
-  /* width: 100%; */
+}
+
+@media screen and (max-width: 768px) {
+  .country-select {
+    min-width: 60%;
+  }
 }
 
 .country-select-btn {

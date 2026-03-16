@@ -9,4 +9,14 @@ const validateMultipleEmails = (value: string) =>
     .filter(Boolean)
     .every(validateSingleEmail);
 
-export { validateMultipleEmails, validateSingleEmail };
+function isBodyEmpty(html: any) {
+  if (!html) return true;
+
+  const div = document.createElement("div");
+  div.innerHTML = html;
+
+  // Get text content and trim whitespace
+  return div.textContent.trim().length === 0;
+}
+
+export { validateMultipleEmails, validateSingleEmail, isBodyEmpty };

@@ -107,7 +107,7 @@ export function Select({
         className="country-select-btn"
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="listbox"
-        style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", minHeight: "2.5rem", paddingTop: multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0" }}
+        style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", minHeight: "2.5rem", paddingTop: multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0", justifyContent: "space-between" }}
       >
         {multiple && Array.isArray(value) && value.length > 0 ? (
           <>
