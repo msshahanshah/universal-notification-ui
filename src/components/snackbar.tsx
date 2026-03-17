@@ -57,6 +57,7 @@ const Snackbar = ({
       <div
         style={{
           wordBreak: "break-word",
+          whiteSpace: "pre-line", // Preserve line breaks
           lineHeight: 1.4,
           flex: 1,
         }}

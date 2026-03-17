@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
@@ -32,6 +32,7 @@ export function SlackWrapper({
   onValueChange,
   maxBlocks = 5,
 }: SlackWrapperProps) {
+  const theme = useTheme();
   // Replace local state with atoms
   const [channels, setChannels] = useAtom(slackSectionsAtom);
   const [callbackData] = useAtom(slackCallbackDataAtom);
@@ -120,7 +121,12 @@ export function SlackWrapper({
           )}
 
           <label
-            style={{ fontSize: "12px", marginBottom: 8, display: "block", color: COLORS.WHITE }}
+            style={{
+              fontSize: "12px",
+              marginBottom: 8,
+              display: "block",
+              color: theme.vars?.palette.text.secondary,
+            }}
           >
             Channel ID
             <span style={{ color: "red", marginLeft: 2 }}>*</span>
@@ -179,6 +185,7 @@ export function SlackWrapper({
                   fontSize: "12px",
                   marginTop: 8,
                   display: "block",
+                  color: theme.vars?.palette.text.secondary,
                 }}
               >
                 Message {sectionIndex + 1}

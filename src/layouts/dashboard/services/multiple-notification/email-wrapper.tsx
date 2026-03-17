@@ -241,6 +241,7 @@ export function EmailWrapper({
                   updateSection(recipient.id, "to", e.target.value)
                 }
                 required
+                showAsteric={true}
               />
 
               <Input
@@ -278,6 +279,7 @@ export function EmailWrapper({
                   updateSection(recipient.id, "subject", e.target.value)
                 }
                 required
+                showAsteric={true}
               />
 
               {/* Separate Message Toggle for each Email section */}

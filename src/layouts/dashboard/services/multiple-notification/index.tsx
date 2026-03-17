@@ -12,16 +12,21 @@ import { SMSWrapper } from "./sms-wrapper";
 import { EmailWrapper } from "./email-wrapper";
 import { SlackWrapper } from "./slack-wrapper";
 import { ServiceType, MultipleNotificationPayload } from "./types";
-
-import "./index.css";
 import { isBodyEmpty } from "src/utility/helper";
+import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
+import { validateAllServices } from "src/utility/validation";
+import "./index.css";
 
 export default function MultipleNotification() {
   const theme = useTheme();
   const queryClient = useQueryClient();
+
   const { mutate: sendNotifications, isPending } =
     useMultipleNotificationService();
+
   const showSnackbar = useSnackbar();
+
+  //  const [smsErrors, setSmsErrors] = useAtom(smsErrorsAtom);
 
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
     const preSignedUrls = data?.email?.preSignedUrls;
@@ -116,6 +121,19 @@ export default function MultipleNotification() {
     { label: "Slack", value: "slack" },
   ];
 
+  // Validation logic
+  const validationResult = validateAllServices(
+    selectedServices,
+    wrapperValues.email,
+    wrapperValues.sms,
+    wrapperValues.slack,
+    commonMessage,
+  );
+
+  console.log("validationResult", validationResult?.sms?.errors?.sms);
+
+  const isSendButtonDisabled = isPending || !validationResult.isFormValid;
+
   const toggleSeparateMessage = (service: "sms" | "email" | "slack") => {
     setSeparateMessages((prev) => ({
       ...prev,
@@ -126,6 +144,7 @@ export default function MultipleNotification() {
   // Callback handlers for wrapper value changes
   const handleSMSValueChange = useCallback(
     (values: { destination: string[]; message: string[]; sections: any[] }) => {
+      // setSmsErrors("")
       setWrapperValues((prev) => ({
         ...prev,
         sms: values,
@@ -173,6 +192,16 @@ export default function MultipleNotification() {
 
     // Add SMS to payload if selected
     if (selectedServices.includes("sms")) {
+      console.log("wrapperValues.sms?.sections", wrapperValues.sms?.sections);
+      const isDisabled = checkValidRecipientsforSMSWrapper(
+        wrapperValues.sms?.sections || [],
+        commonMessage,
+      );
+      console.log("isDisabled", isDisabled);
+      if (isDisabled) {
+        showSnackbar("SMS validations failed", "error");
+        return;
+      }
       // Use the new section-based structure from SMS wrapper
       if (wrapperValues.sms && wrapperValues.sms.sections) {
         payload.sms = wrapperValues.sms.sections.map(
@@ -273,47 +302,104 @@ export default function MultipleNotification() {
       }
     });
 
-    sendNotifications(payload, {
-      onSuccess: async ({ data }) => {
-        // Reset form
-        setCommonMessage("");
-        setSelectedServices([]);
-        setSeparateMessages({
-          sms: false,
-          email: false,
-          slack: false,
-        });
+    // sendNotifications(payload, {
+    //   onSuccess: async ({ data }) => {
+    //     // Reset form
+    //     setCommonMessage("");
+    //     setSelectedServices([]);
+    //     setSeparateMessages({
+    //       sms: false,
+    //       email: false,
+    //       slack: false,
+    //     });
 
-        if (!hasAttachments || allAttachments.length === 0) {
-          queryClient.invalidateQueries({
-            queryKey: logsKeys.all,
-          });
-          showSnackbar(
-            data?.email?.message || "Notification request accepted and queued.",
-            "success",
-          );
-        } else if (data?.email?.success) {
-          await uploadToS3FromAttachments(data, allAttachments);
-        }
-      },
-      onError: (error: any) => {
-        console.info(
-          "error",
-          error?.data?.email,
-          "error?.response?.data",
-          error?.response?.data,
-          "error?.message",
-          error?.message,
-        );
-        if (
-          error?.data?.email?.success === false ||
-          error?.data?.email?.slack === false ||
-          error?.data?.email?.sms === false
-        ) {
-          showSnackbar("Some notifications got failed", "error");
-        }
-      },
-    });
+    //     // Create detailed status message for each service
+    //     const statusMessages = [];
+
+    //     if (selectedServices.includes("sms")) {
+    //       const smsStatus = data?.sms?.success
+    //         ? `SMS: ${data?.sms?.message || "Notification request accepted and queued."}`
+    //         : `SMS: ${data?.sms?.message || "Failed to send notification"}`;
+    //       statusMessages.push(smsStatus);
+    //     }
+
+    //     if (selectedServices.includes("email")) {
+    //       const emailStatus = data?.email?.success
+    //         ? `Email: ${data?.email?.message || "Notification request accepted and queued."}`
+    //         : `Email: ${data?.email?.message || "Failed to send notification"}`;
+    //       statusMessages.push(emailStatus);
+    //     }
+
+    //     if (selectedServices.includes("slack")) {
+    //       const slackStatus = data?.slack?.success
+    //         ? `Slack: ${data?.slack?.message || "Notification request accepted and queued."}`
+    //         : `Slack: ${data?.slack?.message || "Failed to send notification"}`;
+    //       statusMessages.push(slackStatus);
+    //     }
+
+    //     // Show combined status message
+    //     const combinedMessage = statusMessages.join("\n");
+    //     const hasAnyFailure = statusMessages.some((msg) =>
+    //       msg.includes("Failed"),
+    //     );
+
+    //     showSnackbar(
+    //       combinedMessage,
+    //       hasAnyFailure ? "error" : "success",
+    //       30000,
+    //     );
+
+    //     if (!hasAttachments || allAttachments.length === 0) {
+    //       queryClient.invalidateQueries({
+    //         queryKey: logsKeys.all,
+    //       });
+    //     } else if (data?.email?.success) {
+    //       await uploadToS3FromAttachments(data, allAttachments);
+    //     }
+    //   },
+    //   onError: (error: any) => {
+    //     console.info(
+    //       "error",
+    //       error?.data?.email,
+    //       "error?.response?.data",
+    //       "error?.response?.data",
+    //       "error?.message",
+    //       error?.message,
+    //     );
+
+    //     // Handle error case with detailed service status
+    //     const errorData = error?.data || {};
+    //     const statusMessages = [];
+
+    //     if (selectedServices.includes("sms")) {
+    //       if (errorData?.sms?.success === false) {
+    //         const smsStatus = `SMS: ${errorData?.sms?.message || "Failed to send notification"}`;
+    //         statusMessages.push(smsStatus);
+    //       }
+    //     }
+
+    //     if (selectedServices.includes("email")) {
+    //       if (errorData?.email?.success === false) {
+    //         const emailStatus = `Email: ${errorData?.email?.message || "Failed to send notification"}`;
+    //         statusMessages.push(emailStatus);
+    //       }
+    //     }
+
+    //     if (selectedServices.includes("slack")) {
+    //       if (errorData?.slack?.success === false) {
+    //         const slackStatus = `Slack: ${errorData?.slack?.message || "Failed to send notification"}`;
+    //         statusMessages.push(slackStatus);
+    //       }
+    //     }
+
+    //     const combinedMessage = statusMessages.join("\n");
+    //     const hasAnyFailure = statusMessages.some((msg) =>
+    //       msg.includes("Failed"),
+    //     );
+
+    //     showSnackbar(combinedMessage, "error", 30000);
+    //   },
+    // });
   };
 
   return (
@@ -345,7 +431,7 @@ export default function MultipleNotification() {
             options={serviceOptions}
             placeholder="Select services..."
             multiple
-            style={{color: 'text.secondary' }}
+            style={{ color: "text.secondary" }}
           />
         </div>
 
@@ -404,6 +490,12 @@ export default function MultipleNotification() {
               onValueChange={handleSMSValueChange}
               maxBlocks={5}
             />
+            {validationResult?.sms?.errors?.sms &&
+              Array.isArray(validationResult?.sms?.errors?.sms) && (
+                <div style={{ color: "red", fontSize: "12px" }}>
+                  {validationResult.sms.errors.sms?.[0]}
+                </div>
+              )}
           </div>
         )}
 
@@ -431,26 +523,6 @@ export default function MultipleNotification() {
               onValueChange={handleEmailValueChange}
               maxBlocks={5}
             />
-            <button
-              onClick={() => toggleSeparateMessage("email")}
-              style={{
-                padding: "6px 12px",
-                fontSize: "12px",
-                background: separateMessages.email
-                  ? "rgba(76, 175, 80, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-                border: `1px solid ${separateMessages.email ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                color: separateMessages.email ? "#4CAF50" : "#fff",
-                borderRadius: "6px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                marginTop: 16,
-              }}
-            >
-              {separateMessages.email
-                ? "✓ Using Separate Messages"
-                : "Send separate message"}
-            </button>
           </div>
         )}
 
@@ -468,7 +540,7 @@ export default function MultipleNotification() {
             <h3
               style={{
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.primary,
+                color: theme.vars?.palette.text.secondary,
               }}
             >
               Slack
@@ -492,7 +564,7 @@ export default function MultipleNotification() {
             <Button
               label={isPending ? "Sending..." : "Send to All Services"}
               className={isPending ? "button-disabled" : "send-button"}
-              // disabled={isPending || !commonMessage.trim() || !areWrapperValuesValid()}
+              disabled={isSendButtonDisabled}
               onClick={handleSendToAllServices}
             />
           </div>
