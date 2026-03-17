@@ -131,8 +131,8 @@ export default function MultipleNotification() {
     commonMessage,
   );
 
-  console.log("validationResult", validationResult?.slack?.errors?.slack);
-  console.log("wrapperValues.slack",wrapperValues.slack)
+  // console.log("validationResult", validationResult?.email?.errors?.email);
+  // console.log("wrapperValues.email", wrapperValues.email);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -263,36 +263,36 @@ export default function MultipleNotification() {
       }
     }
 
-    console.log("selectedServices",selectedServices)
+    console.log("selectedServices", selectedServices);
     // Add Slack to payload if selected
     if (selectedServices.includes("slack")) {
-      // windsurf rules
-       console.log("wrapperValues.slack", wrapperValues.slack);
-       if (wrapperValues.slack && wrapperValues.slack.sections) {
-        payload.slack = wrapperValues.slack.sections.map(
-          (section: any) => ({
-            destination: section.destination,
-            message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
-          }),
-        );
-      }
-
-      const { isValid, errors } = runValidator("slack", payload);
-      console.log("isValid", isValid, "errors", errors);
-
       // !! Do not remove, need for staging branch
       // Use the new section-based structure from Slack wrapper
-      // if (wrapperValues?.slack?.sections) {
-      //   payload.slack = wrapperValues.slack.sections.map((section: any) => {
-      //     const slackSection: any = { destination: section.destination };
+      if (wrapperValues?.slack?.sections) {
+        payload.slack = wrapperValues.slack.sections.map((section: any) => {
+          const slackSection: any = { destination: section.destination };
 
-      //     if (section.message) {
-      //       slackSection.message = section.message;
-      //     }
+          if (section.message) {
+            slackSection.message = section.message;
+          }
 
-      //     return slackSection;
-      //   });
+          return slackSection;
+        });
+      }
+
+      // // windsurf rules
+      //  console.log("wrapperValues.slack", wrapperValues.slack);
+      //  if (wrapperValues.slack && wrapperValues.slack.sections) {
+      //   payload.slack = wrapperValues.slack.sections.map(
+      //     (section: any) => ({
+      //       destination: section.destination,
+      //       message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
+      //     }),
+      //   );
       // }
+
+      // const { isValid, errors } = runValidator("slack", payload);
+      // console.log("isValid", isValid, "errors", errors);
     }
 
     console.log("payload", payload);
@@ -320,6 +320,7 @@ export default function MultipleNotification() {
       }
     });
 
+    console.log('final payload',payload)
     // sendNotifications(payload, {
     //   onSuccess: async ({ data }) => {
     //     // Reset form
