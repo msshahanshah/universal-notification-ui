@@ -30,7 +30,8 @@
       "src/provider/*": ["src/provider/*"],
       "src/lib/*": ["src/lib/*"],
       "src/api/*": ["src/api/*"],
-      "src/atoms/*": ["src/atoms/*"]
+      "src/atoms/*": ["src/atoms/*"],
+      "src/validators/*": ["src/validators/*"]
     }
   },
   "include": ["src"],

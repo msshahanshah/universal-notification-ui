@@ -16,6 +16,7 @@ import { isBodyEmpty } from "src/utility/helper";
 import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
 import { validateAllServices } from "src/utility/validation";
 import "./index.css";
+import { runValidator } from "src/validators/runValidator";
 
 export default function MultipleNotification() {
   const theme = useTheme();
@@ -130,7 +131,8 @@ export default function MultipleNotification() {
     commonMessage,
   );
 
-  console.log("validationResult", validationResult?.sms?.errors?.sms);
+  // console.log("validationResult", validationResult?.email?.errors?.email);
+  // console.log("wrapperValues.email", wrapperValues.email);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -261,8 +263,10 @@ export default function MultipleNotification() {
       }
     }
 
+    console.log("selectedServices", selectedServices);
     // Add Slack to payload if selected
     if (selectedServices.includes("slack")) {
+      // !! Do not remove, need for staging branch
       // Use the new section-based structure from Slack wrapper
       if (wrapperValues?.slack?.sections) {
         payload.slack = wrapperValues.slack.sections.map((section: any) => {
@@ -275,6 +279,20 @@ export default function MultipleNotification() {
           return slackSection;
         });
       }
+
+      // // windsurf rules
+      //  console.log("wrapperValues.slack", wrapperValues.slack);
+      //  if (wrapperValues.slack && wrapperValues.slack.sections) {
+      //   payload.slack = wrapperValues.slack.sections.map(
+      //     (section: any) => ({
+      //       destination: section.destination,
+      //       message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
+      //     }),
+      //   );
+      // }
+
+      // const { isValid, errors } = runValidator("slack", payload);
+      // console.log("isValid", isValid, "errors", errors);
     }
 
     console.log("payload", payload);
@@ -302,6 +320,7 @@ export default function MultipleNotification() {
       }
     });
 
+    console.log('final payload',payload)
     // sendNotifications(payload, {
     //   onSuccess: async ({ data }) => {
     //     // Reset form
@@ -549,6 +568,12 @@ export default function MultipleNotification() {
               onValueChange={handleSlackValueChange}
               maxBlocks={5}
             />
+            {validationResult?.slack?.errors?.slack &&
+              Array.isArray(validationResult?.slack?.errors?.slack) && (
+                <div style={{ color: "red", fontSize: "12px" }}>
+                  {validationResult.slack.errors.slack?.[0]}
+                </div>
+              )}
           </div>
         )}
 
@@ -564,7 +589,7 @@ export default function MultipleNotification() {
             <Button
               label={isPending ? "Sending..." : "Send to All Services"}
               className={isPending ? "button-disabled" : "send-button"}
-              disabled={isSendButtonDisabled}
+              // disabled={isSendButtonDisabled}
               onClick={handleSendToAllServices}
             />
           </div>

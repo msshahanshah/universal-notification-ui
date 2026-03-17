@@ -102,7 +102,13 @@ export function SlackWrapper({
                 marginBottom: 12,
               }}
             >
-              <span style={{ fontSize: "14px", fontWeight: "bold" }}>
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
                 Slack {sectionIndex + 1}
               </span>
               <button

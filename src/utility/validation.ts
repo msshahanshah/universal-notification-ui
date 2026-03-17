@@ -3,6 +3,7 @@
  */
 
 import { useAtom } from "jotai";
+import { slackSectionsAtom } from "src/atoms/slackAtoms";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
 
 export interface ValidationResult {
@@ -29,6 +30,7 @@ export const validateAllServices = (
   commonMessage: string,
 ): ServiceValidation => {
   const [smsInputData, _] = useAtom(smsSectionsAtom);
+  const [slackInputData, __] = useAtom(slackSectionsAtom);
   const validation: ServiceValidation = {
     email: { isFormValid: true, errors: {} },
     sms: { isFormValid: true, errors: {} },
@@ -112,7 +114,7 @@ export const validateAllServices = (
 
       if (!hasValidDestination) {
         validation.sms.isFormValid = false;
-        smsErrors.push("At least one phone number is required");
+        smsErrors.push("At least one Phone Number is required");
       }
 
       // Check for sections with country code but missing phone number
@@ -126,7 +128,7 @@ export const validateAllServices = (
             if (hasCountryCode && !hasPhoneNumber) {
               validation.sms.isFormValid = false;
               smsErrors.push(
-                `SMS Section ${sectionIndex + 1}, Number ${numIndex + 1}: Country code is selected but phone number is missing`,
+                `SMS Section ${sectionIndex + 1}, Number ${numIndex + 1}: Invalid phone number`,
               );
             }
           });
@@ -135,7 +137,7 @@ export const validateAllServices = (
         if (!section.message.trim() && !commonMessage.trim()) {
           validation.sms.isFormValid = false;
           smsErrors.push(
-            `SMS Section ${sectionIndex + 1}, Common message is required when not using separate messages`,
+            `SMS Section ${sectionIndex + 1}: A message is required when common message is not provided`,
           );
         }
       });
@@ -145,7 +147,7 @@ export const validateAllServices = (
         section.numbers?.forEach((num: any, numIndex: number) => {
           if (num.number && !/^\d{8,15}$/.test(num.number)) {
             smsErrors.push(
-              `SMS Section ${sectionIndex + 1}, Number ${numIndex + 1}: Invalid phone number format`,
+              `SMS Section ${sectionIndex + 1}: Invalid phone number`,
             );
           }
         });
@@ -165,35 +167,38 @@ export const validateAllServices = (
       validation.slack.isFormValid = false;
       slackErrors.push("Slack service data is missing");
     } else {
-      const channels = (slackData as any).sections || [];
-      const hasValidChannels = channels.some(
-        (channel: any) => channel.channelID?.trim() !== "",
+      const sections = (slackData as any).sections || [];
+
+      // At least one destination must be provided
+      const hasValidDestination = sections?.some(
+        ({ destination, channelID }: any) =>
+          destination?.trim() !== "" || channelID?.trim() !== "",
       );
 
-      if (!hasValidChannels) {
-        validation.slack.isFormValid = false;
-        slackErrors.push("At least one Slack channel is required");
-      }
-
-      // Check message requirements
-      const hasSeparateMessages = channels.some(
-        (channel: any) => channel.separateMessage,
-      );
-      const allHaveMessages = channels.every((channel: any) =>
-        channel.separateMessage ? channel.message?.trim() !== "" : true,
-      );
-
-      if (hasSeparateMessages && !allHaveMessages) {
-        validation.slack.isFormValid = false;
-        slackErrors.push("All separate messages must have content");
-      }
-
-      if (!hasSeparateMessages && !commonMessage.trim()) {
+      if (!hasValidDestination) {
         validation.slack.isFormValid = false;
         slackErrors.push(
-          "Common message is required when separate messages are empty",
+          "At least one Channel ID is required",
         );
       }
+
+      // Each section must have a message, or commonMessage must be provided
+      slackInputData.forEach((section: any, sectionIndex: number) => {
+        if (!section.message?.trim() && !commonMessage.trim()) {
+          validation.slack.isFormValid = false;
+          slackErrors.push(
+            `Slack Section ${sectionIndex + 1}: A message is required when common message is not provided`,
+          );
+        }
+
+        // Destination must not be empty if the section exists
+        if (!section.destination?.trim() && !section.channelID?.trim()) {
+          validation.slack.isFormValid = false;
+          slackErrors.push(
+            `Slack Section ${sectionIndex + 1}: Destination is required`,
+          );
+        }
+      });
     }
 
     if (slackErrors.length > 0) {
@@ -209,7 +214,7 @@ export const validateAllServices = (
       validation.email.errors = {
         ...validation.email.errors,
         commonMessage: [
-          "Common message is required when not using separate messages",
+          "A message is required when common message is not provided",
         ],
       };
     }
@@ -219,7 +224,7 @@ export const validateAllServices = (
       validation.sms.errors = {
         ...validation.sms.errors,
         commonMessage: [
-          "Common message is required when not using separate messages",
+          "A message is required when common message is not provided",
         ],
       };
     }
@@ -229,7 +234,7 @@ export const validateAllServices = (
       validation.slack.errors = {
         ...validation.slack.errors,
         commonMessage: [
-          "Common message is required when not using separate messages",
+          "A message is required when common message is not provided",
         ],
       };
     }
