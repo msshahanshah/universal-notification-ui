@@ -3,6 +3,7 @@
  */
 
 import { useAtom } from "jotai";
+import { slackSectionsAtom } from "src/atoms/slackAtoms";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
 
 export interface ValidationResult {
@@ -29,6 +30,7 @@ export const validateAllServices = (
   commonMessage: string,
 ): ServiceValidation => {
   const [smsInputData, _] = useAtom(smsSectionsAtom);
+  const [slackInputData, __] = useAtom(slackSectionsAtom);
   const validation: ServiceValidation = {
     email: { isFormValid: true, errors: {} },
     sms: { isFormValid: true, errors: {} },
@@ -159,16 +161,24 @@ export const validateAllServices = (
 
   // Slack validation
   if (selectedServices.includes("slack")) {
+    // Types of Validations available for slack
+    // 1. "Invalid Slack channel ID: C0" // "destination": "C0",
+    // 2. "Destination is required" // "destination": ""
     const slackErrors: string[] = [];
+
+    console.log("slackInputData",slackInputData)
 
     if (!slackData || typeof slackData !== "object") {
       validation.slack.isFormValid = false;
       slackErrors.push("Slack service data is missing");
     } else {
       const channels = (slackData as any).sections || [];
+      console.log("channels",channels)
       const hasValidChannels = channels.some(
         (channel: any) => channel.channelID?.trim() !== "",
       );
+
+      console.log("hasValidChannels",hasValidChannels)
 
       if (!hasValidChannels) {
         validation.slack.isFormValid = false;
