@@ -13,6 +13,7 @@ import { Toggle } from "src/components/toggle";
 import AttachmentSection from "../email/attachmentSection";
 
 import "../SMS/sms-composer.css";
+import "./index.css";
 import {
   emailSectionsAtom,
   emailCallbackDataAtom,
@@ -44,6 +45,16 @@ export function EmailWrapper({
   maxBlocks = 5,
 }: EmailWrapperProps) {
   const theme = useTheme();
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: theme.vars?.palette.background.paper,
+    color: theme.vars?.palette.text.secondary,
+    border: "1px solid rgba(255, 255, 255, 0.25) !important",
+    width: "100%",
+    height: 42,
+    marginBottom: 12,
+    padding: "0 12px",
+    borderRadius: 6,
+  };
   // Replace local state with atoms
   const [recipients, setRecipients] = useAtom(emailSectionsAtom);
   const [callbackData] = useAtom(emailCallbackDataAtom);
@@ -194,7 +205,7 @@ export function EmailWrapper({
                 borderRadius: "8px",
               }}
             >
-              {recipients.length > 1 && (
+              {recipients.length >= 1 && (
                 <div
                   style={{
                     display: "flex",
@@ -212,24 +223,20 @@ export function EmailWrapper({
                   >
                     Email Section {index + 1}
                   </span>
-                  <button
-                    onClick={() => removeSection(recipient.id)}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#ff4444",
-                      cursor: "pointer",
-                      fontSize: "16px",
-                    }}
-                  >
-                    ×
-                  </button>
+                  {index !== 0 && (
+                    <button
+                      onClick={() => removeSection(recipient.id)}
+                      className="remove-btn"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               )}
               <Input
                 label="From"
                 subLabel="The email address field can be filled only if the 'From Email' option is enabled."
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
                 placeholder="from"
@@ -237,11 +244,12 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "from", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="To"
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`to-${recipient.id}`}
                 placeholder="to"
@@ -251,11 +259,12 @@ export function EmailWrapper({
                 }
                 required
                 showAsteric={true}
+                style={inputStyle}
               />
 
               <Input
                 label="Cc"
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`cc-${recipient.id}`}
                 placeholder="Cc"
@@ -263,11 +272,12 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "cc", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="Bcc"
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`bcc-${recipient.id}`}
                 placeholder="Bcc"
@@ -275,11 +285,12 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "bcc", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="Subject"
-                className="sms-input"
+                // className="sms-input"
                 type="text"
                 id={`subject-${recipient.id}`}
                 placeholder="Email subject"
@@ -289,6 +300,7 @@ export function EmailWrapper({
                 }
                 required
                 showAsteric={true}
+                style={inputStyle}
               />
 
               {/* Separate Message Toggle for each Email section */}
@@ -300,21 +312,8 @@ export function EmailWrapper({
                     !recipient.separateMessage,
                   )
                 }
-                style={{
-                  padding: "4px 8px",
-                  fontSize: "10px",
-                  background: recipient.separateMessage
-                    ? "rgba(76, 175, 80, 0.2)"
-                    : "rgba(255, 255, 255, 0.1)",
-                  border: `1px solid ${recipient.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                  color: recipient.separateMessage ? "#4CAF50" : "#fff",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  marginTop: 8,
-                  marginBottom: 8,
-                  width: "100%",
-                }}
+                className="add-btn"
+                style={{ width: "100%" }}
               >
                 {recipient.separateMessage
                   ? "Use common message"

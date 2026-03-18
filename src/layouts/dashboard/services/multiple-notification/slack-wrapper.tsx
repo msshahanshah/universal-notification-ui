@@ -95,7 +95,7 @@ export function SlackWrapper({
             borderRadius: "8px",
           }}
         >
-          {channels.length > 1 && (
+          {channels.length >= 1 && (
             <div
               style={{
                 display: "flex",
@@ -113,18 +113,20 @@ export function SlackWrapper({
               >
                 Slack Section {sectionIndex + 1}
               </span>
-              <button
-                onClick={() => removeSection(channel.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "red",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
+              {sectionIndex !== 0 && (
+                <button
+                  onClick={() => removeSection(channel.id)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "red",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              )}
             </div>
           )}
 
@@ -164,22 +166,8 @@ export function SlackWrapper({
                 !channel.separateMessage,
               )
             }
-            style={{
-              padding: "4px 8px",
-              fontSize: "10px",
-              background: channel.separateMessage
-                ? "rgba(76, 175, 80, 0.2)"
-                : "rgba(255, 255, 255, 0.1)",
-              border: `1px solid ${channel.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-              color: channel.separateMessage ? "#4CAF50" : "#fff",
-              borderRadius: "4px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              marginTop: 8,
-              marginBottom: 8,
-              width: "100%",
-            }}
-            className="send-separate-message"
+            className="add-btn"
+            style={{ width: "100%" }}
           >
             {channel.separateMessage
               ? "Use common message"

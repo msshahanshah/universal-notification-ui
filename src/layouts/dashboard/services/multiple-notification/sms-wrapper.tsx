@@ -11,6 +11,7 @@ import { useSnackbar } from "src/provider/snackbar";
 import { logsKeys } from "src/api/queryKeys";
 
 import "../SMS/sms-composer.css";
+import "./index.css";
 import { CountryCodeSelect } from "../SMS/country-code-select";
 import {
   smsSectionsAtom,
@@ -158,7 +159,7 @@ export function SMSWrapper({
             borderRadius: "8px",
           }}
         >
-          {sections.length > 1 && (
+          {sections.length >= 1 && (
             <div
               style={{
                 display: "flex",
@@ -176,18 +177,14 @@ export function SMSWrapper({
               >
                 SMS Section {sectionIndex + 1}
               </span>
-              <button
-                onClick={() => removeSection(section.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "red",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
+              {sectionIndex !== 0 && (
+                <button
+                  onClick={() => removeSection(section.id)}
+                  className="remove-btn"
+                >
+                  ×
+                </button>
+              )}
             </div>
           )}
 
@@ -234,14 +231,7 @@ export function SMSWrapper({
               {section.numbers.length > 1 && (
                 <button
                   onClick={() => removeNumberFromSection(section.id, num.id)}
-                  style={{
-                    marginLeft: 8,
-                    cursor: "pointer",
-                    background: "transparent",
-                    border: "none",
-                    color: "red",
-                    fontSize: 18,
-                  }}
+                  className="remove-btn"
                 >
                   ×
                 </button>
@@ -264,22 +254,6 @@ export function SMSWrapper({
                   !section.separateMessage,
                 )
               }
-              // style={{
-              //   padding: "4px 8px",
-              //   fontSize: "10px",
-              //   // background: section.separateMessage
-              //   //   ? "rgba(76, 175, 80, 0.2)"
-              //   //   : "rgba(255, 255, 255, 0.1)",
-              //   border: `1px solid ${section.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-              //   color: section.separateMessage ? "#4CAF50" : "#fff",
-              //   borderRadius: "4px",
-              //   cursor: "pointer",
-              //   transition: "all 0.2s",
-              //   marginTop: 8,
-              //   marginBottom: 8,
-              //   width: "100%",
-              // }}
-              // className="send-separate-message"
               className="add-btn"
               style={{ width: "100%" }}
             >

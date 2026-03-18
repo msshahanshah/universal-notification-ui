@@ -93,6 +93,11 @@ export default function MultipleNotification() {
     slack: false,
   });
 
+  // Remove service from selectedServices
+  const removeService = (serviceType: ServiceType) => {
+    setSelectedServices(prev => prev.filter(service => service !== serviceType));
+  };
+
   // Store wrapper values
   const [wrapperValues, setWrapperValues] = useState<{
     sms: { destination: string[]; message: string[]; sections: any[] } | null;
@@ -478,20 +483,36 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              SMS
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                SMS
+              </h3>
+              <button
+                onClick={() => removeService("sms")}
+                className="remove-btn"
+                aria-label="Remove SMS service"
+              >
+                ×
+              </button>
+            </div>
             <SMSWrapper
               showMessage={separateMessages.sms}
               onValueChange={handleSMSValueChange}
@@ -511,20 +532,36 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              Email
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                Email
+              </h3>
+              <button
+                onClick={() => removeService("email")}
+                className="remove-btn"
+                aria-label="Remove Email service"
+              >
+                ×
+              </button>
+            </div>
             <EmailWrapper
               showBody={separateMessages.email}
               onValueChange={handleEmailValueChange}
@@ -544,20 +581,36 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              Slack
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                Slack
+              </h3>
+              <button
+                onClick={() => removeService("slack")}
+                className="remove-btn"
+                aria-label="Remove Slack service"
+              >
+                ×
+              </button>
+            </div>
             <SlackWrapper
               onValueChange={handleSlackValueChange}
               maxBlocks={5}

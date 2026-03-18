@@ -87,7 +87,6 @@
   scrollbar-width: thin;
   background: #0b1623;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  /* width: 100%; */
 }
 
 .select-list li {
@@ -116,31 +115,7 @@
   cursor: pointer;
   color: hsl(210, 98%, 48%);
 }
-
 /* select options list item */
-
-/* .country-select-list {
-  position: fixed;
-  width: 180px;
-  background: #0b1623;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 12px;
-  max-height: 200px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  z-index: 9999;
-}
-
-.country-select-list li {
-  padding: 10px;
-}
-
-.country-select-list li:hover {
-  background: rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-} */
 
 .country-code-option {
   font-size: 12px;
@@ -152,11 +127,3 @@
 .country-code-option:hover {
   background: rgba(255, 255, 255, 0.08);
 }
-
-/* .country-code-selected {
-  background: rgba(37, 99, 235, 0.3);
-  border-radius: 8px;
-  padding: 10px;
-  color: #93c5fd;
-  font-weight: 500;
-} */
