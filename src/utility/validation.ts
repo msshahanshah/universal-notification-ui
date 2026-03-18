@@ -49,9 +49,6 @@ export const validateAllServices = (
       emailErrors.push("Email service data is missing");
     } else {
       const sections = (emailData as any).sections || [];
-      console.log("sections",sections)
-
-      console.log("emailInputData",emailInputData)
       // At least one destination must be provided
       const hasValidDestination = emailInputData?.some(
         ({ to }: any) => to?.trim() !== "",
@@ -84,7 +81,7 @@ export const validateAllServices = (
           );
         }
 
-         // Validate destination email format
+        // Validate destination email format
         if (
           section.to?.trim() &&
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.to.trim())
@@ -94,7 +91,6 @@ export const validateAllServices = (
             `Email Section ${sectionIndex + 1}: Email in To is invalid`,
           );
         }
-
 
         if (!section.subject?.trim()) {
           validation.email.isFormValid = false;
@@ -214,20 +210,15 @@ export const validateAllServices = (
   if (selectedServices.includes("sms")) {
     const smsErrors: string[] = [];
 
-    console.log("smsData", smsData);
-
     if (!smsData || typeof smsData !== "object") {
       validation.sms.isFormValid = false;
       smsErrors.push("SMS service data is missing");
     } else {
       const sections = (smsData as any).sections || [];
-      console.log("SMS sections", sections);
-      console.log("smsInputData", smsInputData);
+
       const hasValidDestination = sections?.some(
         ({ destination }: any) => destination?.trim() !== "",
       );
-
-      // console.log("hasValidSections",hasValidSections)
 
       if (!hasValidDestination) {
         validation.sms.isFormValid = false;
