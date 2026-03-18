@@ -67,8 +67,6 @@ export const emailBodiesAtom = atom((get) => {
 
 // Combined callback data atom (for parent communication)
 export const emailCallbackDataAtom = atom((get) => {
-  const destinations = get(emailDestinationsAtom);
-  const bodies = get(emailBodiesAtom);
   const sections = get(emailPayloadAtom);
   const fromEmail = get(emailSectionsAtom)[0]?.from || "";
   

@@ -167,7 +167,7 @@ export default function EmailComposer() {
     if (bcc) formData.append("bcc", bcc);
 
     renamedFiles.forEach((file) => {
-      formData.append("attachments", file); // 🔥 IMPORTANT
+      formData.append("attachments", file);
     });
 
     const payload = {

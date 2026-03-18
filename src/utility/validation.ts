@@ -49,9 +49,7 @@ export const validateAllServices = (
       emailErrors.push("Email service data is missing");
     } else {
       const sections = (emailData as any).sections || [];
-      console.log("sections",sections)
 
-      console.log("emailInputData",emailInputData)
       // At least one destination must be provided
       const hasValidDestination = emailInputData?.some(
         ({ to }: any) => to?.trim() !== "",
@@ -84,7 +82,7 @@ export const validateAllServices = (
           );
         }
 
-         // Validate destination email format
+        // Validate destination email format
         if (
           section.to?.trim() &&
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.to.trim())
@@ -94,7 +92,6 @@ export const validateAllServices = (
             `Email Section ${sectionIndex + 1}: Email in To is invalid`,
           );
         }
-
 
         if (!section.subject?.trim()) {
           validation.email.isFormValid = false;
@@ -151,83 +148,19 @@ export const validateAllServices = (
     }
   }
 
-  // // Email validation
-  // if (selectedServices.includes("email")) {
-  //   const emailErrors: string[] = [];
-
-  //   console.log("emailData",emailData)
-  //   if (!emailData || typeof emailData !== "object") {
-  //     validation.email.isFormValid = false;
-  //     emailErrors.push("Email service data is missing");
-  //   } else {
-  //     const recipients = (emailData as any)?.recipients || [];
-  //     console.log("recipients",recipients)
-  //     const hasValidRecipients = recipients.some(
-  //       (rec: any) => rec.destination?.trim() !== "",
-  //     );
-
-  //     // if (!hasValidRecipients) {
-  //     //   validation.email.isFormValid = false;
-  //     //   emailErrors.push("At least one Email Recipient is required");
-  //     // }
-
-  //     // Check for required fields
-  //     console.log("recipients",recipients)
-  //     recipients.forEach((rec: any, index: number) => {
-  //       if (!rec.destination?.trim()) {
-  //         emailErrors.push(`Email ${index + 1}: Recipient email is required`);
-  //       }
-  //       if (!rec.subject?.trim()) {
-  //         emailErrors.push(`Email ${index + 1}: Subject is required`);
-  //       }
-  //     });
-
-  //     // Check message requirements
-  //     const hasSeparateMessages = recipients.some(
-  //       (rec: any) => rec.separateMessage,
-  //     );
-  //     const allHaveMessages = recipients.every((rec: any) =>
-  //       rec.separateMessage ? rec.body?.trim() !== "" : true,
-  //     );
-
-  //     if (hasSeparateMessages && !allHaveMessages) {
-  //       validation.email.isFormValid = false;
-  //       emailErrors.push("All separate messages must have content");
-  //     }
-
-  //     if (!hasSeparateMessages && !commonMessage.trim()) {
-  //       validation.email.isFormValid = false;
-  //       emailErrors.push(
-  //         "Common message is required when separate messages are empty",
-  //       );
-  //     }
-
-  //     console.log("emailErrors",emailErrors)
-
-  //     if (emailErrors.length > 0) {
-  //       validation.email.errors = { email: emailErrors };
-  //     }
-  //   }
-  // }
-
   // SMS validation
   if (selectedServices.includes("sms")) {
     const smsErrors: string[] = [];
-
-    console.log("smsData", smsData);
 
     if (!smsData || typeof smsData !== "object") {
       validation.sms.isFormValid = false;
       smsErrors.push("SMS service data is missing");
     } else {
       const sections = (smsData as any).sections || [];
-      console.log("SMS sections", sections);
-      console.log("smsInputData", smsInputData);
+
       const hasValidDestination = sections?.some(
         ({ destination }: any) => destination?.trim() !== "",
       );
-
-      // console.log("hasValidSections",hasValidSections)
 
       if (!hasValidDestination) {
         validation.sms.isFormValid = false;
