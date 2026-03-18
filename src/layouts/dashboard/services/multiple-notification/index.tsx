@@ -262,8 +262,6 @@ export default function MultipleNotification() {
           });
       }
     }
-
-    // console.log("selectedServices", selectedServices);
     // Add Slack to payload if selected
     if (selectedServices.includes("slack")) {
       // !! Do not remove, need for staging branch
@@ -595,7 +593,7 @@ export default function MultipleNotification() {
             <Button
               label={isPending ? "Sending..." : "Send to All Services"}
               className={isPending ? "button-disabled" : "send-button"}
-              disabled={isSendButtonDisabled}
+              // disabled={isSendButtonDisabled}
               onClick={handleSendToAllServices}
             />
           </div>
