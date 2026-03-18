@@ -37,8 +37,6 @@ export function SlackWrapper({
   const [channels, setChannels] = useAtom(slackSectionsAtom);
   const [callbackData] = useAtom(slackCallbackDataAtom);
 
-  console.log("channels", channels);
-
   // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
     if (onValueChange) {
@@ -109,7 +107,7 @@ export function SlackWrapper({
                   color: theme.vars?.palette.text.secondary,
                 }}
               >
-                Slack {sectionIndex + 1}
+                Slack Section {sectionIndex + 1}
               </span>
               <button
                 onClick={() => removeSection(channel.id)}

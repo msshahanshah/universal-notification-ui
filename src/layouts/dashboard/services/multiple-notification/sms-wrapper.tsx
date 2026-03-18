@@ -38,9 +38,6 @@ export function SMSWrapper({
   // Replace local state with atoms
   const [sections, setSections] = useAtom(smsSectionsAtom);
   const [callbackData] = useAtom(smsCallbackDataAtom);
-
-  console.log("sections", sections);
-
   // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
     if (onValueChange) {
@@ -85,7 +82,7 @@ export function SMSWrapper({
     const latestSection = sections.map((section) =>
       section.id === sectionId ? { ...section, [field]: value } : section,
     );
-    console.log("latestSection", latestSection);
+
     setSections(latestSection);
   };
 
@@ -147,11 +144,6 @@ export function SMSWrapper({
 
   return (
     <div className="sms-wrapper">
-      {/* <label style={{ fontSize: "12px" }}>
-        Phone numbers
-        <span style={{ color: "red", marginLeft: 2 }}>*</span>
-      </label> */}
-
       {sections.map((section, sectionIndex) => (
         <div
           key={section.id}
@@ -171,8 +163,14 @@ export function SMSWrapper({
                 marginBottom: 12,
               }}
             >
-              <span style={{ fontSize: "14px", fontWeight: "bold",color: theme.vars?.palette.text.secondary }}>
-                SMS {sectionIndex + 1}
+              <span
+                style={{
+                  fontSize: "14px",
+                  fontWeight: "bold",
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                SMS Section {sectionIndex + 1}
               </span>
               <button
                 onClick={() => removeSection(section.id)}
@@ -253,7 +251,6 @@ export function SMSWrapper({
           />
 
           {/* Separate Message Toggle for each SMS section */}
-          {/* {showMessage && ( */}
           <>
             <button
               onClick={() =>
@@ -291,7 +288,7 @@ export function SMSWrapper({
                     marginBottom: 4,
                     fontSize: "12px",
                     display: "block",
-                    color: theme.vars?.palette.text.secondary
+                    color: theme.vars?.palette.text.secondary,
                   }}
                 >
                   Message {sectionIndex + 1}
@@ -309,7 +306,6 @@ export function SMSWrapper({
               </>
             )}
           </>
-          {/* )} */}
         </div>
       ))}
 

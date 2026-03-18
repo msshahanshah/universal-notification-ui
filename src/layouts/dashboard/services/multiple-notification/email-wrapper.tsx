@@ -18,6 +18,7 @@ import {
   emailCallbackDataAtom,
   type EmailRecipient as EmailRecipientType,
 } from "src/atoms/emailAtoms";
+import { useTheme } from "@mui/material/styles";
 
 type ViewMode = "editor" | "preview";
 
@@ -41,6 +42,7 @@ export function EmailWrapper({
   onValueChange,
   maxBlocks = 5,
 }: EmailWrapperProps) {
+  const theme= useTheme()
   // Replace local state with atoms
   const [recipients, setRecipients] = useAtom(emailSectionsAtom);
   const [callbackData] = useAtom(emailCallbackDataAtom);
@@ -200,8 +202,8 @@ export function EmailWrapper({
                     marginBottom: 12,
                   }}
                 >
-                  <span style={{ fontSize: "14px", fontWeight: "bold" }}>
-                    Email {index + 1}
+                  <span style={{ fontSize: "14px", fontWeight: "bold", color: theme.vars?.palette.text.secondary }}>
+                    Email Section {index + 1}
                   </span>
                   <button
                     onClick={() => removeSection(recipient.id)}
@@ -373,9 +375,9 @@ export function EmailWrapper({
               }}
             >
               <h4
-                style={{ margin: "0 0 12px 0", color: "rgba(255,255,255,0.8)" }}
+                style={{ margin: "0 0 12px 0", color: theme.vars?.palette.text.secondary }}
               >
-                Email {index + 1}
+                Email Section {index + 1}
               </h4>
               <EmailPreview
                 html={recipient.body}
