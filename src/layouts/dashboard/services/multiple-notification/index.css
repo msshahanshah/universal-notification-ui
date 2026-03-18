@@ -166,3 +166,24 @@
 .email-row-container:last-child {
   border-bottom: none;
 }
+
+.sms-textarea {
+  width: 100%;
+  resize: none;
+  padding: 12px;
+  border-radius: 8px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.sms-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sms-textarea:focus {
+  outline: none;
+  border-color: #93c5fd;
+}

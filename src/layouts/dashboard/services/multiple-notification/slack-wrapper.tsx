@@ -18,6 +18,7 @@ import {
   type SlackChannel,
 } from "src/atoms/slackAtoms";
 import COLORS from "src/utility/colors";
+import { AddButton } from "./helper";
 
 interface SlackWrapperProps {
   onValueChange?: (values: {
@@ -80,7 +81,10 @@ export function SlackWrapper({
   };
 
   return (
-    <div className="sms-wrapper">
+    <div
+      className="sms-wrapper"
+      style={{ backgroundColor: theme.vars?.palette.background.paper }}
+    >
       {channels.map((channel, sectionIndex) => (
         <div
           key={channel.id}
@@ -175,6 +179,7 @@ export function SlackWrapper({
               marginBottom: 8,
               width: "100%",
             }}
+            className="send-separate-message"
           >
             {channel.separateMessage
               ? "Use common message"
@@ -193,7 +198,6 @@ export function SlackWrapper({
                 }}
               >
                 Message {sectionIndex + 1}
-                <span style={{ color: "red", marginLeft: 2 }}>*</span>
               </label>
               <textarea
                 className="sms-textarea"
@@ -210,28 +214,12 @@ export function SlackWrapper({
         </div>
       ))}
 
-      <button
+      <AddButton
+        title="Slack"
         onClick={addSection}
-        disabled={channels.length >= maxBlocks}
-        style={{
-          padding: "6px 12px",
-          fontSize: "12px",
-          background:
-            channels.length >= maxBlocks
-              ? "rgba(128, 128, 128, 0.2)"
-              : "rgba(255, 255, 255, 0.1)",
-          border: `1px solid ${channels.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-          color: channels.length >= maxBlocks ? "#888" : "#fff",
-          borderRadius: "6px",
-          cursor: channels.length >= maxBlocks ? "not-allowed" : "pointer",
-          transition: "all 0.2s",
-          marginTop: 8,
-        }}
-      >
-        {channels.length >= maxBlocks
-          ? `Max ${maxBlocks} Slack sections reached`
-          : `Add Another Slack Section (${channels.length}/${maxBlocks})`}
-      </button>
+        data={channels}
+        maxBlocks={maxBlocks}
+      />
 
       {invalidChannelId && <ErrorText>{invalidChannelId}</ErrorText>}
     </div>

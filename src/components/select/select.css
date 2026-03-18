@@ -52,7 +52,6 @@
 .country-select-btn {
   height: 2.5rem;
   padding: 0 12px;
-  background: #0b1623;
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   border-radius: 8px;
@@ -100,24 +99,27 @@
   cursor: pointer;
 }
 
-.country-code-option {
+/* select options list item */
+.item-inactive {
   font-size: 12px;
   padding: 10px;
   cursor: pointer;
+  margin-bottom: 4px;
+  border-radius: 8px;
 }
 
-.country-code-selected {
-  background: rgba(255, 255, 255, 0.08);
+.item-active {
+  font-size: 12px;
   border-radius: 8px;
   padding: 10px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  color: hsl(210, 98%, 48%);
 }
 
-.caret {
-  font-size: 10px;
-  margin-left: 10px;
-}
+/* select options list item */
 
-.country-select-list {
+/* .country-select-list {
   position: fixed;
   width: 180px;
   background: #0b1623;
@@ -138,4 +140,23 @@
 .country-select-list li:hover {
   background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
+} */
+
+.country-code-option {
+  font-size: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
+
+.country-code-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* .country-code-selected {
+  background: rgba(37, 99, 235, 0.3);
+  border-radius: 8px;
+  padding: 10px;
+  color: #93c5fd;
+  font-weight: 500;
+} */

@@ -14,7 +14,6 @@ import { feedbackCustomizations } from "./customizations/feedback";
 import { navigationCustomizations } from "./customizations/navigation";
 import { surfacesCustomizations } from "./customizations/surfaces";
 import { paginationCustomizations } from "./customizations/pagination";
-import { ModeDebugger } from "./mode-debugger";
 import { colorSchemes, typography, shadows, shape } from "./theme-primitives";
 
 interface AppThemeProps {
@@ -107,7 +106,6 @@ export default function AppTheme(props: AppThemeProps) {
         modeStorageKey="app-color-mode"
         disableTransitionOnChange
       >
-        <ModeDebugger />
         <CssBaseline />
         {children}
       </ThemeProvider>

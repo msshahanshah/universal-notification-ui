@@ -19,6 +19,7 @@ import {
   type EmailRecipient as EmailRecipientType,
 } from "src/atoms/emailAtoms";
 import { useTheme } from "@mui/material/styles";
+import { AddButton } from "./helper";
 
 type ViewMode = "editor" | "preview";
 
@@ -42,7 +43,7 @@ export function EmailWrapper({
   onValueChange,
   maxBlocks = 5,
 }: EmailWrapperProps) {
-  const theme= useTheme()
+  const theme = useTheme();
   // Replace local state with atoms
   const [recipients, setRecipients] = useAtom(emailSectionsAtom);
   const [callbackData] = useAtom(emailCallbackDataAtom);
@@ -202,7 +203,13 @@ export function EmailWrapper({
                     marginBottom: 12,
                   }}
                 >
-                  <span style={{ fontSize: "14px", fontWeight: "bold", color: theme.vars?.palette.text.secondary }}>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: theme.vars?.palette.text.secondary,
+                    }}
+                  >
                     Email Section {index + 1}
                   </span>
                   <button
@@ -336,29 +343,12 @@ export function EmailWrapper({
             </div>
           ))}
 
-          <button
+          <AddButton
+            title="Email"
             onClick={addSection}
-            disabled={recipients.length >= maxBlocks}
-            style={{
-              padding: "6px 12px",
-              fontSize: "12px",
-              background:
-                recipients.length >= maxBlocks
-                  ? "rgba(128, 128, 128, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-              border: `1px solid ${recipients.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-              color: recipients.length >= maxBlocks ? "#888" : "#fff",
-              borderRadius: "6px",
-              cursor:
-                recipients.length >= maxBlocks ? "not-allowed" : "pointer",
-              transition: "all 0.2s",
-              marginTop: 8,
-            }}
-          >
-            {recipients.length >= maxBlocks
-              ? `Max ${maxBlocks} emails reached`
-              : `Add Another Email (${recipients.length}/${maxBlocks})`}
-          </button>
+            data={recipients}
+            maxBlocks={maxBlocks}
+          />
         </>
       )}
 
@@ -375,7 +365,10 @@ export function EmailWrapper({
               }}
             >
               <h4
-                style={{ margin: "0 0 12px 0", color: theme.vars?.palette.text.secondary }}
+                style={{
+                  margin: "0 0 12px 0",
+                  color: theme.vars?.palette.text.secondary,
+                }}
               >
                 Email Section {index + 1}
               </h4>

@@ -448,7 +448,7 @@ export default function MultipleNotification() {
             options={serviceOptions}
             placeholder="Select services..."
             multiple
-            style={{ color: "text.secondary" }}
+            style={{ color: "text.secondary",backgroundColor: theme.vars?.palette.background.paper }}
           />
         </div>
 
@@ -468,18 +468,8 @@ export default function MultipleNotification() {
             value={commonMessage}
             onChange={(e) => setCommonMessage(e.target.value)}
             placeholder="Enter message to be sent across all selected services"
-            style={{
-              width: "100%",
-              minHeight: 100,
-              padding: "12px",
-              borderRadius: "8px",
-              background: "hsla(220, 35%, 3%, 0.4)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "#fff",
-              fontSize: "13px",
-              fontFamily: '"Inter", sans-serif',
-              resize: "vertical",
-            }}
+            className="sms-textarea"
+            rows={6}
           />
         </div>
 

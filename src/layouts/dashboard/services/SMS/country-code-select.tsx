@@ -103,7 +103,7 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
         ref={buttonRef}
         onClick={toggleDropdown}
         aria-haspopup="listbox"
-        style={{ background: theme.vars?.palette.background.paper }}
+        // style={{ background: theme.vars?.palette.background.paper }}
       >
         {value}
         <span className="caret">▼</span>
@@ -116,40 +116,44 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
             className="country-select-list"
             role="listbox"
             style={{
-              position: 'fixed',
+              position: "fixed",
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
-              // width: `${dropdownPos.width}px`,
               color: theme.vars?.palette.text.secondary,
               backgroundColor: theme.vars?.palette.background.paper,
               border: `1px solid ${theme.vars?.palette.divider}`,
               zIndex: 9999,
             }}
           >
-          {" "}
-          {COUNTRY_CODES.map((c) => {
-            const selectedValue = c.code === value;
-            return (
-              <div
-                key={c.code}
-                role="option"
-                data-testid={`country-option-${c.iso}`}
-                onClick={() => {
-                  onChange(c.code);
-                  closeDropdown();
-                }}
-                className={
-                  selectedValue
-                    ? "country-code-selected"
-                    : "country-code-option"
-                }
-              >
-                {" "}
-                {c.country} ({c.code}){" "}
-              </div>
-            );
-          })}{" "}
-        </div>,
+            {" "}
+            {COUNTRY_CODES.map((c) => {
+              const selectedValue = c.code === value;
+              return (
+                <div
+                  key={c.code}
+                  role="option"
+                  data-testid={`country-option-${c.iso}`}
+                  onClick={() => {
+                    onChange(c.code);
+                    closeDropdown();
+                  }}
+                  className={
+                    selectedValue
+                      ? "item-active"
+                      : "item-inactive"
+                  }
+                  style={{
+                    backgroundColor: selectedValue
+                      ? theme.vars?.palette.background.default
+                      : "transparent",
+                  }}
+                >
+                  {" "}
+                  {c.country} ({c.code}){" "}
+                </div>
+              );
+            })}{" "}
+          </div>,
           document.body,
         )}
     </div>

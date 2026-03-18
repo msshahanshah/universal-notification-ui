@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 
 import "./select.css";
+import "@/components/index.css";
 
 type Option = {
   label: string;
@@ -25,7 +26,7 @@ export function Select({
   placeholder = "Select option",
   dataTestId,
   multiple = false,
-  style
+  style,
 }: Props) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -103,13 +104,27 @@ export function Select({
   };
 
   return (
-    <div className="common-select" style={style} data-testid={dataTestId} ref={containerRef}>
+    <div
+      className="common-select"
+      style={style}
+      data-testid={dataTestId}
+      ref={containerRef}
+    >
       <button
         type="button"
         className="country-select-btn"
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="listbox"
-        style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", minHeight: "2.5rem", paddingTop: multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0", justifyContent: "space-between" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "6px",
+          minHeight: "2.5rem",
+          paddingTop:
+            multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0",
+          justifyContent: "space-between",
+        }}
       >
         {multiple && Array.isArray(value) && value.length > 0 ? (
           <>
@@ -131,7 +146,9 @@ export function Select({
                 <button
                   type="button"
                   onClick={(e) => {
-                    const valueToRemove = options.find((opt) => opt.label === label)?.value;
+                    const valueToRemove = options.find(
+                      (opt) => opt.label === label,
+                    )?.value;
                     if (valueToRemove) handleRemoveChip(e, valueToRemove);
                   }}
                   style={{
@@ -149,7 +166,9 @@ export function Select({
                 </button>
               </span>
             ))}
-            <span className="caret" style={{ marginLeft: "auto" }}>▼</span>
+            <span className="caret" style={{ marginLeft: "auto" }}>
+              ▼
+            </span>
           </>
         ) : (
           <>
@@ -160,7 +179,15 @@ export function Select({
       </button>
 
       {open && (
-        <div className="select-list" role="listbox">
+        <div
+          className="select-list"
+          role="listbox"
+          style={{
+            backgroundColor: theme.vars?.palette.background.paper,
+            border: `1px solid ${theme.vars?.palette.divider}`,
+            zIndex: 9999,
+          }}
+        >
           {options.map((option) => {
             const selected = isSelected(option.value);
 
@@ -169,10 +196,18 @@ export function Select({
                 key={option.value}
                 role="option"
                 className={
-                  selected ? "select-option selected" : "select-option"
+                  selected
+                    ? "item-active"
+                    : "item-inactive"
                 }
                 onClick={() => handleSelect(option.value)}
-                style={{ display: "flex", alignItems: "center",padding: 10, color:theme.vars?.palette.text.secondary }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 10,
+                  color: theme.vars?.palette.text.secondary,
+                  backgroundColor: selected ? theme.vars?.palette.background.default : "transparent",
+                }}
               >
                 {multiple && (
                   <input type="checkbox" checked={selected} readOnly />
