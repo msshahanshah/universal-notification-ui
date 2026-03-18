@@ -172,7 +172,7 @@ export function SMSWrapper({
               }}
             >
               <span style={{ fontSize: "14px", fontWeight: "bold",color: theme.vars?.palette.text.secondary }}>
-                SMS {sectionIndex + 1}
+                SMS Section {sectionIndex + 1}
               </span>
               <button
                 onClick={() => removeSection(section.id)}

@@ -109,7 +109,7 @@ export function SlackWrapper({
                   color: theme.vars?.palette.text.secondary,
                 }}
               >
-                Slack {sectionIndex + 1}
+                Slack Section {sectionIndex + 1}
               </span>
               <button
                 onClick={() => removeSection(channel.id)}

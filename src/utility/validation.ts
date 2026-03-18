@@ -3,6 +3,7 @@
  */
 
 import { useAtom } from "jotai";
+import { emailSectionsAtom } from "src/atoms/emailAtoms";
 import { slackSectionsAtom } from "src/atoms/slackAtoms";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
 
@@ -31,6 +32,7 @@ export const validateAllServices = (
 ): ServiceValidation => {
   const [smsInputData, _] = useAtom(smsSectionsAtom);
   const [slackInputData, __] = useAtom(slackSectionsAtom);
+  const [emailInputData, ___] = useAtom(emailSectionsAtom);
   const validation: ServiceValidation = {
     email: { isFormValid: true, errors: {} },
     sms: { isFormValid: true, errors: {} },
@@ -39,7 +41,6 @@ export const validateAllServices = (
     errors: {},
   };
 
-  // Email validation
   if (selectedServices.includes("email")) {
     const emailErrors: string[] = [];
 
@@ -47,51 +48,167 @@ export const validateAllServices = (
       validation.email.isFormValid = false;
       emailErrors.push("Email service data is missing");
     } else {
-      const recipients = (emailData as any)?.recipients || [];
-      const hasValidRecipients = recipients.some(
-        (rec: any) => rec.to?.trim() !== "",
+      const sections = (emailData as any).sections || [];
+      console.log("sections",sections)
+
+      console.log("emailInputData",emailInputData)
+      // At least one destination must be provided
+      const hasValidDestination = emailInputData?.some(
+        ({ to }: any) => to?.trim() !== "",
       );
 
-      if (!hasValidRecipients) {
+      if (!hasValidDestination) {
         validation.email.isFormValid = false;
-        emailErrors.push("At least one email recipient is required");
+        emailErrors.push("At least one recipient email address is required");
       }
 
-      // Check for required fields
-      recipients.forEach((rec: any, index: number) => {
-        if (!rec.to?.trim()) {
-          emailErrors.push(`Email ${index + 1}: Recipient email is required`);
+      // Per-section validations
+      emailInputData.forEach((section: any, sectionIndex: number) => {
+        // Destination (To) is required
+
+        // Validate fromEmail format
+        if (
+          section?.from?.trim() &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.from.trim())
+        ) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Email in fromEmail is invalid`,
+          );
         }
-        if (!rec.subject?.trim()) {
-          emailErrors.push(`Email ${index + 1}: Subject is required`);
+
+        if (!section.to?.trim()) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: To can't be empty for email`,
+          );
+        }
+
+         // Validate destination email format
+        if (
+          section.to?.trim() &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.to.trim())
+        ) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Email in To is invalid`,
+          );
+        }
+
+
+        if (!section.subject?.trim()) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Subject can't be empty for email`,
+          );
+        }
+
+        // Validate CC format if provided
+        if (
+          section.cc?.trim() &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.cc.trim())
+        ) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Email in cc is invalid`,
+          );
+        }
+
+        // Validate BCC format if provided
+        if (
+          section.bcc?.trim() &&
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(section.bcc.trim())
+        ) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Email in bcc is invalid`,
+          );
+        }
+
+        // Body or commonMessage must be provided
+        if (!section.body?.trim() && !commonMessage.trim()) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: A body is required when common message is not provided`,
+          );
+        }
+
+        // attachments must be an array if present (do not alter existing attachment logic)
+        if (
+          section.attachments !== undefined &&
+          !Array.isArray(section.attachments)
+        ) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Attachments must be a valid list`,
+          );
         }
       });
+    }
 
-      // Check message requirements
-      const hasSeparateMessages = recipients.some(
-        (rec: any) => rec.separateMessage,
-      );
-      const allHaveMessages = recipients.every((rec: any) =>
-        rec.separateMessage ? rec.body?.trim() !== "" : true,
-      );
-
-      if (hasSeparateMessages && !allHaveMessages) {
-        validation.email.isFormValid = false;
-        emailErrors.push("All separate messages must have content");
-      }
-
-      if (!hasSeparateMessages && !commonMessage.trim()) {
-        validation.email.isFormValid = false;
-        emailErrors.push(
-          "Common message is required when separate messages are empty",
-        );
-      }
-
-      if (emailErrors.length > 0) {
-        validation.email.errors = { email: emailErrors };
-      }
+    if (emailErrors.length > 0) {
+      validation.email.errors = { email: emailErrors };
     }
   }
+
+  // // Email validation
+  // if (selectedServices.includes("email")) {
+  //   const emailErrors: string[] = [];
+
+  //   console.log("emailData",emailData)
+  //   if (!emailData || typeof emailData !== "object") {
+  //     validation.email.isFormValid = false;
+  //     emailErrors.push("Email service data is missing");
+  //   } else {
+  //     const recipients = (emailData as any)?.recipients || [];
+  //     console.log("recipients",recipients)
+  //     const hasValidRecipients = recipients.some(
+  //       (rec: any) => rec.destination?.trim() !== "",
+  //     );
+
+  //     // if (!hasValidRecipients) {
+  //     //   validation.email.isFormValid = false;
+  //     //   emailErrors.push("At least one Email Recipient is required");
+  //     // }
+
+  //     // Check for required fields
+  //     console.log("recipients",recipients)
+  //     recipients.forEach((rec: any, index: number) => {
+  //       if (!rec.destination?.trim()) {
+  //         emailErrors.push(`Email ${index + 1}: Recipient email is required`);
+  //       }
+  //       if (!rec.subject?.trim()) {
+  //         emailErrors.push(`Email ${index + 1}: Subject is required`);
+  //       }
+  //     });
+
+  //     // Check message requirements
+  //     const hasSeparateMessages = recipients.some(
+  //       (rec: any) => rec.separateMessage,
+  //     );
+  //     const allHaveMessages = recipients.every((rec: any) =>
+  //       rec.separateMessage ? rec.body?.trim() !== "" : true,
+  //     );
+
+  //     if (hasSeparateMessages && !allHaveMessages) {
+  //       validation.email.isFormValid = false;
+  //       emailErrors.push("All separate messages must have content");
+  //     }
+
+  //     if (!hasSeparateMessages && !commonMessage.trim()) {
+  //       validation.email.isFormValid = false;
+  //       emailErrors.push(
+  //         "Common message is required when separate messages are empty",
+  //       );
+  //     }
+
+  //     console.log("emailErrors",emailErrors)
+
+  //     if (emailErrors.length > 0) {
+  //       validation.email.errors = { email: emailErrors };
+  //     }
+  //   }
+  // }
 
   // SMS validation
   if (selectedServices.includes("sms")) {
@@ -177,9 +294,7 @@ export const validateAllServices = (
 
       if (!hasValidDestination) {
         validation.slack.isFormValid = false;
-        slackErrors.push(
-          "At least one Channel ID is required",
-        );
+        slackErrors.push("At least one Channel ID is required");
       }
 
       // Each section must have a message, or commonMessage must be provided
