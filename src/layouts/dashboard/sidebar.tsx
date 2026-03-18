@@ -214,7 +214,9 @@ const Sidebar = ({
         {/* Services Sub Tabs */}
         {open && (
           <Collapse
-            in={open && (isServicesActive || (isSearching && matchesServiceItems))}
+            in={
+              open && (isServicesActive || (isSearching && matchesServiceItems))
+            }
             timeout="auto"
             unmountOnExit
           >
@@ -241,7 +243,7 @@ const Sidebar = ({
                       primaryTypographyProps={{
                         fontSize: 13,
                       }}
-                      style={{ marginLeft: 10 }}
+                      style={{ marginLeft: 10, maxWidth: "min-content", minWidth: 100 }}
                     />
                   </ListItemButton>
                 );
