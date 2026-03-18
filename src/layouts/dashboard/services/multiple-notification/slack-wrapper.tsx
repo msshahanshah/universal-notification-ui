@@ -37,8 +37,6 @@ export function SlackWrapper({
   const [channels, setChannels] = useAtom(slackSectionsAtom);
   const [callbackData] = useAtom(slackCallbackDataAtom);
 
-  console.log("channels", channels);
-
   // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
     if (onValueChange) {
