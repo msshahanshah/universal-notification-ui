@@ -239,7 +239,7 @@ export function EmailWrapper({
                 // className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
-                placeholder="from"
+                placeholder="From"
                 value={recipient.from}
                 onChange={(e) =>
                   updateSection(recipient.id, "from", e.target.value)
@@ -249,10 +249,10 @@ export function EmailWrapper({
 
               <Input
                 label="To"
-                // className="sms-input"
+                
                 type="email"
                 id={`to-${recipient.id}`}
-                placeholder="to"
+                placeholder="To"
                 value={recipient.to}
                 onChange={(e) =>
                   updateSection(recipient.id, "to", e.target.value)

@@ -2,6 +2,10 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Typography, useTheme } from "@mui/material";
 import api from "src/lib/axios";
+import { useSetAtom } from "jotai";
+import { smsSectionsAtom } from "src/atoms/smsAtoms";
+import { slackSectionsAtom } from "src/atoms/slackAtoms";
+import { emailSectionsAtom } from "src/atoms/emailAtoms";
 
 import { Select } from "src/components/select";
 import Button from "src/components/button";
@@ -67,14 +71,15 @@ export default function MultipleNotification() {
               Authorization: ``,
             },
           });
-
-          showSnackbar("Notification request accepted and queued.", "success");
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
         } catch (err) {
           console.error("❌ Upload failed:", fileObj.name, err);
-          showSnackbar("Failed to upload attachments", "error");
+
+          setTimeout(() => {
+            showSnackbar("Email: Failed to upload attachments", "error");
+          }, 30000);
           throw err;
         }
       }
@@ -95,8 +100,95 @@ export default function MultipleNotification() {
 
   // Remove service from selectedServices
   const removeService = (serviceType: ServiceType) => {
-    setSelectedServices(prev => prev.filter(service => service !== serviceType));
+    setSelectedServices((prev) =>
+      prev.filter((service) => service !== serviceType),
+    );
   };
+
+  // Atom setters for resetting service fields
+  const setSmsSections = useSetAtom(smsSectionsAtom);
+  const setSlackSections = useSetAtom(slackSectionsAtom);
+  const setEmailSections = useSetAtom(emailSectionsAtom);
+
+  // Reset functions for each service
+  const resetSmsFields = useCallback(() => {
+    setSmsSections([
+      {
+        id: "1",
+        numbers: [{ id: "1", countryCode: "+91", number: "" }],
+        message: "",
+        separateMessage: false,
+      },
+    ]);
+  }, [setSmsSections]);
+
+  const resetSlackFields = useCallback(() => {
+    setSlackSections([
+      {
+        id: "1",
+        channelID: "",
+        message: "",
+        separateMessage: false,
+      },
+    ]);
+  }, [setSlackSections]);
+
+  const resetEmailFields = useCallback(() => {
+    setEmailSections([
+      {
+        id: "1",
+        from: "",
+        to: "",
+        cc: "",
+        bcc: "",
+        subject: "",
+        body: "",
+        attachments: [],
+        separateMessage: false,
+      },
+    ]);
+  }, [setEmailSections]);
+
+  // Main function to reset service fields
+  const resetServiceFields = useCallback(
+    (services: ServiceType[]) => {
+      services.forEach((service) => {
+        switch (service) {
+          case "sms":
+            resetSmsFields();
+            break;
+          case "slack":
+            resetSlackFields();
+            break;
+          case "email":
+            resetEmailFields();
+            break;
+        }
+      });
+    },
+    [resetSmsFields, resetSlackFields, resetEmailFields],
+  );
+
+  // Handle service selection with field reset
+  const handleServiceSelection = useCallback(
+    (newServices: ServiceType[]) => {
+      const currentServices = selectedServices;
+
+      // Find newly added services
+      const newlyAddedServices = newServices.filter(
+        (service) => !currentServices.includes(service),
+      );
+
+      // Reset fields for newly selected services
+      if (newlyAddedServices.length > 0) {
+        resetServiceFields(newlyAddedServices);
+      }
+
+      // Update selected services
+      setSelectedServices(newServices);
+    },
+    [selectedServices, resetServiceFields],
+  );
 
   // Store wrapper values
   const [wrapperValues, setWrapperValues] = useState<{
@@ -136,8 +228,8 @@ export default function MultipleNotification() {
     commonMessage,
   );
 
-  // console.log("validationResult", validationResult?.email?.errors?.email);
-  // console.log("wrapperValues.email", wrapperValues.email);
+  console.log("isPending", isPending);
+  console.log("validationResult", validationResult);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -449,11 +541,14 @@ export default function MultipleNotification() {
           </label>
           <Select
             value={selectedServices}
-            onChange={(val) => setSelectedServices(val as ServiceType[])}
+            onChange={(val) => handleServiceSelection(val as ServiceType[])}
             options={serviceOptions}
             placeholder="Select services..."
             multiple
-            style={{ color: "text.secondary",backgroundColor: theme.vars?.palette.background.paper }}
+            style={{
+              color: "text.secondary",
+              backgroundColor: theme.vars?.palette.background.paper,
+            }}
           />
         </div>
 
@@ -519,7 +614,8 @@ export default function MultipleNotification() {
               maxBlocks={5}
             />
             {validationResult?.sms?.errors?.sms &&
-              Array.isArray(validationResult?.sms?.errors?.sms) && (
+              Array.isArray(validationResult?.sms?.errors?.sms) &&
+              validationResult?.sms?.errors?.sms?.length && (
                 <div style={{ color: "red", fontSize: "12px" }}>
                   {validationResult.sms.errors.sms?.[0]}
                 </div>
@@ -568,7 +664,8 @@ export default function MultipleNotification() {
               maxBlocks={5}
             />
             {validationResult?.email?.errors?.email &&
-              Array.isArray(validationResult?.email?.errors?.email) && (
+              Array.isArray(validationResult?.email?.errors?.email) &&
+              validationResult?.email?.errors?.email?.length && (
                 <div style={{ color: "red", fontSize: "12px", marginTop: 20 }}>
                   {validationResult.email.errors.email?.[0]}
                 </div>
@@ -616,7 +713,8 @@ export default function MultipleNotification() {
               maxBlocks={5}
             />
             {validationResult?.slack?.errors?.slack &&
-              Array.isArray(validationResult?.slack?.errors?.slack) && (
+              Array.isArray(validationResult?.slack?.errors?.slack) &&
+              validationResult?.slack?.errors?.slack?.length && (
                 <div style={{ color: "red", fontSize: "12px" }}>
                   {validationResult.slack.errors.slack?.[0]}
                 </div>
@@ -636,7 +734,7 @@ export default function MultipleNotification() {
             <Button
               label={isPending ? "Sending..." : "Send to All Services"}
               className={isPending ? "button-disabled" : "send-button"}
-              // disabled={isSendButtonDisabled}
+              disabled={isSendButtonDisabled}
               onClick={handleSendToAllServices}
             />
           </div>

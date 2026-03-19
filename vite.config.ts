@@ -9,6 +9,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5000,
+    host: true,
+    port: 5173,
+    allowedHosts: ["callie-prefearful-subculturally.ngrok-free.dev"],
+     hmr: {
+      clientPort: 443,
+    },
   },
 });
