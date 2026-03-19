@@ -45,7 +45,7 @@ export const AddButton = ({
   title: string;
 }) => {
   /** `true` when the current section count has met or exceeded `maxBlocks`. */
-  const limitExceed = data.length >= maxBlocks;
+  const limitExceed = data?.length >= maxBlocks;
 
   return (
     <button
@@ -63,7 +63,7 @@ export const AddButton = ({
     >
       {limitExceed
         ? `Max ${maxBlocks} ${title} sections reached`
-        : `Add Another ${title} Section (${data.length}/${maxBlocks})`}
+        : `Add Another ${title} Section (${data?.length}/${maxBlocks})`}
     </button>
   );
 };
