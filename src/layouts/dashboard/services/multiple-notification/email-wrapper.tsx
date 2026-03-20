@@ -21,6 +21,7 @@ import {
 } from "src/atoms/emailAtoms";
 import { useTheme } from "@mui/material/styles";
 import { AddButton } from "./helper";
+import { renameDuplicateFiles } from "src/utility/helper";
 
 type ViewMode = "editor" | "preview";
 
@@ -48,7 +49,7 @@ export function EmailWrapper({
   const inputStyle: React.CSSProperties = {
     backgroundColor: theme.vars?.palette.background.paper,
     color: theme.vars?.palette.text.secondary,
-    border: "1px solid rgba(255, 255, 255, 0.25) !important",
+    border: `1px solid ${theme.vars?.palette.divider} !important`,
     width: "100%",
     height: 42,
     marginBottom: 12,
@@ -147,23 +148,41 @@ export function EmailWrapper({
 
     if (!files.length) return;
 
-    const newAttachments = files.map((file) => {
+    // Rename duplicate files to avoid conflicts
+    const renamedFiles = renameDuplicateFiles(files);
+
+    const newAttachments = renamedFiles.map((file, index) => {
       const isImage = file.type.startsWith("image/");
 
-      return {
-        id: crypto.randomUUID(),
+      console.log(`renamed file ${index}:`, {
         name: file.name,
         size: file.size,
         type: file.type,
-        file, // 🔥 store real File
-        previewUrl: isImage ? URL.createObjectURL(file) : undefined,
+        lastModified: file.lastModified,
+        isSameObject: file === files[index]
+      });
+
+      const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+      console.log(`previewUrl for ${file.name}:`, previewUrl);
+
+      return {
+        id: crypto.randomUUID(),
+        name: file.name, // This will now be the renamed filename
+        size: file.size,
+        type: file.type,
+        file, // 🔥 store real File (with new name)
+        previewUrl,
       };
     });
 
-    updateSection(recipientId, "attachments", [
+    const newAttachment = [
       ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
       ...newAttachments,
-    ]);
+    ];
+
+    console.log("newAttachment",newAttachment)
+
+    updateSection(recipientId, "attachments", newAttachment);
 
     // allow re-selecting same file again
     e.target.value = "";
@@ -249,7 +268,6 @@ export function EmailWrapper({
 
               <Input
                 label="To"
-                
                 type="email"
                 id={`to-${recipient.id}`}
                 placeholder="To"

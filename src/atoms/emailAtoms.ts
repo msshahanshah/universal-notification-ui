@@ -72,6 +72,11 @@ export const emailCallbackDataAtom = atom((get) => {
   
   return {
     from: fromEmail,
-    recipients: sections,
+    recipients: sections, // Return processed sections (payload format)
   };
+});
+
+// Atom to access raw recipients with file objects for uploads
+export const emailRawRecipientsAtom = atom((get) => {
+  return get(emailSectionsAtom);
 });

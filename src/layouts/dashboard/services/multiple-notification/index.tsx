@@ -2,10 +2,13 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Typography, useTheme } from "@mui/material";
 import api from "src/lib/axios";
-import { useSetAtom } from "jotai";
+import { useSetAtom, useAtom } from "jotai";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
 import { slackSectionsAtom } from "src/atoms/slackAtoms";
-import { emailSectionsAtom } from "src/atoms/emailAtoms";
+import {
+  emailSectionsAtom,
+  emailRawRecipientsAtom,
+} from "src/atoms/emailAtoms";
 
 import { Select } from "src/components/select";
 import Button from "src/components/button";
@@ -43,14 +46,21 @@ export default function MultipleNotification() {
       const urls = presigned?.urls;
 
       if (!urls?.length) continue;
-      // console.log("urls found,", urls);
+      // console.log("attachmentsCopy", attachmentsCopy);
 
       for (let j = 0; j < urls.length; j++) {
         const urlEntry = urls[j];
-        const fileObj = attachmentsCopy[i];
-        // console.log("file found", fileObj);
+        
+        // Find the file that matches this URL's filename
+        const filenameFromUrl = urlEntry.s3.fields?.key?.split('/').pop();
+        const fileObj = attachmentsCopy.find(file => file.name === filenameFromUrl);
+        
+        // console.log(`Looking for file with name "${filenameFromUrl}", found:`, fileObj?.name);
 
-        if (!fileObj) continue;
+        if (!fileObj) {
+          console.warn(`No file found for URL with filename: ${filenameFromUrl}`);
+          continue;
+        }
 
         const formData = new FormData();
 
@@ -60,7 +70,7 @@ export default function MultipleNotification() {
           formData.append(key, value as string);
         });
 
-        // console.log("urlEntry.s3.url", urlEntry.s3.url);
+        // console.log("fileObj", fileObj);
         // File MUST be last
         formData.append("file", fileObj);
 
@@ -109,6 +119,9 @@ export default function MultipleNotification() {
   const setSmsSections = useSetAtom(smsSectionsAtom);
   const setSlackSections = useSetAtom(slackSectionsAtom);
   const setEmailSections = useSetAtom(emailSectionsAtom);
+
+  // Raw recipients for file uploads
+  const [emailRawRecipients] = useAtom(emailRawRecipientsAtom);
 
   // Reset functions for each service
   const resetSmsFields = useCallback(() => {
@@ -228,8 +241,8 @@ export default function MultipleNotification() {
     commonMessage,
   );
 
-  console.log("isPending", isPending);
-  console.log("validationResult", validationResult);
+  // console.log("isPending", isPending);
+  // console.log("validationResult", validationResult);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -400,20 +413,29 @@ export default function MultipleNotification() {
 
     // Collect all attachments for upload
     const allAttachments: any[] = [];
+
+    // console.log("wrapperValues.email", wrapperValues.email);
+    // console.log("emailRawRecipients", emailRawRecipients);
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {
         // Find the corresponding recipient to get the actual file objects
-        const recipient = wrapperValues.email?.recipients.find(
+        const recipient = emailRawRecipients.find(
           (rec) =>
             rec.to === email.destination ||
             rec.destination === email.destination,
         );
         if (recipient) {
           // console.log("recipient", recipient);
-          allAttachments.push(...recipient.attachments);
+          // Extract only the actual File objects from attachment objects
+          const fileObjects = recipient.attachments
+            .map(att => att.file)
+            .filter(file => file instanceof File);
+          allAttachments.push(...fileObjects);
         }
       }
     });
+
+    // console.log("allAttachments", allAttachments);
 
     // console.log("final payload", payload);
     sendNotifications(payload, {
@@ -463,12 +485,14 @@ export default function MultipleNotification() {
           30000,
         );
 
-        if (!hasAttachments || allAttachments.length === 0) {
+        const attachmentsCopy = [...allAttachments];
+
+        if (!hasAttachments || attachmentsCopy.length === 0) {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
         } else if (data?.email?.success) {
-          await uploadToS3FromAttachments(data, allAttachments);
+          await uploadToS3FromAttachments(data, attachmentsCopy);
         }
       },
       onError: (error: any) => {
