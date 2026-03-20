@@ -48,7 +48,7 @@ export function EmailWrapper({
   const inputStyle: React.CSSProperties = {
     backgroundColor: theme.vars?.palette.background.paper,
     color: theme.vars?.palette.text.secondary,
-    border: "1px solid rgba(255, 255, 255, 0.25) !important",
+    border: `1px solid ${theme.vars?.palette.divider} !important`,
     width: "100%",
     height: 42,
     marginBottom: 12,
