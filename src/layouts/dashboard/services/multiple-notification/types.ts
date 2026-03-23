@@ -19,11 +19,23 @@ export interface SlackNotification {
   message: string;
 }
 
+export interface WhatsappNotification {
+  destination: string;
+  subject: string;
+  body: string;
+  attachments?: string[];
+  uniqueKey?: string;
+  fromEmail?: string;
+  cc?: string;
+  bcc?: string;
+}
+
 export interface MultipleNotificationPayload {
   commonMessage: string;
   sms?: SMSNotification[];
   email?: EmailNotification[];
   slack?: SlackNotification[];
+  whatsapp?: WhatsappNotification[];
 }
 
-export type ServiceType = "sms" | "email" | "slack";
+export type ServiceType = "sms" | "email" | "slack" | "whatsapp";

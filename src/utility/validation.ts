@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { emailSectionsAtom } from "src/atoms/emailAtoms";
 import { slackSectionsAtom } from "src/atoms/slackAtoms";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
+import { whatsappSectionsAtom } from "src/atoms/whatsappAtoms";
 
 export interface ValidationResult {
   isFormValid: boolean;
@@ -16,6 +17,7 @@ export interface ServiceValidation {
   email: ValidationResult;
   sms: ValidationResult;
   slack: ValidationResult;
+  whatsapp: ValidationResult;
   isFormValid: boolean;
   errors: Record<string, string[]>;
 }
@@ -28,15 +30,18 @@ export const validateAllServices = (
   emailData: any,
   smsData: any,
   slackData: any,
+  whatsappData: any,
   commonMessage: string,
 ): ServiceValidation => {
   const [smsInputData, _] = useAtom(smsSectionsAtom);
   const [slackInputData, __] = useAtom(slackSectionsAtom);
   const [emailInputData, ___] = useAtom(emailSectionsAtom);
+  const [whatsappInputData, ____] = useAtom(whatsappSectionsAtom);
   const validation: ServiceValidation = {
     email: { isFormValid: true, errors: {} },
     sms: { isFormValid: true, errors: {} },
     slack: { isFormValid: true, errors: {} },
+    whatsapp: { isFormValid: true, errors: {} },
     isFormValid: true,
     errors: {},
   };
@@ -142,7 +147,7 @@ export const validateAllServices = (
       });
     }
 
-    console.log("emailErrors",emailErrors)
+    console.log("emailErrors", emailErrors);
 
     if (emailErrors.length > 0) {
       validation.email.errors = { email: emailErrors };
@@ -273,57 +278,101 @@ export const validateAllServices = (
     }
   }
 
-  // Common message validation
-  // if (selectedServices.length > 0 && !commonMessage.trim()) {
-  //   // Add common message error to all services
-  //   if (validation.email.isFormValid) {
-  //     validation.email.isFormValid = false;
-  //     validation.email.errors = {
-  //       ...validation.email.errors,
-  //       commonMessage: [
-  //         "A message is required when common message is not provided",
-  //       ],
-  //     };
-  //   }
+  // WhatsApp validation
+  if (selectedServices.includes("whatsapp")) {
+    const whatsappErrors: string[] = [];
 
-  //   if (validation.sms.isFormValid) {
-  //     validation.sms.isFormValid = false;
-  //     validation.sms.errors = {
-  //       ...validation.sms.errors,
-  //       commonMessage: [
-  //         "A message is required when common message is not provided",
-  //       ],
-  //     };
-  //   }
+    if (!whatsappData || typeof whatsappData !== "object") {
+      validation.whatsapp.isFormValid = false;
+      whatsappErrors.push("WhatsApp service data is missing");
+    } else {
+      console.log("whatsappInputData",whatsappInputData)
+      const sections = (whatsappData as any).sections || [];
+      // At least one destination must be provided
+      const hasValidDestination = whatsappInputData?.some(
+        ({ to }: any) => to?.trim() !== "",
+      );
 
-  //   if (validation.slack.isFormValid) {
-  //     validation.slack.isFormValid = false;
-  //     validation.slack.errors = {
-  //       ...validation.slack.errors,
-  //       commonMessage: [
-  //         "A message is required when common message is not provided",
-  //       ],
-  //     };
-  //   }
-  // }
+      if (!hasValidDestination) {
+        validation.whatsapp.isFormValid = false;
+        whatsappErrors.push("At least one recipient phone number is required");
+      }
+
+      // Per-section validations
+      whatsappInputData.forEach((section: any, sectionIndex: number) => {
+        // Destination is required
+        if (!section.to?.trim()) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: To is required`,
+          );
+        }
+
+        // Validate destination phone format (basic validation)
+        if (
+          section.to?.trim() &&
+          !/^[\d\s\-\+\(\)]+$/.test(section.to.trim())
+        ) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Phone number format is invalid`,
+          );
+        }
+
+        // Body or commonMessage must be provided
+        if (!section.body?.trim() && !commonMessage.trim()) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: A body is required when common message is not provided`,
+          );
+        }
+
+        // attachments must be an array if present
+        if (
+          section.attachments !== undefined &&
+          !Array.isArray(section.attachments)
+        ) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Attachments must be a valid list`,
+          );
+        }
+
+        // Check if uniqueKey is present when attachments exist
+        // if (section.attachments && section.attachments.length > 0 && !section.uniqueKey?.trim()) {
+        //   validation.whatsapp.isFormValid = false;
+        //   whatsappErrors.push(
+        //     `WhatsApp Section ${sectionIndex + 1}: Unique key is required when attachments are present`,
+        //   );
+        // }
+      });
+    }
+
+    if (whatsappErrors.length > 0) {
+      validation.whatsapp.errors = { whatsapp: whatsappErrors };
+    }
+  }
 
   // Overall validation
   const overallValid =
     validation.email.isFormValid &&
     validation.sms.isFormValid &&
-    validation.slack.isFormValid;
+    validation.slack.isFormValid &&
+    validation.whatsapp.isFormValid;
 
-    console.log("validation",validation)
+  console.log("validation", validation);
 
   return {
     email: validation.email,
     sms: validation.sms,
     slack: validation.slack,
+    whatsapp: validation.whatsapp,
     isFormValid: overallValid,
     errors: {
       email: Object.values(validation.email.errors).flat(),
       sms: Object.values(validation.sms.errors).flat(),
       slack: Object.values(validation.slack.errors).flat(),
+      whatsapp: Object.values(validation.whatsapp.errors).flat(),
     },
   };
 };
