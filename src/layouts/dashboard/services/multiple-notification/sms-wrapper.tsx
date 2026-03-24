@@ -11,6 +11,7 @@ import { useSnackbar } from "src/provider/snackbar";
 import { logsKeys } from "src/api/queryKeys";
 
 import "../SMS/sms-composer.css";
+import "./index.css";
 import { CountryCodeSelect } from "../SMS/country-code-select";
 import {
   smsSectionsAtom,
@@ -18,6 +19,7 @@ import {
   type SMSNumber,
   type SMSSection,
 } from "src/atoms/smsAtoms";
+import { AddButton } from "./helper";
 
 interface SMSWrapperProps {
   showMessage: boolean;
@@ -143,7 +145,10 @@ export function SMSWrapper({
   };
 
   return (
-    <div className="sms-wrapper">
+    <div
+      className="sms-wrapper"
+      style={{ backgroundColor: theme.vars?.palette.background.paper }}
+    >
       {sections.map((section, sectionIndex) => (
         <div
           key={section.id}
@@ -154,7 +159,7 @@ export function SMSWrapper({
             borderRadius: "8px",
           }}
         >
-          {sections.length > 1 && (
+          {sections.length >= 1 && (
             <div
               style={{
                 display: "flex",
@@ -172,18 +177,14 @@ export function SMSWrapper({
               >
                 SMS Section {sectionIndex + 1}
               </span>
-              <button
-                onClick={() => removeSection(section.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "red",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
+              {sectionIndex !== 0 && (
+                <button
+                  onClick={() => removeSection(section.id)}
+                  className="remove-btn"
+                >
+                  ×
+                </button>
+              )}
             </div>
           )}
 
@@ -225,18 +226,12 @@ export function SMSWrapper({
                   const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
                   updateNumberInSection(section.id, num.id, "number", onlyNums);
                 }}
+                style={{ color: "#fff" }}
               />
               {section.numbers.length > 1 && (
                 <button
                   onClick={() => removeNumberFromSection(section.id, num.id)}
-                  style={{
-                    marginLeft: 8,
-                    cursor: "pointer",
-                    background: "transparent",
-                    border: "none",
-                    color: "red",
-                    fontSize: 18,
-                  }}
+                  className="remove-btn"
                 >
                   ×
                 </button>
@@ -246,8 +241,7 @@ export function SMSWrapper({
           <Button
             label="Add Another Number"
             onClick={() => addNumberToSection(section.id)}
-            className="sms-add-btn"
-            style={{ background: theme.vars?.palette.background.paper }}
+            className="add-btn"
           />
 
           {/* Separate Message Toggle for each SMS section */}
@@ -260,21 +254,8 @@ export function SMSWrapper({
                   !section.separateMessage,
                 )
               }
-              style={{
-                padding: "4px 8px",
-                fontSize: "10px",
-                background: section.separateMessage
-                  ? "rgba(76, 175, 80, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-                border: `1px solid ${section.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                color: section.separateMessage ? "#4CAF50" : "#fff",
-                borderRadius: "4px",
-                cursor: "pointer",
-                transition: "all 0.2s",
-                marginTop: 8,
-                marginBottom: 8,
-                width: "100%",
-              }}
+              className="add-btn"
+              style={{ width: "100%" }}
             >
               {section.separateMessage
                 ? "Use common message"
@@ -292,7 +273,6 @@ export function SMSWrapper({
                   }}
                 >
                   Message {sectionIndex + 1}
-                  <span style={{ color: "red", marginLeft: 2 }}>*</span>
                 </label>
                 <textarea
                   className="sms-textarea"
@@ -308,29 +288,12 @@ export function SMSWrapper({
           </>
         </div>
       ))}
-
-      <button
+      <AddButton
+        title="SMS"
         onClick={addSection}
-        disabled={sections.length >= maxBlocks}
-        style={{
-          padding: "6px 12px",
-          fontSize: "12px",
-          background:
-            sections.length >= maxBlocks
-              ? "rgba(128, 128, 128, 0.2)"
-              : "rgba(255, 255, 255, 0.1)",
-          border: `1px solid ${sections.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-          color: sections.length >= maxBlocks ? "#888" : "#fff",
-          borderRadius: "6px",
-          cursor: sections.length >= maxBlocks ? "not-allowed" : "pointer",
-          transition: "all 0.2s",
-          marginTop: 8,
-        }}
-      >
-        {sections.length >= maxBlocks
-          ? `Max ${maxBlocks} SMS sections reached`
-          : `Add Another SMS Section (${sections.length}/${maxBlocks})`}
-      </button>
+        data={sections}
+        maxBlocks={maxBlocks}
+      />
     </div>
   );
 }

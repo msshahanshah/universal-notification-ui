@@ -142,69 +142,12 @@ export const validateAllServices = (
       });
     }
 
+    console.log("emailErrors",emailErrors)
+
     if (emailErrors.length > 0) {
       validation.email.errors = { email: emailErrors };
     }
   }
-
-  // // Email validation
-  // if (selectedServices.includes("email")) {
-  //   const emailErrors: string[] = [];
-
-  //   console.log("emailData",emailData)
-  //   if (!emailData || typeof emailData !== "object") {
-  //     validation.email.isFormValid = false;
-  //     emailErrors.push("Email service data is missing");
-  //   } else {
-  //     const recipients = (emailData as any)?.recipients || [];
-  //     console.log("recipients",recipients)
-  //     const hasValidRecipients = recipients.some(
-  //       (rec: any) => rec.destination?.trim() !== "",
-  //     );
-
-  //     // if (!hasValidRecipients) {
-  //     //   validation.email.isFormValid = false;
-  //     //   emailErrors.push("At least one Email Recipient is required");
-  //     // }
-
-  //     // Check for required fields
-  //     console.log("recipients",recipients)
-  //     recipients.forEach((rec: any, index: number) => {
-  //       if (!rec.destination?.trim()) {
-  //         emailErrors.push(`Email ${index + 1}: Recipient email is required`);
-  //       }
-  //       if (!rec.subject?.trim()) {
-  //         emailErrors.push(`Email ${index + 1}: Subject is required`);
-  //       }
-  //     });
-
-  //     // Check message requirements
-  //     const hasSeparateMessages = recipients.some(
-  //       (rec: any) => rec.separateMessage,
-  //     );
-  //     const allHaveMessages = recipients.every((rec: any) =>
-  //       rec.separateMessage ? rec.body?.trim() !== "" : true,
-  //     );
-
-  //     if (hasSeparateMessages && !allHaveMessages) {
-  //       validation.email.isFormValid = false;
-  //       emailErrors.push("All separate messages must have content");
-  //     }
-
-  //     if (!hasSeparateMessages && !commonMessage.trim()) {
-  //       validation.email.isFormValid = false;
-  //       emailErrors.push(
-  //         "Common message is required when separate messages are empty",
-  //       );
-  //     }
-
-  //     console.log("emailErrors",emailErrors)
-
-  //     if (emailErrors.length > 0) {
-  //       validation.email.errors = { email: emailErrors };
-  //     }
-  //   }
-  // }
 
   // SMS validation
   if (selectedServices.includes("sms")) {
@@ -290,6 +233,7 @@ export const validateAllServices = (
 
       // Each section must have a message, or commonMessage must be provided
       slackInputData.forEach((section: any, sectionIndex: number) => {
+        console.log("section", section);
         if (!section.message?.trim() && !commonMessage.trim()) {
           validation.slack.isFormValid = false;
           slackErrors.push(
@@ -304,6 +248,23 @@ export const validateAllServices = (
             `Slack Section ${sectionIndex + 1}: Destination is required`,
           );
         }
+
+        const destination = section.destination || section.channelID;
+
+        if (destination?.trim()) {
+          const channelIds = destination
+            .split(",")
+            .map((id: string) => id.trim())
+            .filter((id: string) => id.length > 0);
+
+          const uniqueChannelIds = new Set(channelIds);
+          if (channelIds.length !== uniqueChannelIds.size) {
+            validation.slack.isFormValid = false;
+            slackErrors.push(
+              `Slack Section ${sectionIndex + 1}: Duplicate Slack channel IDs are not allowed`,
+            );
+          }
+        }
       });
     }
 
@@ -313,44 +274,46 @@ export const validateAllServices = (
   }
 
   // Common message validation
-  if (selectedServices.length > 0 && !commonMessage.trim()) {
-    // Add common message error to all services
-    if (validation.email.isFormValid) {
-      validation.email.isFormValid = false;
-      validation.email.errors = {
-        ...validation.email.errors,
-        commonMessage: [
-          "A message is required when common message is not provided",
-        ],
-      };
-    }
+  // if (selectedServices.length > 0 && !commonMessage.trim()) {
+  //   // Add common message error to all services
+  //   if (validation.email.isFormValid) {
+  //     validation.email.isFormValid = false;
+  //     validation.email.errors = {
+  //       ...validation.email.errors,
+  //       commonMessage: [
+  //         "A message is required when common message is not provided",
+  //       ],
+  //     };
+  //   }
 
-    if (validation.sms.isFormValid) {
-      validation.sms.isFormValid = false;
-      validation.sms.errors = {
-        ...validation.sms.errors,
-        commonMessage: [
-          "A message is required when common message is not provided",
-        ],
-      };
-    }
+  //   if (validation.sms.isFormValid) {
+  //     validation.sms.isFormValid = false;
+  //     validation.sms.errors = {
+  //       ...validation.sms.errors,
+  //       commonMessage: [
+  //         "A message is required when common message is not provided",
+  //       ],
+  //     };
+  //   }
 
-    if (validation.slack.isFormValid) {
-      validation.slack.isFormValid = false;
-      validation.slack.errors = {
-        ...validation.slack.errors,
-        commonMessage: [
-          "A message is required when common message is not provided",
-        ],
-      };
-    }
-  }
+  //   if (validation.slack.isFormValid) {
+  //     validation.slack.isFormValid = false;
+  //     validation.slack.errors = {
+  //       ...validation.slack.errors,
+  //       commonMessage: [
+  //         "A message is required when common message is not provided",
+  //       ],
+  //     };
+  //   }
+  // }
 
   // Overall validation
   const overallValid =
     validation.email.isFormValid &&
     validation.sms.isFormValid &&
     validation.slack.isFormValid;
+
+    console.log("validation",validation)
 
   return {
     email: validation.email,

@@ -2,6 +2,13 @@ import { useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Typography, useTheme } from "@mui/material";
 import api from "src/lib/axios";
+import { useSetAtom, useAtom } from "jotai";
+import { smsSectionsAtom } from "src/atoms/smsAtoms";
+import { slackSectionsAtom } from "src/atoms/slackAtoms";
+import {
+  emailSectionsAtom,
+  emailRawRecipientsAtom,
+} from "src/atoms/emailAtoms";
 
 import { Select } from "src/components/select";
 import Button from "src/components/button";
@@ -39,14 +46,21 @@ export default function MultipleNotification() {
       const urls = presigned?.urls;
 
       if (!urls?.length) continue;
-      // console.log("urls found,", urls);
+      // console.log("attachmentsCopy", attachmentsCopy);
 
       for (let j = 0; j < urls.length; j++) {
         const urlEntry = urls[j];
-        const fileObj = attachmentsCopy[i];
-        // console.log("file found", fileObj);
+        
+        // Find the file that matches this URL's filename
+        const filenameFromUrl = urlEntry.s3.fields?.key?.split('/').pop();
+        const fileObj = attachmentsCopy.find(file => file.name === filenameFromUrl);
+        
+        // console.log(`Looking for file with name "${filenameFromUrl}", found:`, fileObj?.name);
 
-        if (!fileObj) continue;
+        if (!fileObj) {
+          console.warn(`No file found for URL with filename: ${filenameFromUrl}`);
+          continue;
+        }
 
         const formData = new FormData();
 
@@ -56,7 +70,7 @@ export default function MultipleNotification() {
           formData.append(key, value as string);
         });
 
-        // console.log("urlEntry.s3.url", urlEntry.s3.url);
+        // console.log("fileObj", fileObj);
         // File MUST be last
         formData.append("file", fileObj);
 
@@ -67,14 +81,15 @@ export default function MultipleNotification() {
               Authorization: ``,
             },
           });
-
-          showSnackbar("Notification request accepted and queued.", "success");
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
         } catch (err) {
           console.error("❌ Upload failed:", fileObj.name, err);
-          showSnackbar("Failed to upload attachments", "error");
+
+          setTimeout(() => {
+            showSnackbar("Email: Failed to upload attachments", "error");
+          }, 30000);
           throw err;
         }
       }
@@ -92,6 +107,101 @@ export default function MultipleNotification() {
     email: false,
     slack: false,
   });
+
+  // Remove service from selectedServices
+  const removeService = (serviceType: ServiceType) => {
+    setSelectedServices((prev) =>
+      prev.filter((service) => service !== serviceType),
+    );
+  };
+
+  // Atom setters for resetting service fields
+  const setSmsSections = useSetAtom(smsSectionsAtom);
+  const setSlackSections = useSetAtom(slackSectionsAtom);
+  const setEmailSections = useSetAtom(emailSectionsAtom);
+
+  // Raw recipients for file uploads
+  const [emailRawRecipients] = useAtom(emailRawRecipientsAtom);
+
+  // Reset functions for each service
+  const resetSmsFields = useCallback(() => {
+    setSmsSections([
+      {
+        id: "1",
+        numbers: [{ id: "1", countryCode: "+91", number: "" }],
+        message: "",
+        separateMessage: false,
+      },
+    ]);
+  }, [setSmsSections]);
+
+  const resetSlackFields = useCallback(() => {
+    setSlackSections([
+      {
+        id: "1",
+        channelID: "",
+        message: "",
+        separateMessage: false,
+      },
+    ]);
+  }, [setSlackSections]);
+
+  const resetEmailFields = useCallback(() => {
+    setEmailSections([
+      {
+        id: "1",
+        from: "",
+        to: "",
+        cc: "",
+        bcc: "",
+        subject: "",
+        body: "",
+        attachments: [],
+        separateMessage: false,
+      },
+    ]);
+  }, [setEmailSections]);
+
+  // Main function to reset service fields
+  const resetServiceFields = useCallback(
+    (services: ServiceType[]) => {
+      services.forEach((service) => {
+        switch (service) {
+          case "sms":
+            resetSmsFields();
+            break;
+          case "slack":
+            resetSlackFields();
+            break;
+          case "email":
+            resetEmailFields();
+            break;
+        }
+      });
+    },
+    [resetSmsFields, resetSlackFields, resetEmailFields],
+  );
+
+  // Handle service selection with field reset
+  const handleServiceSelection = useCallback(
+    (newServices: ServiceType[]) => {
+      const currentServices = selectedServices;
+
+      // Find newly added services
+      const newlyAddedServices = newServices.filter(
+        (service) => !currentServices.includes(service),
+      );
+
+      // Reset fields for newly selected services
+      if (newlyAddedServices.length > 0) {
+        resetServiceFields(newlyAddedServices);
+      }
+
+      // Update selected services
+      setSelectedServices(newServices);
+    },
+    [selectedServices, resetServiceFields],
+  );
 
   // Store wrapper values
   const [wrapperValues, setWrapperValues] = useState<{
@@ -131,8 +241,8 @@ export default function MultipleNotification() {
     commonMessage,
   );
 
-  // console.log("validationResult", validationResult?.email?.errors?.email);
-  // console.log("wrapperValues.email", wrapperValues.email);
+  // console.log("isPending", isPending);
+  // console.log("validationResult", validationResult);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -303,20 +413,29 @@ export default function MultipleNotification() {
 
     // Collect all attachments for upload
     const allAttachments: any[] = [];
+
+    // console.log("wrapperValues.email", wrapperValues.email);
+    // console.log("emailRawRecipients", emailRawRecipients);
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {
         // Find the corresponding recipient to get the actual file objects
-        const recipient = wrapperValues.email?.recipients.find(
+        const recipient = emailRawRecipients.find(
           (rec) =>
             rec.to === email.destination ||
             rec.destination === email.destination,
         );
         if (recipient) {
           // console.log("recipient", recipient);
-          allAttachments.push(...recipient.attachments);
+          // Extract only the actual File objects from attachment objects
+          const fileObjects = recipient.attachments
+            .map(att => att.file)
+            .filter(file => file instanceof File);
+          allAttachments.push(...fileObjects);
         }
       }
     });
+
+    // console.log("allAttachments", allAttachments);
 
     // console.log("final payload", payload);
     sendNotifications(payload, {
@@ -366,12 +485,14 @@ export default function MultipleNotification() {
           30000,
         );
 
-        if (!hasAttachments || allAttachments.length === 0) {
+        const attachmentsCopy = [...allAttachments];
+
+        if (!hasAttachments || attachmentsCopy.length === 0) {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
         } else if (data?.email?.success) {
-          await uploadToS3FromAttachments(data, allAttachments);
+          await uploadToS3FromAttachments(data, attachmentsCopy);
         }
       },
       onError: (error: any) => {
@@ -444,11 +565,14 @@ export default function MultipleNotification() {
           </label>
           <Select
             value={selectedServices}
-            onChange={(val) => setSelectedServices(val as ServiceType[])}
+            onChange={(val) => handleServiceSelection(val as ServiceType[])}
             options={serviceOptions}
             placeholder="Select services..."
             multiple
-            style={{ color: "text.secondary" }}
+            style={{
+              color: "text.secondary",
+              backgroundColor: theme.vars?.palette.background.paper,
+            }}
           />
         </div>
 
@@ -468,18 +592,8 @@ export default function MultipleNotification() {
             value={commonMessage}
             onChange={(e) => setCommonMessage(e.target.value)}
             placeholder="Enter message to be sent across all selected services"
-            style={{
-              width: "100%",
-              minHeight: 100,
-              padding: "12px",
-              borderRadius: "8px",
-              background: "hsla(220, 35%, 3%, 0.4)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "#fff",
-              fontSize: "13px",
-              fontFamily: '"Inter", sans-serif',
-              resize: "vertical",
-            }}
+            className="sms-textarea"
+            rows={6}
           />
         </div>
 
@@ -488,27 +602,44 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              SMS
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                SMS
+              </h3>
+              <button
+                onClick={() => removeService("sms")}
+                className="remove-btn"
+                aria-label="Remove SMS service"
+              >
+                ×
+              </button>
+            </div>
             <SMSWrapper
               showMessage={separateMessages.sms}
               onValueChange={handleSMSValueChange}
               maxBlocks={5}
             />
             {validationResult?.sms?.errors?.sms &&
-              Array.isArray(validationResult?.sms?.errors?.sms) && (
+              Array.isArray(validationResult?.sms?.errors?.sms) &&
+              validationResult?.sms?.errors?.sms?.length && (
                 <div style={{ color: "red", fontSize: "12px" }}>
                   {validationResult.sms.errors.sms?.[0]}
                 </div>
@@ -521,27 +652,44 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              Email
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                Email
+              </h3>
+              <button
+                onClick={() => removeService("email")}
+                className="remove-btn"
+                aria-label="Remove Email service"
+              >
+                ×
+              </button>
+            </div>
             <EmailWrapper
               showBody={separateMessages.email}
               onValueChange={handleEmailValueChange}
               maxBlocks={5}
             />
             {validationResult?.email?.errors?.email &&
-              Array.isArray(validationResult?.email?.errors?.email) && (
+              Array.isArray(validationResult?.email?.errors?.email) &&
+              validationResult?.email?.errors?.email?.length && (
                 <div style={{ color: "red", fontSize: "12px", marginTop: 20 }}>
                   {validationResult.email.errors.email?.[0]}
                 </div>
@@ -554,26 +702,43 @@ export default function MultipleNotification() {
           <div
             className="service-section"
             style={{
-              border: `1px solid rgba(255, 255, 255, 0.15)`,
+              border: `1px solid ${theme.vars?.palette.divider}`,
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
             }}
           >
-            <h3
+            <div
               style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 margin: "0 0 16px 0",
-                color: theme.vars?.palette.text.secondary,
               }}
             >
-              Slack
-            </h3>
+              <h3
+                style={{
+                  margin: 0,
+                  color: theme.vars?.palette.text.secondary,
+                }}
+              >
+                Slack
+              </h3>
+              <button
+                onClick={() => removeService("slack")}
+                className="remove-btn"
+                aria-label="Remove Slack service"
+              >
+                ×
+              </button>
+            </div>
             <SlackWrapper
               onValueChange={handleSlackValueChange}
               maxBlocks={5}
             />
             {validationResult?.slack?.errors?.slack &&
-              Array.isArray(validationResult?.slack?.errors?.slack) && (
+              Array.isArray(validationResult?.slack?.errors?.slack) &&
+              validationResult?.slack?.errors?.slack?.length && (
                 <div style={{ color: "red", fontSize: "12px" }}>
                   {validationResult.slack.errors.slack?.[0]}
                 </div>
@@ -593,7 +758,7 @@ export default function MultipleNotification() {
             <Button
               label={isPending ? "Sending..." : "Send to All Services"}
               className={isPending ? "button-disabled" : "send-button"}
-              // disabled={isSendButtonDisabled}
+              disabled={isSendButtonDisabled}
               onClick={handleSendToAllServices}
             />
           </div>

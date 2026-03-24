@@ -13,12 +13,15 @@ import { Toggle } from "src/components/toggle";
 import AttachmentSection from "../email/attachmentSection";
 
 import "../SMS/sms-composer.css";
+import "./index.css";
 import {
   emailSectionsAtom,
   emailCallbackDataAtom,
   type EmailRecipient as EmailRecipientType,
 } from "src/atoms/emailAtoms";
 import { useTheme } from "@mui/material/styles";
+import { AddButton } from "./helper";
+import { renameDuplicateFiles } from "src/utility/helper";
 
 type ViewMode = "editor" | "preview";
 
@@ -42,7 +45,17 @@ export function EmailWrapper({
   onValueChange,
   maxBlocks = 5,
 }: EmailWrapperProps) {
-  const theme= useTheme()
+  const theme = useTheme();
+  const inputStyle: React.CSSProperties = {
+    backgroundColor: theme.vars?.palette.background.paper,
+    color: theme.vars?.palette.text.secondary,
+    border: `1px solid ${theme.vars?.palette.divider} !important`,
+    width: "100%",
+    height: 42,
+    marginBottom: 12,
+    padding: "0 12px",
+    borderRadius: 6,
+  };
   // Replace local state with atoms
   const [recipients, setRecipients] = useAtom(emailSectionsAtom);
   const [callbackData] = useAtom(emailCallbackDataAtom);
@@ -135,23 +148,41 @@ export function EmailWrapper({
 
     if (!files.length) return;
 
-    const newAttachments = files.map((file) => {
+    // Rename duplicate files to avoid conflicts
+    const renamedFiles = renameDuplicateFiles(files);
+
+    const newAttachments = renamedFiles.map((file, index) => {
       const isImage = file.type.startsWith("image/");
 
-      return {
-        id: crypto.randomUUID(),
+      console.log(`renamed file ${index}:`, {
         name: file.name,
         size: file.size,
         type: file.type,
-        file, // 🔥 store real File
-        previewUrl: isImage ? URL.createObjectURL(file) : undefined,
+        lastModified: file.lastModified,
+        isSameObject: file === files[index]
+      });
+
+      const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+      console.log(`previewUrl for ${file.name}:`, previewUrl);
+
+      return {
+        id: crypto.randomUUID(),
+        name: file.name, // This will now be the renamed filename
+        size: file.size,
+        type: file.type,
+        file, // 🔥 store real File (with new name)
+        previewUrl,
       };
     });
 
-    updateSection(recipientId, "attachments", [
+    const newAttachment = [
       ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
       ...newAttachments,
-    ]);
+    ];
+
+    console.log("newAttachment",newAttachment)
+
+    updateSection(recipientId, "attachments", newAttachment);
 
     // allow re-selecting same file again
     e.target.value = "";
@@ -193,7 +224,7 @@ export function EmailWrapper({
                 borderRadius: "8px",
               }}
             >
-              {recipients.length > 1 && (
+              {recipients.length >= 1 && (
                 <div
                   style={{
                     display: "flex",
@@ -202,53 +233,56 @@ export function EmailWrapper({
                     marginBottom: 12,
                   }}
                 >
-                  <span style={{ fontSize: "14px", fontWeight: "bold", color: theme.vars?.palette.text.secondary }}>
-                    Email Section {index + 1}
-                  </span>
-                  <button
-                    onClick={() => removeSection(recipient.id)}
+                  <span
                     style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#ff4444",
-                      cursor: "pointer",
-                      fontSize: "16px",
+                      fontSize: "14px",
+                      fontWeight: "bold",
+                      color: theme.vars?.palette.text.secondary,
                     }}
                   >
-                    ×
-                  </button>
+                    Email Section {index + 1}
+                  </span>
+                  {index !== 0 && (
+                    <button
+                      onClick={() => removeSection(recipient.id)}
+                      className="remove-btn"
+                    >
+                      ×
+                    </button>
+                  )}
                 </div>
               )}
               <Input
                 label="From"
                 subLabel="The email address field can be filled only if the 'From Email' option is enabled."
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
-                placeholder="from"
+                placeholder="From"
                 value={recipient.from}
                 onChange={(e) =>
                   updateSection(recipient.id, "from", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="To"
-                className="sms-input"
                 type="email"
                 id={`to-${recipient.id}`}
-                placeholder="to"
+                placeholder="To"
                 value={recipient.to}
                 onChange={(e) =>
                   updateSection(recipient.id, "to", e.target.value)
                 }
                 required
                 showAsteric={true}
+                style={inputStyle}
               />
 
               <Input
                 label="Cc"
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`cc-${recipient.id}`}
                 placeholder="Cc"
@@ -256,11 +290,12 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "cc", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="Bcc"
-                className="sms-input"
+                // className="sms-input"
                 type="email"
                 id={`bcc-${recipient.id}`}
                 placeholder="Bcc"
@@ -268,11 +303,12 @@ export function EmailWrapper({
                 onChange={(e) =>
                   updateSection(recipient.id, "bcc", e.target.value)
                 }
+                style={inputStyle}
               />
 
               <Input
                 label="Subject"
-                className="sms-input"
+                // className="sms-input"
                 type="text"
                 id={`subject-${recipient.id}`}
                 placeholder="Email subject"
@@ -282,6 +318,7 @@ export function EmailWrapper({
                 }
                 required
                 showAsteric={true}
+                style={inputStyle}
               />
 
               {/* Separate Message Toggle for each Email section */}
@@ -293,21 +330,8 @@ export function EmailWrapper({
                     !recipient.separateMessage,
                   )
                 }
-                style={{
-                  padding: "4px 8px",
-                  fontSize: "10px",
-                  background: recipient.separateMessage
-                    ? "rgba(76, 175, 80, 0.2)"
-                    : "rgba(255, 255, 255, 0.1)",
-                  border: `1px solid ${recipient.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-                  color: recipient.separateMessage ? "#4CAF50" : "#fff",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  marginTop: 8,
-                  marginBottom: 8,
-                  width: "100%",
-                }}
+                className="add-btn"
+                style={{ width: "100%" }}
               >
                 {recipient.separateMessage
                   ? "Use common message"
@@ -336,29 +360,12 @@ export function EmailWrapper({
             </div>
           ))}
 
-          <button
+          <AddButton
+            title="Email"
             onClick={addSection}
-            disabled={recipients.length >= maxBlocks}
-            style={{
-              padding: "6px 12px",
-              fontSize: "12px",
-              background:
-                recipients.length >= maxBlocks
-                  ? "rgba(128, 128, 128, 0.2)"
-                  : "rgba(255, 255, 255, 0.1)",
-              border: `1px solid ${recipients.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-              color: recipients.length >= maxBlocks ? "#888" : "#fff",
-              borderRadius: "6px",
-              cursor:
-                recipients.length >= maxBlocks ? "not-allowed" : "pointer",
-              transition: "all 0.2s",
-              marginTop: 8,
-            }}
-          >
-            {recipients.length >= maxBlocks
-              ? `Max ${maxBlocks} emails reached`
-              : `Add Another Email (${recipients.length}/${maxBlocks})`}
-          </button>
+            data={recipients}
+            maxBlocks={maxBlocks}
+          />
         </>
       )}
 
@@ -375,7 +382,10 @@ export function EmailWrapper({
               }}
             >
               <h4
-                style={{ margin: "0 0 12px 0", color: theme.vars?.palette.text.secondary }}
+                style={{
+                  margin: "0 0 12px 0",
+                  color: theme.vars?.palette.text.secondary,
+                }}
               >
                 Email Section {index + 1}
               </h4>

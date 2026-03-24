@@ -165,7 +165,7 @@ export default function SMS() {
           <Button
             label="Add Another Number"
             onClick={addRecipient}
-            className="sms-add-btn"
+            className="add-btn"
           />
         </div>
 

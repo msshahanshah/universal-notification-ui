@@ -18,6 +18,7 @@ import {
   type SlackChannel,
 } from "src/atoms/slackAtoms";
 import COLORS from "src/utility/colors";
+import { AddButton } from "./helper";
 
 interface SlackWrapperProps {
   onValueChange?: (values: {
@@ -80,7 +81,10 @@ export function SlackWrapper({
   };
 
   return (
-    <div className="sms-wrapper">
+    <div
+      className="sms-wrapper"
+      style={{ backgroundColor: theme.vars?.palette.background.paper }}
+    >
       {channels.map((channel, sectionIndex) => (
         <div
           key={channel.id}
@@ -91,7 +95,7 @@ export function SlackWrapper({
             borderRadius: "8px",
           }}
         >
-          {channels.length > 1 && (
+          {channels.length >= 1 && (
             <div
               style={{
                 display: "flex",
@@ -109,18 +113,20 @@ export function SlackWrapper({
               >
                 Slack Section {sectionIndex + 1}
               </span>
-              <button
-                onClick={() => removeSection(channel.id)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "red",
-                  fontSize: "16px",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
+              {sectionIndex !== 0 && (
+                <button
+                  onClick={() => removeSection(channel.id)}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "red",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              )}
             </div>
           )}
 
@@ -160,21 +166,8 @@ export function SlackWrapper({
                 !channel.separateMessage,
               )
             }
-            style={{
-              padding: "4px 8px",
-              fontSize: "10px",
-              background: channel.separateMessage
-                ? "rgba(76, 175, 80, 0.2)"
-                : "rgba(255, 255, 255, 0.1)",
-              border: `1px solid ${channel.separateMessage ? "#4CAF50" : "rgba(255, 255, 255, 0.2)"}`,
-              color: channel.separateMessage ? "#4CAF50" : "#fff",
-              borderRadius: "4px",
-              cursor: "pointer",
-              transition: "all 0.2s",
-              marginTop: 8,
-              marginBottom: 8,
-              width: "100%",
-            }}
+            className="add-btn"
+            style={{ width: "100%" }}
           >
             {channel.separateMessage
               ? "Use common message"
@@ -193,7 +186,6 @@ export function SlackWrapper({
                 }}
               >
                 Message {sectionIndex + 1}
-                <span style={{ color: "red", marginLeft: 2 }}>*</span>
               </label>
               <textarea
                 className="sms-textarea"
@@ -210,28 +202,12 @@ export function SlackWrapper({
         </div>
       ))}
 
-      <button
+      <AddButton
+        title="Slack"
         onClick={addSection}
-        disabled={channels.length >= maxBlocks}
-        style={{
-          padding: "6px 12px",
-          fontSize: "12px",
-          background:
-            channels.length >= maxBlocks
-              ? "rgba(128, 128, 128, 0.2)"
-              : "rgba(255, 255, 255, 0.1)",
-          border: `1px solid ${channels.length >= maxBlocks ? "rgba(128, 128, 128, 0.4)" : "rgba(255, 255, 255, 0.2)"}`,
-          color: channels.length >= maxBlocks ? "#888" : "#fff",
-          borderRadius: "6px",
-          cursor: channels.length >= maxBlocks ? "not-allowed" : "pointer",
-          transition: "all 0.2s",
-          marginTop: 8,
-        }}
-      >
-        {channels.length >= maxBlocks
-          ? `Max ${maxBlocks} Slack sections reached`
-          : `Add Another Slack Section (${channels.length}/${maxBlocks})`}
-      </button>
+        data={channels}
+        maxBlocks={maxBlocks}
+      />
 
       {invalidChannelId && <ErrorText>{invalidChannelId}</ErrorText>}
     </div>

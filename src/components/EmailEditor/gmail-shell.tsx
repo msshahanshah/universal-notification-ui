@@ -48,7 +48,6 @@ export function GmailShell({
   const inputStyle: React.CSSProperties = {
     backgroundColor: theme.vars?.palette.background.paper,
     color: theme.vars?.palette.text.secondary,
-    // background: "hsla(220, 35%, 3%, 0.4)",
   };
   const [errors, setErrors] = useState({
     from: "",
@@ -110,7 +109,7 @@ export function GmailShell({
         onChange={(e) => handleFromChange(e.target.value)}
         placeholder="From"
         className="sms-input"
-        style={inputStyle}    
+        style={inputStyle}
       />
       {errors.from && <ErrorText>{errors.from}</ErrorText>}
 
@@ -133,7 +132,7 @@ export function GmailShell({
         placeholder="Cc"
         className="sms-input"
         style={inputStyle}
-        />
+      />
       {errors.cc && <ErrorText>{errors.cc}</ErrorText>}
       <Input
         label="Bcc"
