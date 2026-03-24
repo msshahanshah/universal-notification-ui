@@ -21,13 +21,11 @@ export interface SlackNotification {
 
 export interface WhatsappNotification {
   destination: string;
-  subject: string;
   body: string;
   attachments?: string[];
   uniqueKey?: string;
-  fromEmail?: string;
-  cc?: string;
-  bcc?: string;
+  templateId?: string;
+  variableValues?: Record<string, string>;
 }
 
 export interface MultipleNotificationPayload {

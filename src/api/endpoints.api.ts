@@ -27,6 +27,7 @@ export const ENDPOINTS = {
     MULTIPLE_NOTIFICATION: {
       SEND: "/v2/notify",
     },
+    TEMPLATES: "/templates",
   },
   WEBHOOK: {
     SAVE: "/api/webhook/config",
