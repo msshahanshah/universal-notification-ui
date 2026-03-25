@@ -79,7 +79,9 @@ export function WhatsappWrapper({
   // Generate unique key for WhatsApp attachments
   const generateUniqueKey = (numbers: WhatsAppNumber[], index: number) => {
     const phoneNumber = formatNumbersForUniqueKey(numbers);
-    if (!phoneNumber) return `whatsapp-${index + 1}`;
+    
+    // If no phone number, use recipient ID for unique key
+    if (!phoneNumber) return `whatsapp-recipient-${index + 1}`;
 
     // Remove non-alphanumeric characters from phone number for clean key
     const cleanNumber = phoneNumber.replace(/[^a-z0-9]/gi, "");
@@ -242,6 +244,54 @@ export function WhatsappWrapper({
     }
   };
 
+  const handleAttachmentChange = (
+    recipientId: string,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(e.target.files || []);
+
+    if (!files.length) return;
+
+    // Rename duplicate files to avoid conflicts
+    const renamedFiles = renameDuplicateFiles(files);
+
+    const newAttachments = renamedFiles.map((file, index) => {
+      const isImage = file.type.startsWith("image/");
+
+      console.log(`renamed file ${index}:`, {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        isSameObject: file === files[index]
+      });
+
+      const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
+      // console.log(`previewUrl for ${file.name}:`, previewUrl);
+
+      return {
+        id: crypto.randomUUID(),
+        name: file.name, // This will now be the renamed filename
+        size: file.size,
+        type: file.type,
+        file, // 🔥 store real File (with new name)
+        previewUrl,
+      };
+    });
+
+    const newAttachment = [
+      ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
+      ...newAttachments,
+    ];
+
+    console.log("newAttachment",newAttachment)
+
+    updateSection(recipientId, "attachments", newAttachment);
+
+    // allow re-selecting same file again
+    e.target.value = "";
+  };
+
   const updateSection = (
     id: string,
     field: keyof WhatsappRecipient,
@@ -280,6 +330,9 @@ export function WhatsappWrapper({
       const index = recipients.findIndex((r) => r.id === recipientId);
       const uniqueKey = generateUniqueKey(recipient.numbers, index);
       updateSection(recipientId, "uniqueKey", uniqueKey);
+    } else if (urlArray.length === 0) {
+      // Clear uniqueKey if no attachments remain
+      updateSection(recipientId, "uniqueKey", "");
     }
   };
 
@@ -331,6 +384,11 @@ export function WhatsappWrapper({
     if (recipient.numbers && updatedAttachments.length > 0) {
       const index = recipients.findIndex((r) => r.id === recipientId);
       const uniqueKey = generateUniqueKey(recipient.numbers, index);
+      console.log("🔑 Generating uniqueKey for file attachments:", {
+        recipientId,
+        numbers: recipient.numbers,
+        generatedKey: uniqueKey
+      });
       updateSection(recipientId, "uniqueKey", uniqueKey);
     }
   };
@@ -768,13 +826,13 @@ export function WhatsappWrapper({
                       </label>
                       <AttachmentSection
                         attachments={recipient.attachments}
-                        onAdd={(e) =>
+                        onAdd={(e: React.ChangeEvent<HTMLInputElement>) =>
                           handleFileAttachmentChange(
                             recipient.id,
                             e.target.files,
                           )
                         }
-                        onRemove={(id) =>
+                        onRemove={(id: string) =>
                           removeFileAttachment(recipient.id, id)
                         }
                         hideBtn={recipient.attachments.length >= 10}
