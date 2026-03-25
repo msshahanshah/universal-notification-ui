@@ -278,8 +278,6 @@ export function WhatsappWrapper({
       ...newAttachments,
     ];
 
-    console.log("newAttachment", newAttachment);
-
     updateSection(recipientId, "attachments", newAttachment);
 
     // allow re-selecting same file again

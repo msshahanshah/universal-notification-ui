@@ -3,10 +3,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
 import { useEmailService } from "src/hooks/useService";
-import Button from "src/components/button";
 import Input from "src/components/input";
 import { useSnackbar } from "src/provider/snackbar";
-import { logsKeys } from "src/api/queryKeys";
 import { EmailEditor } from "src/components/EmailEditor/tiptap-email-editor";
 import { EmailPreview } from "src/components/EmailEditor/email-preview";
 import { Toggle } from "src/components/toggle";
@@ -22,6 +20,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { AddButton } from "./helper";
 import { useInputStyles } from "src/utility/styles";
+import { renameDuplicateFiles } from "src/utility/helper";
 
 type ViewMode = "editor" | "preview";
 
@@ -145,16 +144,7 @@ export function EmailWrapper({
     const newAttachments = renamedFiles.map((file, index) => {
       const isImage = file.type.startsWith("image/");
 
-      console.log(`renamed file ${index}:`, {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        lastModified: file.lastModified,
-        isSameObject: file === files[index],
-      });
-
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
-      console.log(`previewUrl for ${file.name}:`, previewUrl);
 
       return {
         id: crypto.randomUUID(),
@@ -170,8 +160,6 @@ export function EmailWrapper({
       ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
       ...newAttachments,
     ];
-
-    console.log("newAttachment", newAttachment);
 
     updateSection(recipientId, "attachments", newAttachment);
 

@@ -49,7 +49,6 @@ const LogsTable = () => {
     return "[" + params.value.toLocaleString() + "]";
   }, []);
 
-  console.log("sortModel", sortModel);
   const [data, setData] = useState<LogMessage[]>([]);
 
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
@@ -400,8 +399,6 @@ const LogsTable = () => {
     const sortQuery = sortModel
       .map((s: any) => (s.sort === "asc" ? s.colId : `-${s.colId}`))
       .join(",");
-
-    console.log("sortQuery..", sortQuery);
 
     setSortModel(sortQuery);
   };
