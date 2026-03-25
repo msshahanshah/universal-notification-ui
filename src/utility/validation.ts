@@ -147,8 +147,6 @@ export const validateAllServices = (
       });
     }
 
-    console.log("emailErrors", emailErrors);
-
     if (emailErrors.length > 0) {
       validation.email.errors = { email: emailErrors };
     }
@@ -286,7 +284,7 @@ export const validateAllServices = (
       validation.whatsapp.isFormValid = false;
       whatsappErrors.push("WhatsApp service data is missing");
     } else {
-      console.log("whatsappInputData",whatsappInputData)
+      console.log("whatsappInputData", whatsappInputData);
       const sections = (whatsappData as any).sections || [];
       // At least one destination must be provided
       const hasValidDestination = whatsappInputData?.some(
@@ -359,8 +357,6 @@ export const validateAllServices = (
     validation.sms.isFormValid &&
     validation.slack.isFormValid &&
     validation.whatsapp.isFormValid;
-
-  console.log("validation", validation);
 
   return {
     email: validation.email,

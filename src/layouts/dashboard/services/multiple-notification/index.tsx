@@ -47,11 +47,11 @@ export default function MultipleNotification() {
 
     for (let i = 0; i < preSignedUrls.length; i++) {
       const presigned = preSignedUrls[i];
-      // console.log("presigned", presigned);
+     
       const urls = presigned?.urls;
 
       if (!urls?.length) continue;
-      // console.log("attachmentsCopy", attachmentsCopy);
+     
 
       for (let j = 0; j < urls.length; j++) {
         const urlEntry = urls[j];
@@ -61,8 +61,6 @@ export default function MultipleNotification() {
         const fileObj = attachmentsCopy.find(
           (file) => file.name === filenameFromUrl,
         );
-
-        // console.log(`Looking for file with name "${filenameFromUrl}", found:`, fileObj?.name);
 
         if (!fileObj) {
           console.warn(
@@ -75,11 +73,9 @@ export default function MultipleNotification() {
 
         // Append S3 fields
         Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
-          // console.log("key", key, "value", value);
           formData.append(key, value as string);
         });
 
-        // console.log("fileObj", fileObj);
         // File MUST be last
         formData.append("file", fileObj);
 
@@ -516,8 +512,8 @@ export default function MultipleNotification() {
           // console.log("recipient", recipient);
           // Extract only the actual File objects from attachment objects
           const fileObjects = recipient.attachments
-            .map((att) => att.file)
-            .filter((file) => file instanceof File);
+            .map(att => att.file)
+            .filter(file => file instanceof File);
           allAttachments.push(...fileObjects);
         }
       }
@@ -538,128 +534,110 @@ export default function MultipleNotification() {
             .map((att) => att.file)
             .filter((file) => file instanceof File);
           allAttachments.push(...fileObjects);
+
+        }}})
+
+    sendNotifications(payload, {
+      onSuccess: async ({ data }) => {
+        // Reset form
+        setCommonMessage("");
+        setSelectedServices([]);
+        setSeparateMessages({
+          sms: false,
+          email: false,
+          slack: false,
+          whatsapp: false,
+        });
+
+        // Create detailed status message for each service
+        const statusMessages = [];
+
+        if (selectedServices.includes("sms")) {
+          const smsStatus = data?.sms?.success
+            ? `SMS: ${data?.sms?.message || "Notification request accepted and queued."}`
+            : `SMS: ${data?.sms?.message || "Failed to send notification"}`;
+          statusMessages.push(smsStatus);
         }
-      }
+
+        if (selectedServices.includes("email")) {
+          const emailStatus = data?.email?.success
+            ? `Email: ${data?.email?.message || "Notification request accepted and queued."}`
+            : `Email: ${data?.email?.message || "Failed to send notification"}`;
+          statusMessages.push(emailStatus);
+        }
+
+        if (selectedServices.includes("slack")) {
+          const slackStatus = data?.slack?.success
+            ? `Slack: ${data?.slack?.message || "Notification request accepted and queued."}`
+            : `Slack: ${data?.slack?.message || "Failed to send notification"}`;
+          statusMessages.push(slackStatus);
+        }
+
+        // Show combined status message
+        const combinedMessage = statusMessages.join("\n");
+        const hasAnyFailure = statusMessages.some((msg) =>
+          msg.includes("Failed"),
+        );
+
+        showSnackbar(
+          combinedMessage,
+          hasAnyFailure ? "error" : "success",
+          30000,
+        );
+
+        const attachmentsCopy = [...allAttachments];
+
+        if (!hasAttachments || attachmentsCopy.length === 0) {
+          queryClient.invalidateQueries({
+            queryKey: logsKeys.all,
+          });
+        } else if (data?.email?.success) {
+          await uploadToS3FromAttachments(data, attachmentsCopy);
+        }
+      },
+      onError: (error: any) => {
+        console.info(
+          "error",
+          error?.data?.email,
+          "error?.response?.data",
+          "error?.response?.data",
+          "error?.message",
+          error?.message,
+        );
+
+        // Handle error case with detailed service status
+        const errorData = error?.data || {};
+        const statusMessages = [];
+
+        if (selectedServices.includes("sms")) {
+          if (errorData?.sms?.success === false) {
+            const smsStatus = `SMS: ${errorData?.sms?.message || "Failed to send notification"}`;
+            statusMessages.push(smsStatus);
+          }
+        }
+
+        if (selectedServices.includes("email")) {
+          if (errorData?.email?.success === false) {
+            const emailStatus = `Email: ${errorData?.email?.message || "Failed to send notification"}`;
+            statusMessages.push(emailStatus);
+          }
+        }
+
+        if (selectedServices.includes("slack")) {
+          if (errorData?.slack?.success === false) {
+            const slackStatus = `Slack: ${errorData?.slack?.message || "Failed to send notification"}`;
+            statusMessages.push(slackStatus);
+          }
+        }
+
+        const combinedMessage = statusMessages.join("\n");
+        const hasAnyFailure = statusMessages.some((msg) =>
+          msg.includes("Failed"),
+        );
+
+        showSnackbar(combinedMessage, "error", 30000);
+      },
     });
-
-    // console.log("allAttachments", allAttachments);
-
-    // console.log("final payload", payload);
-    // sendNotifications(payload, {
-    //   onSuccess: async ({ data }) => {
-    //     // Reset form
-    //     setCommonMessage("");
-    //     setSelectedServices([]);
-    //     setSeparateMessages({
-    //       sms: false,
-    //       email: false,
-    //       slack: false,
-    //       whatsapp: false,
-    //     });
-
-    //     // Create detailed status message for each service
-    //     const statusMessages = [];
-
-    //     if (selectedServices.includes("sms")) {
-    //       const smsStatus = data?.sms?.success
-    //         ? `SMS: ${data?.sms?.message || "Notification request accepted and queued."}`
-    //         : `SMS: ${data?.sms?.message || "Failed to send notification"}`;
-    //       statusMessages.push(smsStatus);
-    //     }
-
-    //     if (selectedServices.includes("email")) {
-    //       const emailStatus = data?.email?.success
-    //         ? `Email: ${data?.email?.message || "Notification request accepted and queued."}`
-    //         : `Email: ${data?.email?.message || "Failed to send notification"}`;
-    //       statusMessages.push(emailStatus);
-    //     }
-
-    //     if (selectedServices.includes("slack")) {
-    //       const slackStatus = data?.slack?.success
-    //         ? `Slack: ${data?.slack?.message || "Notification request accepted and queued."}`
-    //         : `Slack: ${data?.slack?.message || "Failed to send notification"}`;
-    //       statusMessages.push(slackStatus);
-    //     }
-
-    //     if (selectedServices.includes("whatsapp")) {
-    //       const whatsappStatus = data?.whatsapp?.success
-    //         ? `WhatsApp: ${data?.whatsapp?.message || "Notification request accepted and queued."}`
-    //         : `WhatsApp: ${data?.whatsapp?.message || "Failed to send notification"}`;
-    //       statusMessages.push(whatsappStatus);
-    //     }
-
-    //     // Show combined status message
-    //     const combinedMessage = statusMessages.join("\n");
-    //     const hasAnyFailure = statusMessages.some((msg) =>
-    //       msg.includes("Failed"),
-    //     );
-
-    //     showSnackbar(
-    //       combinedMessage,
-    //       hasAnyFailure ? "error" : "success",
-    //       30000,
-    //     );
-
-    //     const attachmentsCopy = [...allAttachments];
-
-    //     if (!hasAttachments || attachmentsCopy.length === 0) {
-    //       queryClient.invalidateQueries({
-    //         queryKey: logsKeys.all,
-    //       });
-    //     } else if (data?.email?.success) {
-    //       await uploadToS3FromAttachments(data, attachmentsCopy);
-    //     }
-    //   },
-    //   onError: (error: any) => {
-    //     console.info(
-    //       "error",
-    //       error?.data?.email,
-    //       "error?.response?.data",
-    //       "error?.response?.data",
-    //       "error?.message",
-    //       error?.message,
-    //     );
-
-    //     // Handle error case with detailed service status
-    //     const errorData = error?.data || {};
-    //     const statusMessages = [];
-
-    //     if (selectedServices.includes("sms")) {
-    //       if (errorData?.sms?.success === false) {
-    //         const smsStatus = `SMS: ${errorData?.sms?.message || "Failed to send notification"}`;
-    //         statusMessages.push(smsStatus);
-    //       }
-    //     }
-
-    //     if (selectedServices.includes("email")) {
-    //       if (errorData?.email?.success === false) {
-    //         const emailStatus = `Email: ${errorData?.email?.message || "Failed to send notification"}`;
-    //         statusMessages.push(emailStatus);
-    //       }
-    //     }
-
-    //     if (selectedServices.includes("slack")) {
-    //       if (errorData?.slack?.success === false) {
-    //         const slackStatus = `Slack: ${errorData?.slack?.message || "Failed to send notification"}`;
-    //         statusMessages.push(slackStatus);
-    //       }
-    //     }
-
-    //     if (selectedServices.includes("whatsapp")) {
-    //       if (errorData?.whatsapp?.success === false) {
-    //         const whatsappStatus = `WhatsApp: ${errorData?.whatsapp?.message || "Failed to send notification"}`;
-    //         statusMessages.push(whatsappStatus);
-    //       }
-    //     }
-
-    //     const combinedMessage = statusMessages.join("\n");
-    //     const hasAnyFailure = statusMessages.some((msg) =>
-    //       msg.includes("Failed"),
-    //     );
-
-    //     showSnackbar(combinedMessage, "error", 30000);
-    //   },
-    // });
   };
 
   return (
