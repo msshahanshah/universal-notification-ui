@@ -27,7 +27,7 @@
 
 .common-select {
   position: relative;
-  width: 30%;
+  width: 50%;
 }
 
 @media screen and (max-width: 1024px) {
