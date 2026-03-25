@@ -11,9 +11,9 @@ export const formatDateForTable = (date: string) => {
     year: "numeric",
   }).formatToParts(d);
 
-  const day = Number(parts.find(p => p.type === "day")?.value);
-  const month = parts.find(p => p.type === "month")?.value;
-  const year = parts.find(p => p.type === "year")?.value;
+  const day = Number(parts.find((p) => p.type === "day")?.value);
+  const month = parts.find((p) => p.type === "month")?.value;
+  const year = parts.find((p) => p.type === "year")?.value;
 
   const time = new Intl.DateTimeFormat("en-US", {
     timeZone: userTimeZone,
@@ -23,16 +23,19 @@ export const formatDateForTable = (date: string) => {
   }).format(d);
 
   const ordinal = (n: number) => {
-    const s = ["th","st","nd","rd"];
+    const s = ["th", "st", "nd", "rd"];
     const v = n % 100;
-    return n + (s[(v-20)%10] || s[v] || s[0]);
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
   };
 
   return `${ordinal(day)} ${month} ${year} ${time}`;
 };
 
 export const getStatusStyle = (status: string, theme: Theme) => {
-  switch (status?.toLowerCase()) {
+  const statusText =
+    status?.split(":")?.length > 1 ? status?.split(":")?.[1]?.trim() : status;
+
+  switch (statusText?.toLowerCase()) {
     case "sent":
       return {
         color: "#04b34f",
