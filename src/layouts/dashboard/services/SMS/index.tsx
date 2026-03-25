@@ -58,6 +58,7 @@ export default function SMS() {
     setRecipients((prev) => prev.filter((r) => r.id !== id));
   };
 
+  // use from utility function
   const isValidRecipients =
     recipients.length > 0 &&
     recipients.every(
@@ -164,7 +165,7 @@ export default function SMS() {
           <Button
             label="Add Another Number"
             onClick={addRecipient}
-            className="sms-add-btn"
+            className="add-btn"
           />
         </div>
 

@@ -1,10 +1,5 @@
 import { ChangeEvent, useState } from "react";
-import {
-  styled,
-  Typography,
-  useColorScheme,
-  useTheme,
-} from "@mui/material";
+import { styled, Typography, useColorScheme, useTheme } from "@mui/material";
 import MuiCard from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 
@@ -140,7 +135,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
               autoComplete="new-password"
               className="input-field"
               dataTestId="password-input"
-              style={{ color: COLORS.WHITE, border:'none' }}
+              style={{ color: COLORS.WHITE, border: "none" }}
             />
 
             <div style={{ height: 20 }}>

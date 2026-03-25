@@ -2,30 +2,33 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import { queryClient } from "./lib/queryClient";
-import { SnackbarProvider } from "./provider/snackbar";
+import { Provider } from "jotai";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import "./index.css";
-import AppTheme from "./theme/app-theme";
+import reportWebVitals from "./reportWebVitals";
+import { queryClient } from "./lib/queryClient";
 
+import { SnackbarProvider } from "./provider/snackbar";
+import AppTheme from "./theme/app-theme";
+import App from "./App";
+
+import "./index.css";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SnackbarProvider>
-          <AppTheme>
-            <App />
-          </AppTheme>
-        </SnackbarProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <Provider>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SnackbarProvider>
+            <AppTheme>
+              <App />
+            </AppTheme>
+          </SnackbarProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
   </React.StrictMode>,
 );
 

@@ -104,3 +104,29 @@
   padding: 8px 20px;
   border-radius: 8px;
 }
+
+.send-separate-message {
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.add-btn {
+  padding: 10px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  box-shadow: rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px;
+}

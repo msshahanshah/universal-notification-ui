@@ -25,7 +25,7 @@ const PasswordInput = ({
   className,
   dataTestId,
   name,
-  style
+  style,
 }: PasswordInputProps) => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +35,7 @@ const PasswordInput = ({
       style={{
         position: "relative",
         width: "100%",
+        marginTop: 10,
       }}
     >
       <Input
@@ -64,7 +65,9 @@ const PasswordInput = ({
         }}
       >
         {showPassword ? (
-          <VisibilityOff style={{ color: theme.vars?.palette.text.secondary }} />
+          <VisibilityOff
+            style={{ color: theme.vars?.palette.text.secondary }}
+          />
         ) : (
           <Visibility style={{ color: theme.vars?.palette.text.secondary }} />
         )}

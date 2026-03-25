@@ -1,0 +1,197 @@
+.multiple-notification-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* height: 100vh; */
+}
+
+.multiple-notification-wrapper {
+  min-width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  border-radius: 14px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 20px;
+  box-shadow: rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.service-section {
+  margin-bottom: 24px;
+}
+
+.service-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.notification-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+.notification-field {
+  flex: 1;
+}
+
+.notification-field label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.notification-field input,
+.notification-field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 13px;
+  font-family: "Inter", sans-serif;
+}
+
+.notification-field textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.notification-field input::placeholder,
+.notification-field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.notification-field input:focus,
+.notification-field textarea:focus {
+  outline: none;
+  border-color: #93c5fd;
+}
+
+.add-button {
+  padding: 8px 16px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.remove-button {
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ff6b6b;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.remove-button:hover {
+  background: rgba(255, 99, 99, 0.1);
+  border-color: #ff6b6b;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.send-button {
+  padding: 10px 24px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.send-button:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.send-button:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.no-services-selected {
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.email-row-container {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.email-row-container:last-child {
+  border-bottom: none;
+}
+
+.sms-textarea {
+  width: 100%;
+  resize: none;
+  padding: 12px;
+  border-radius: 8px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.sms-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.sms-textarea:focus {
+  outline: none;
+  border-color: #93c5fd;
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 16px;
+}

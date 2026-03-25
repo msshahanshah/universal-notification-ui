@@ -5,7 +5,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   value: string | number;
   id: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   autoComplete?: string;
   dataTestId?: string;
   showAsteric?: boolean;
@@ -36,6 +36,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         style={{
           display: "flex",
           flexDirection: "column",
+          alignItems: "flex-start",
           width: "100%",
         }}
       >

@@ -19,6 +19,8 @@ import Slack from "./layouts/dashboard/services/slack";
 import ServiceGuard from "./routes/service-guard";
 import EmailComposer from "./layouts/dashboard/services/email";
 import SMS from "./layouts/dashboard/services/SMS";
+import MultipleNotification from "./layouts/dashboard/services/multiple-notification";
+import WebhookConfigPage from "./webhook";
 
 export default function App() {
   ModuleRegistry.registerModules([
@@ -35,11 +37,13 @@ export default function App() {
       </Route>
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        {/* <Route path="/webhook-config" element={<WebhookConfigPage />} /> */}
         <Route path="/services" element={<Services />} />
         <Route path="/services/demo1" element={<Services1 />} />
         <Route path="/services/demo2" element={<ServicesAccordion />} />
         <Route path="/services/email-editor" element={<EmailComposer />} />
         <Route path="/services/sms" element={<SMS />} />
+        <Route path="/services/multiple-notification" element={<MultipleNotification />} />
         <Route element={<ServiceGuard service="slack" />}>
           <Route path="/services/slack" element={<Slack />} />
         </Route>

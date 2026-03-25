@@ -4,7 +4,7 @@ import Snackbar from "src/components/snackbar";
 type SnackbarType = "success" | "error" | "info" | "warning";
 
 const SnackbarContext = createContext<
-  (message: string | Error, type?: SnackbarType) => void
+  (message: string | Error, type?: SnackbarType, duration?: number) => void
 >(() => {});
 
 export const SnackbarProvider = ({
@@ -16,10 +16,11 @@ export const SnackbarProvider = ({
     open: false,
     message: "",
     type: "success" as SnackbarType,
+    duration: 3000,
   });
 
-  const showSnackbar = (message: string | Error, type: SnackbarType = "success") => {
-    setSnackbar({ open: true, message: message instanceof Error ? message?.message : message, type });
+  const showSnackbar = (message: string | Error, type: SnackbarType = "success", duration: number = 3000) => {
+    setSnackbar({ open: true, duration, message: message instanceof Error ? message?.message : message, type });
   };
 
   return (
@@ -30,6 +31,7 @@ export const SnackbarProvider = ({
         message={snackbar.message}
         type={snackbar.type}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        duration={snackbar.duration}
       />
     </SnackbarContext.Provider>
   );

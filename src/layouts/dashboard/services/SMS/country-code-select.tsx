@@ -14,7 +14,7 @@ type Props = {
 
 export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
   const [open, setOpen] = useState(false);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -24,9 +24,11 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
   const updateDropdownPos = () => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      // Use getBoundingClientRect which already accounts for scroll position
       setDropdownPos({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 4, // No need to add scrollY, getBoundingClientRect is relative to viewport
+        left: rect.left, // No need to add scrollX
+        width: rect.width, // Match button width
       });
     }
   };
@@ -70,14 +72,22 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
       }
     };
 
+    const handleResize = () => {
+      if (open) {
+        updateDropdownPos();
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
     document.addEventListener("keydown", onEsc);
     window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleResize);
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", onEsc);
       window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleResize);
     };
   }, [open]);
 
@@ -93,6 +103,7 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
         ref={buttonRef}
         onClick={toggleDropdown}
         aria-haspopup="listbox"
+        // style={{ background: theme.vars?.palette.background.paper }}
       >
         {value}
         <span className="caret">▼</span>
@@ -105,37 +116,44 @@ export function CountryCodeSelect({ value, onChange, onOpen, onClose }: Props) {
             className="country-select-list"
             role="listbox"
             style={{
+              position: "fixed",
               top: `${dropdownPos.top}px`,
               left: `${dropdownPos.left}px`,
               color: theme.vars?.palette.text.secondary,
               backgroundColor: theme.vars?.palette.background.paper,
               border: `1px solid ${theme.vars?.palette.divider}`,
+              zIndex: 9999,
             }}
           >
-          {" "}
-          {COUNTRY_CODES.map((c) => {
-            const selectedValue = c.code === value;
-            return (
-              <div
-                key={c.code}
-                role="option"
-                data-testid={`country-option-${c.iso}`}
-                onClick={() => {
-                  onChange(c.code);
-                  closeDropdown();
-                }}
-                className={
-                  selectedValue
-                    ? "country-code-selected"
-                    : "country-code-option"
-                }
-              >
-                {" "}
-                {c.country} ({c.code}){" "}
-              </div>
-            );
-          })}{" "}
-        </div>,
+            {" "}
+            {COUNTRY_CODES.map((c) => {
+              const selectedValue = c.code === value;
+              return (
+                <div
+                  key={c.code}
+                  role="option"
+                  data-testid={`country-option-${c.iso}`}
+                  onClick={() => {
+                    onChange(c.code);
+                    closeDropdown();
+                  }}
+                  className={
+                    selectedValue
+                      ? "item-active"
+                      : "item-inactive"
+                  }
+                  style={{
+                    backgroundColor: selectedValue
+                      ? theme.vars?.palette.background.default
+                      : "transparent",
+                  }}
+                >
+                  {" "}
+                  {c.country} ({c.code}){" "}
+                </div>
+              );
+            })}{" "}
+          </div>,
           document.body,
         )}
     </div>

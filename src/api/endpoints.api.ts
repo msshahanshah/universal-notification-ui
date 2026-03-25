@@ -1,17 +1,20 @@
 export const cleanQueryParams = (params?: Record<string, any>) => {
   if (!params) return {};
 
-  return Object.entries(params).reduce((acc, [key, value]) => {
-    if (
-      value !== undefined &&
-      value !== null &&
-      value !== "" &&
-      !(typeof value === "string" && value.trim() === "")
-    ) {
-      acc[key] = value;
-    }
-    return acc;
-  }, {} as Record<string, any>);
+  return Object.entries(params).reduce(
+    (acc, [key, value]) => {
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== "" &&
+        !(typeof value === "string" && value.trim() === "")
+      ) {
+        acc[key] = value;
+      }
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
 };
 
 export const ENDPOINTS = {
@@ -21,6 +24,17 @@ export const ENDPOINTS = {
   },
   SERVICES: {
     NOTIFY: "/notify",
+    MULTIPLE_NOTIFICATION: {
+      SEND: "/v2/notify",
+    },
+    TEMPLATES: "/templates",
+  },
+  WEBHOOK: {
+    SAVE: "/api/webhook/config",
+    GET: `/api/webhook/configs`,
+    UPDATE: ({ webhookId }: any) => `/api/webhook/${webhookId}`,
+    DELETE: (webhookId: string) => `/api/webhook/${webhookId}`,
+    TOGGLE: (webhookId: string) => `/api/webhook/${webhookId}`,
   },
   LOGS: {
     LIST: (params?: Record<string, any>) => {

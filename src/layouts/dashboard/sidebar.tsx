@@ -18,7 +18,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import SearchIcon from "@mui/icons-material/Search";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Mail, MessageSquare, SlackIcon } from "lucide-react";
+import { Mail, MessageSquare, SlackIcon, Send } from "lucide-react";
 import { useTheme, useColorScheme } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
@@ -40,6 +40,12 @@ const sidebarItems = [
     label: "SMS",
     path: "/services/sms",
     icon: MessageSquare,
+    isDisabled: false,
+  },
+  {
+    label: "Multiple Notification",
+    path: "/services/multiple-notification",
+    icon: Send,
     isDisabled: false,
   },
 ];
@@ -208,7 +214,9 @@ const Sidebar = ({
         {/* Services Sub Tabs */}
         {open && (
           <Collapse
-            in={open && (isServicesActive || (isSearching && matchesServiceItems))}
+            in={
+              open && (isServicesActive || (isSearching && matchesServiceItems))
+            }
             timeout="auto"
             unmountOnExit
           >
@@ -235,7 +243,7 @@ const Sidebar = ({
                       primaryTypographyProps={{
                         fontSize: 13,
                       }}
-                      style={{ marginLeft: 10 }}
+                      style={{ marginLeft: 10, maxWidth: "min-content", minWidth: 100 }}
                     />
                   </ListItemButton>
                 );

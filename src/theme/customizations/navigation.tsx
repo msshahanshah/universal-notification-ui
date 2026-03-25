@@ -286,4 +286,3 @@ export const navigationCustomizations: Components<Theme> = {
     },
   },
 };
-

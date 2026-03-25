@@ -1,0 +1,129 @@
+@media screen and (max-width: 768px) {
+  .sms-wrapper {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+.button-disabled {
+  background: #808080;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: not-allowed;
+  opacity: 0.5;
+  display: flex;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 8px;
+}
+
+.sms-to-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.common-select {
+  position: relative;
+  width: 30%;
+}
+
+@media screen and (max-width: 1024px) {
+  .common-select {
+    width: 100%;
+    min-width: 60%;
+  }
+}
+
+.country-select {
+  position: relative;
+  width: 10%;
+}
+
+@media screen and (max-width: 1024px) {
+  .country-select {
+    width: 15%;
+    min-width: 15%;
+  }
+}
+
+.country-select-btn {
+  height: 2.5rem;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: "Inter", sans-serif;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.country-select-btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.country-select-btn:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.select-list {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  z-index: 20;
+  top: 40px;
+  padding: 10px;
+  font-size: 12px;
+  height: 200px;
+  overflow-y: scroll;
+  scrollbar-width: thin;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.select-list li {
+  padding: 10px;
+}
+
+.select-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+}
+
+/* select options list item */
+.item-inactive {
+  font-size: 12px;
+  padding: 10px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  border-radius: 8px;
+}
+
+.item-active {
+  font-size: 12px;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  color: hsl(210, 98%, 48%);
+}
+/* select options list item */
+
+.country-code-option {
+  font-size: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.country-code-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
