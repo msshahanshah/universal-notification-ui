@@ -47,11 +47,10 @@ export default function MultipleNotification() {
 
     for (let i = 0; i < preSignedUrls.length; i++) {
       const presigned = preSignedUrls[i];
-      // console.log("presigned", presigned);
+
       const urls = presigned?.urls;
 
       if (!urls?.length) continue;
-      // console.log("attachmentsCopy", attachmentsCopy);
 
       for (let j = 0; j < urls.length; j++) {
         const urlEntry = urls[j];
@@ -61,8 +60,6 @@ export default function MultipleNotification() {
         const fileObj = attachmentsCopy.find(
           (file) => file.name === filenameFromUrl,
         );
-
-        // console.log(`Looking for file with name "${filenameFromUrl}", found:`, fileObj?.name);
 
         if (!fileObj) {
           console.warn(
@@ -75,11 +72,9 @@ export default function MultipleNotification() {
 
         // Append S3 fields
         Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
-          // console.log("key", key, "value", value);
           formData.append(key, value as string);
         });
 
-        // console.log("fileObj", fileObj);
         // File MUST be last
         formData.append("file", fileObj);
 
@@ -179,10 +174,13 @@ export default function MultipleNotification() {
     setWhatsappSections([
       {
         id: "1",
-        to: "",
-        body: "",
+        numbers: [{ id: "1", countryCode: "+91", number: "" }],
+        message: "",
         attachments: [],
         separateMessage: false,
+        attachmentType: "url",
+        variableValues: {},
+        toggleType: "template",
       },
     ]);
   }, [setWhatsappSections]);
@@ -256,6 +254,7 @@ export default function MultipleNotification() {
         attachments: any[];
         separateMessage: boolean;
         templateId: string | null;
+        variableValues: Record<string, string>;
       }[];
     } | null;
   }>({
@@ -281,9 +280,6 @@ export default function MultipleNotification() {
     wrapperValues.whatsapp,
     commonMessage,
   );
-
-  // console.log("isPending", isPending);
-  // console.log("validationResult", validationResult);
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
@@ -331,10 +327,7 @@ export default function MultipleNotification() {
   );
 
   const handleWhatsappValueChange = useCallback(
-    (values: {
-      recipients: [];
-    }) => {
-      console.log("handleWhatsappValueChange",values)
+    (values: { recipients: [] }) => {
       setWrapperValues((prev) => ({
         ...prev,
         whatsapp: values,
@@ -360,12 +353,11 @@ export default function MultipleNotification() {
 
     // Add SMS to payload if selected
     if (selectedServices.includes("sms")) {
-      // console.log("wrapperValues.sms?.sections", wrapperValues.sms?.sections);
       const isDisabled = checkValidRecipientsforSMSWrapper(
         wrapperValues.sms?.sections || [],
         commonMessage,
       );
-      // console.log("isDisabled", isDisabled);
+
       if (isDisabled) {
         showSnackbar("SMS validations failed", "error");
         return;
@@ -385,11 +377,9 @@ export default function MultipleNotification() {
     if (selectedServices.includes("email")) {
       // Use the new section-based structure from Email wrapper
       if (wrapperValues.email && wrapperValues.email.recipients) {
-        // console.log("wrapperValues.email", wrapperValues.email);
         payload.email = wrapperValues.email.recipients
           .filter((rec: any) => rec?.destination?.trim() !== "")
           .map((rec: any, index: number) => {
-            // console.log("rec", rec);
             // Generate unique key for each recipient
             const emailId = rec.destination
               .split("@")[0]
@@ -429,32 +419,6 @@ export default function MultipleNotification() {
       }
     }
 
-    // Add WhatsApp to payload if selected
-    if (selectedServices.includes("whatsapp")) {
-      if (wrapperValues.whatsapp && wrapperValues.whatsapp.recipients) {
-        payload.whatsapp = wrapperValues.whatsapp.recipients
-          .filter((rec: any) => rec?.destination?.trim() !== "")
-          .map((rec: any) => {
-            const whatsappSection: any = {
-              destination: rec.destination,
-              uniqueKey: rec.uniqueKey,
-              attachments:
-                rec.attachments?.map((att: any) => att.url || att) || [],
-            };
-
-            // Add body if separateMessage is true or if no common message
-            if (rec.separateMessage || !commonMessage.trim()) {
-              whatsappSection.body = rec.body || "";
-            }
-            if (rec?.templateId) {
-              whatsappSection.templateId = rec.templateId || "";
-            }
-
-            return whatsappSection;
-          });
-      }
-    }
-
     // Add Slack to payload if selected
     if (selectedServices.includes("slack")) {
       // !! Do not remove, need for staging branch
@@ -470,23 +434,51 @@ export default function MultipleNotification() {
           return slackSection;
         });
       }
-
-      // // windsurf rules
-      //  console.log("wrapperValues.slack", wrapperValues.slack);
-      //  if (wrapperValues.slack && wrapperValues.slack.sections) {
-      //   payload.slack = wrapperValues.slack.sections.map(
-      //     (section: any) => ({
-      //       destination: section.destination,
-      //       message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
-      //     }),
-      //   );
-      // }
-
-      // const { isValid, errors } = runValidator("slack", payload);
-      // console.log("isValid", isValid, "errors", errors);
     }
+    // Add WhatsApp to payload if selected
+    if (selectedServices.includes("whatsapp")) {
+      if (wrapperValues.whatsapp && wrapperValues.whatsapp.recipients) {
+        payload.whatsapp = wrapperValues.whatsapp.recipients
+          .filter(
+            (rec: any) =>
+              rec?.destination?.trim() !== "" ||
+              // rec?.numbers?.some((num: any) => num.number.trim() !== "") ||
+              rec?.templateId ||
+              rec?.separateMessage,
+          )
+          .map((rec: any) => {
+            const whatsappSection: any = {
+              destination: rec.destination,
+            };
 
-    console.log("payload", payload);
+            // Only include uniqueKey if it exists
+            if (rec.uniqueKey) {
+              whatsappSection.uniqueKey = rec.uniqueKey;
+            }
+
+            // Only include attachments if they exist and are not empty
+            if (rec.attachments && rec.attachments.length > 0) {
+              whatsappSection.attachments = rec.attachments.map(
+                (att: any) => att.url || att,
+              );
+            }
+
+            // Add body if separateMessage is true or if no common message
+            if (
+              !rec?.templateId &&
+              (rec.separateMessage || !commonMessage.trim())
+            ) {
+              whatsappSection.message = rec.message || "";
+            }
+            if (rec?.templateId) {
+              whatsappSection.templateId = rec.templateId;
+              whatsappSection.variableValues = rec.variableValues;
+            }
+
+            return whatsappSection;
+          });
+      }
+    }
 
     // // Check if there are any attachments in the payload
     const hasAttachments =
@@ -502,8 +494,6 @@ export default function MultipleNotification() {
     // Collect all attachments for upload
     const allAttachments: any[] = [];
 
-    // console.log("wrapperValues.email", wrapperValues.email);
-    // console.log("emailRawRecipients", emailRawRecipients);
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {
         // Find the corresponding recipient to get the actual file objects
@@ -513,7 +503,6 @@ export default function MultipleNotification() {
             rec.destination === email.destination,
         );
         if (recipient) {
-          // console.log("recipient", recipient);
           // Extract only the actual File objects from attachment objects
           const fileObjects = recipient.attachments
             .map((att) => att.file)
@@ -542,9 +531,6 @@ export default function MultipleNotification() {
       }
     });
 
-    // console.log("allAttachments", allAttachments);
-
-    // console.log("final payload", payload);
     // sendNotifications(payload, {
     //   onSuccess: async ({ data }) => {
     //     // Reset form

@@ -17,6 +17,7 @@ type Props = {
   dataTestId?: string;
   multiple?: boolean;
   style?: Object;
+  dropdownStyle?: Object;
 };
 
 export function Select({
@@ -27,6 +28,7 @@ export function Select({
   dataTestId,
   multiple = false,
   style,
+  dropdownStyle,
 }: Props) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -186,6 +188,7 @@ export function Select({
             backgroundColor: theme.vars?.palette.background.paper,
             border: `1px solid ${theme.vars?.palette.divider}`,
             zIndex: 9999,
+            ...dropdownStyle
           }}
         >
           {options.map((option) => {
