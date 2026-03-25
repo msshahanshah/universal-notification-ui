@@ -10,16 +10,20 @@ type ToggleProps<T extends string> = {
   value: T;
   options: ToggleOption<T>[];
   onChange: (value: T) => void;
+  style?: React.CSSProperties;
+  textStyle?: React.CSSProperties;
 };
 
 export function Toggle<T extends string>({
   value,
   options,
   onChange,
+  style,
+  textStyle
 }: ToggleProps<T>) {
   const theme = useTheme();
   return (
-    <div style={toggleContainer}>
+    <div style={{ ...toggleContainer, ...style }}>
       {options.map((opt) => (
         <button
           key={opt.value}
@@ -35,6 +39,7 @@ export function Toggle<T extends string>({
               value === opt.value
                 ? COLORS.WHITE
                 : theme.vars?.palette.text.secondary,
+            ...textStyle
           }}
         >
           {opt.label}

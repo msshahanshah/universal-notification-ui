@@ -60,7 +60,6 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     default:
       return {
         color: "#666",
-        px: 1,
         py: 0.5,
         borderRadius: 1,
       };

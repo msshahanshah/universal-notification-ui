@@ -130,7 +130,7 @@ export const validateAllServices = (
         if (!section.body?.trim() && !commonMessage.trim()) {
           validation.email.isFormValid = false;
           emailErrors.push(
-            `Email Section ${sectionIndex + 1}: A body is required when common message is not provided`,
+            `Email Section ${sectionIndex + 1}: A body is required when "common message" is not provided`,
           );
         }
 
@@ -236,7 +236,6 @@ export const validateAllServices = (
 
       // Each section must have a message, or commonMessage must be provided
       slackInputData.forEach((section: any, sectionIndex: number) => {
-        console.log("section", section);
         if (!section.message?.trim() && !commonMessage.trim()) {
           validation.slack.isFormValid = false;
           slackErrors.push(
@@ -284,7 +283,6 @@ export const validateAllServices = (
       validation.whatsapp.isFormValid = false;
       whatsappErrors.push("WhatsApp service data is missing");
     } else {
-      console.log("whatsappInputData", whatsappInputData);
       const sections = (whatsappData as any).sections || [];
       // At least one destination must be provided
       const hasValidDestination = whatsappInputData?.some(
@@ -298,30 +296,38 @@ export const validateAllServices = (
 
       // Per-section validations
       whatsappInputData.forEach((section: any, sectionIndex: number) => {
-        // Destination is required
-        if (!section.to?.trim()) {
-          validation.whatsapp.isFormValid = false;
-          whatsappErrors.push(
-            `WhatsApp Section ${sectionIndex + 1}: To is required`,
-          );
-        }
+        
+        // Validate phone numbers with country codes
+        section.numbers.forEach((num: any, numIndex: number) => {
+          
+          const phonenNumberRegex = new RegExp(/^\+[0-9]+$/);
+         
+          if (num.number.trim() && !phonenNumberRegex.test(`${num.countryCode}${num.number.trim()}`)) {
+            validation.whatsapp.isFormValid = false;
+            whatsappErrors.push(
+              `WhatsApp Section ${sectionIndex + 1}, Number ${numIndex + 1}: Invalid phone number format`,
+            );
+          }
+        });
 
-        // Validate destination phone format (basic validation)
-        if (
-          section.to?.trim() &&
-          !/^[\d\s\-\+\(\)]+$/.test(section.to.trim())
-        ) {
+        // Ensure at least one valid number
+        const hasValidNumber = section.numbers.some((num: any) => num.number.trim() !== "");
+        if (!hasValidNumber) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
-            `WhatsApp Section ${sectionIndex + 1}: Phone number format is invalid`,
+            `WhatsApp Section ${sectionIndex + 1}: At least one phone number is required`,
           );
         }
 
         // Body or commonMessage must be provided
-        if (!section.body?.trim() && !commonMessage.trim()) {
+        if (
+          !section.message?.trim() &&
+          !commonMessage.trim() &&
+          section.toggleType !== "template"
+        ) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
-            `WhatsApp Section ${sectionIndex + 1}: A body is required when common message is not provided`,
+            `WhatsApp Section ${sectionIndex + 1}: A "separate message" is required when "common message" is not provided`,
           );
         }
 
@@ -336,13 +342,83 @@ export const validateAllServices = (
           );
         }
 
-        // Check if uniqueKey is present when attachments exist
-        // if (section.attachments && section.attachments.length > 0 && !section.uniqueKey?.trim()) {
-        //   validation.whatsapp.isFormValid = false;
-        //   whatsappErrors.push(
-        //     `WhatsApp Section ${sectionIndex + 1}: Unique key is required when attachments are present`,
-        //   );
-        // }
+
+        // Validate variableValues structure
+        if (
+          section.variableValues &&
+          typeof section.variableValues !== "object"
+        ) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Variable values must be an object`,
+          );
+        }
+
+        // Validate attachment type
+        if (
+          !section.attachmentType ||
+          !["file", "url"].includes(section.attachmentType)
+        ) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Attachment type must be selected`,
+          );
+        }
+
+        // Limit number of attachments (max 10)
+        if (section.attachments && section.attachments.length > 10) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Maximum 10 attachments allowed`,
+          );
+        }
+
+        // Validate WhatsApp URL attachments
+        if (section.attachments && section.attachments.length > 0 && section.attachmentType === 'url') {
+          const invalidAttachments = section.attachments.filter((attachment: any) => {
+            const url = attachment.url || attachment.name;
+            
+            // Check for HTTPS
+            if (url.startsWith("https://")) {
+              return false; // Valid
+            }
+            
+            // Check for valid file extensions (case insensitive)
+            const validExtensions = [
+              ".png", ".jpg", ".jpeg", ".gif", ".pdf", 
+              ".doc", ".docx", ".txt", ".zip", ".mp4", ".mp3"
+            ];
+            const hasValidExtension = validExtensions.some((ext) =>
+              url.toLowerCase().endsWith(ext)
+            );
+            
+            return !hasValidExtension; // Return true if invalid
+          });
+
+          if (invalidAttachments.length > 0) {
+            validation.whatsapp.isFormValid = false;
+            whatsappErrors.push(
+              `WhatsApp Section ${sectionIndex + 1}: Invalid attachment URLs: ${invalidAttachments.map((a: any) => a.url || a.name).join(", ")}\nURLs must start with "https://" or have valid file extensions like .png, .jpg, .pdf, etc.`
+            );
+          }
+        }
+
+        // Validate template variables
+        if (section.selectedTemplate && section.variableValues) {
+          const requiredFields = section.selectedTemplate.requiredFields || [];
+          const missingFields = requiredFields.filter(
+            (field: any) =>
+              !section.variableValues![field.name] ||
+              section.variableValues![field.name].trim() === "",
+          );
+
+          if (missingFields.length > 0) {
+            validation.whatsapp.isFormValid = false;
+            whatsappErrors.push(
+              `WhatsApp Section ${sectionIndex + 1}: Missing values for template variables: ${missingFields.map((f: any) => f.name).join(", ")}`,
+            );
+          }
+        }
       });
     }
 
