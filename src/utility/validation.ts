@@ -407,7 +407,7 @@ export const validateAllServices = (
         if (section.selectedTemplate && section.variableValues) {
           const requiredFields = section.selectedTemplate.requiredFields || [];
           const missingFields = requiredFields.filter(
-            (field) =>
+            (field: any) =>
               !section.variableValues![field.name] ||
               section.variableValues![field.name].trim() === "",
           );
@@ -415,7 +415,7 @@ export const validateAllServices = (
           if (missingFields.length > 0) {
             validation.whatsapp.isFormValid = false;
             whatsappErrors.push(
-              `WhatsApp Section ${sectionIndex + 1}: Missing values for template variables: ${missingFields.map((f) => f.name).join(", ")}`,
+              `WhatsApp Section ${sectionIndex + 1}: Missing values for template variables: ${missingFields.map((f: any) => f.name).join(", ")}`,
             );
           }
         }
@@ -433,7 +433,6 @@ export const validateAllServices = (
     validation.sms.isFormValid &&
     validation.slack.isFormValid &&
     validation.whatsapp.isFormValid;
-
 
   return {
     email: validation.email,

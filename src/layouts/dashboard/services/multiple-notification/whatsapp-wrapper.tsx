@@ -26,7 +26,10 @@ import { useTemplates } from "src/hooks/useTemplates";
 import { Template } from "src/api/service.api";
 import { Select } from "src/components/select";
 import { CountryCodeSelect } from "../SMS/country-code-select";
-import { formatNumbersForUniqueKey, WhatsAppNumber } from "src/utility/whatsapp";
+import {
+  formatNumbersForUniqueKey,
+  WhatsAppNumber,
+} from "src/utility/whatsapp";
 
 type ViewMode = "editor" | "preview";
 
@@ -403,7 +406,12 @@ export function WhatsappWrapper({
               <div
                 key={num.id}
                 className="whatsapp-to-row"
-                style={{ marginBottom: 8, display: "flex", gap: 8, alignItems: "center" }}
+                style={{
+                  marginBottom: 8,
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "center",
+                }}
               >
                 <CountryCodeSelect
                   value={num.countryCode}
@@ -419,52 +427,51 @@ export function WhatsappWrapper({
                 <Input
                   id={`whatsapp-number-${num.id}`}
                   type="tel"
+                  className="sms-input"
                   placeholder="Enter receiver number"
                   value={num.number}
                   inputMode="numeric"
                   onChange={(e) => {
                     const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
-                    updateNumberInSection(recipient.id, num.id, "number", onlyNums);
+                    updateNumberInSection(
+                      recipient.id,
+                      num.id,
+                      "number",
+                      onlyNums,
+                    );
                   }}
-                  style={{ flex: 1, ...inputStyle }}
+                  style={{ color: "#fff", height: 40, marginTop: 12 }}
                 />
                 {recipient.numbers.length > 1 && (
                   <button
-                    onClick={() => removeNumberFromSection(recipient.id, num.id)}
+                    onClick={() =>
+                      removeNumberFromSection(recipient.id, num.id)
+                    }
                     className="remove-btn"
                     style={{ marginLeft: 8 }}
                   >
                     ×
                   </button>
                 )}
+                {numIndex === recipient.numbers.length - 1 && (
+                  <button
+                    onClick={() => addNumberToSection(recipient.id)}
+                    className="add-btn"
+                    style={{ marginLeft: 8 }}
+                  >
+                    +
+                  </button>
+                )}
               </div>
             ))}
-            <button
-              label="Add Another Number"
-              onClick={() => addNumberToSection(recipient.id)}
-              className="add-btn"
-              style={{ width: "100%", marginTop: 8 }}
-            >
-              Add Another Number
-            </button>
             <div
               style={{
-                marginTop: 16,
+                marginTop: 30,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
               }}
             >
-              <label
-                style={{
-                  marginBottom: 4,
-                  fontSize: "12px",
-                  display: "block",
-                  color: theme.vars?.palette.text.secondary,
-                }}
-              >
-                Message Type
-              </label>
               <Toggle<"template" | "non-template">
                 value={recipient.toggleType}
                 onChange={(value) => handleToggleChange(recipient.id, value)}
@@ -507,7 +514,7 @@ export function WhatsappWrapper({
                     marginBottom: "12px",
                   }}
                   dropdownStyle={{
-                    height: 100
+                    height: 100,
                   }}
                 />
                 {templatesError && (
@@ -575,11 +582,12 @@ export function WhatsappWrapper({
                             value={`{{${field.name}}}`}
                             readOnly
                             style={{
-                              flex: 1,
+                              // flex: 1,
                               ...inputStyle,
                               backgroundColor:
                                 theme.vars?.palette.background.default,
                               cursor: "not-allowed",
+                              // height
                             }}
                           />
                           <Input
@@ -597,7 +605,7 @@ export function WhatsappWrapper({
                                 newValues,
                               );
                             }}
-                            style={{ flex: 1, ...inputStyle }}
+                            style={{ ...inputStyle }}
                           />
                         </div>
                       ),
@@ -626,17 +634,28 @@ export function WhatsappWrapper({
 
             {recipient.separateMessage &&
               recipient.toggleType === "non-template" && (
-                <Input
-                  label="Separate Message"
-                  type="text"
-                  id={`message-${recipient.message}`}
-                  placeholder="Separate Message"
-                  value={recipient.message}
-                  onChange={(e) =>
-                    updateSection(recipient.id, "message", e.target.value)
-                  }
-                  style={inputStyle}
-                />
+                <>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      color: theme.vars?.palette.text.secondary,
+                      display: "block",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Separate Message
+                  </label>
+                  <textarea
+                    value={recipient.message}
+                    onChange={(e) =>
+                      updateSection(recipient.id, "message", e.target.value)
+                    }
+                    placeholder="Separate Message"
+                    // style={inputStyle}
+                    className="sms-textarea"
+                    rows={6}
+                  />
+                </>
               )}
             {/* Attachment Type Dropdown - Show only in non-template mode */}
             {recipient.toggleType === "non-template" && (
@@ -671,8 +690,8 @@ export function WhatsappWrapper({
                   style={{
                     width: "100%",
                   }}
-                   dropdownStyle={{
-                    height: 100
+                  dropdownStyle={{
+                    height: 100,
                   }}
                 />
               </div>
@@ -691,7 +710,7 @@ export function WhatsappWrapper({
                         color: theme.vars?.palette.text.secondary,
                       }}
                     >
-                      Attachments (URLs, comma-separated) (Max 10)
+                      Attachments (URLs, comma-separated)
                     </label>
                     <div
                       style={{
@@ -745,7 +764,7 @@ export function WhatsappWrapper({
                           color: theme.vars?.palette.text.secondary,
                         }}
                       >
-                        File Attachments (Max 10)
+                        File Attachments
                       </label>
                       <AttachmentSection
                         attachments={recipient.attachments}
