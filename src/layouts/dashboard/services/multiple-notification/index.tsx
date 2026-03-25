@@ -31,16 +31,17 @@ import { WhatsappWrapper } from "./whatsapp-wrapper";
 import { ServiceType, MultipleNotificationPayload } from "./types";
 
 import "./index.css";
+import { useTextareaStyles } from "src/utility/styles";
 
 export default function MultipleNotification() {
   const theme = useTheme();
   const queryClient = useQueryClient();
+  const textAreaStyle = useTextareaStyles();
 
   const { mutate: sendNotifications, isPending } =
     useMultipleNotificationService();
 
   const showSnackbar = useSnackbar();
-
 
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
     const serviceKeys = Object.keys(data);
@@ -733,6 +734,7 @@ export default function MultipleNotification() {
             placeholder="Enter message to be sent across all selected services"
             className="sms-textarea"
             rows={6}
+            style={textAreaStyle}
           />
         </div>
 

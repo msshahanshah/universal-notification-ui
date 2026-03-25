@@ -21,7 +21,7 @@ import {
 } from "src/atoms/emailAtoms";
 import { useTheme } from "@mui/material/styles";
 import { AddButton } from "./helper";
-import { renameDuplicateFiles } from "src/utility/helper";
+import { useInputStyles } from "src/utility/styles";
 
 type ViewMode = "editor" | "preview";
 
@@ -46,16 +46,7 @@ export function EmailWrapper({
   maxBlocks = 5,
 }: EmailWrapperProps) {
   const theme = useTheme();
-  const inputStyle: React.CSSProperties = {
-    backgroundColor: theme.vars?.palette.background.paper,
-    color: theme.vars?.palette.text.secondary,
-    border: `1px solid ${theme.vars?.palette.divider} !important`,
-    width: "100%",
-    height: 42,
-    marginBottom: 12,
-    padding: "0 12px",
-    borderRadius: 6,
-  };
+  const inputStyle = useInputStyles();
   // Replace local state with atoms
   const [recipients, setRecipients] = useAtom(emailSectionsAtom);
   const [callbackData] = useAtom(emailCallbackDataAtom);
@@ -159,7 +150,7 @@ export function EmailWrapper({
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-        isSameObject: file === files[index]
+        isSameObject: file === files[index],
       });
 
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
@@ -180,7 +171,7 @@ export function EmailWrapper({
       ...newAttachments,
     ];
 
-    console.log("newAttachment",newAttachment)
+    console.log("newAttachment", newAttachment);
 
     updateSection(recipientId, "attachments", newAttachment);
 
@@ -255,7 +246,6 @@ export function EmailWrapper({
               <Input
                 label="From"
                 subLabel="The email address field can be filled only if the 'From Email' option is enabled."
-                // className="sms-input"
                 type="email"
                 id={`from-${recipient.id}`}
                 placeholder="From"
@@ -282,7 +272,6 @@ export function EmailWrapper({
 
               <Input
                 label="Cc"
-                // className="sms-input"
                 type="email"
                 id={`cc-${recipient.id}`}
                 placeholder="Cc"
@@ -295,7 +284,6 @@ export function EmailWrapper({
 
               <Input
                 label="Bcc"
-                // className="sms-input"
                 type="email"
                 id={`bcc-${recipient.id}`}
                 placeholder="Bcc"
@@ -308,7 +296,6 @@ export function EmailWrapper({
 
               <Input
                 label="Subject"
-                // className="sms-input"
                 type="text"
                 id={`subject-${recipient.id}`}
                 placeholder="Email subject"

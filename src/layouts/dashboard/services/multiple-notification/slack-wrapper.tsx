@@ -19,6 +19,7 @@ import {
 } from "src/atoms/slackAtoms";
 import COLORS from "src/utility/colors";
 import { AddButton } from "./helper";
+import { useInputStyles } from "src/utility/styles";
 
 interface SlackWrapperProps {
   onValueChange?: (values: {
@@ -34,6 +35,7 @@ export function SlackWrapper({
   maxBlocks = 5,
 }: SlackWrapperProps) {
   const theme = useTheme();
+  const inputStyle = useInputStyles();
   // Replace local state with atoms
   const [channels, setChannels] = useAtom(slackSectionsAtom);
   const [callbackData] = useAtom(slackCallbackDataAtom);
@@ -145,7 +147,7 @@ export function SlackWrapper({
           <Input
             type="text"
             id={`slack-channel-${channel.id}`}
-            className="sms-input"
+            // className="sms-input"
             placeholder="Eg. C0991E9E10R"
             value={channel.channelID}
             onChange={(e) => {
@@ -155,6 +157,7 @@ export function SlackWrapper({
               updateSection(channel.id, "channelID", e.target.value);
             }}
             showAsteric
+            style={inputStyle}
           />
 
           {/* Separate Message Toggle for each Slack channel */}

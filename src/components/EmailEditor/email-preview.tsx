@@ -124,7 +124,6 @@ const previewShell: React.CSSProperties = {
   borderRadius: 8,
   overflow: "hidden",
   minHeight: "600px",
-  // background: (theme: any) => theme.vars?.palette.background.default,
 };
 
 const iframe: React.CSSProperties = {

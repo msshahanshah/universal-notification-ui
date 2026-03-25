@@ -10,6 +10,7 @@ import { type WhatsappRecipient } from "src/atoms/whatsappAtoms";
 import { useTheme } from "@mui/material/styles";
 import { AddButton } from "./helper";
 import AttachmentSection from "../email/attachmentSection";
+import { useInputStyles, useTextareaStyles } from "src/utility/styles";
 import { renameDuplicateFiles } from "src/utility/helper";
 import {
   whatsappCallbackDataAtom,
@@ -22,6 +23,7 @@ import {
   formatNumbersForUniqueKey,
   WhatsAppNumber,
 } from "src/utility/whatsapp";
+import COLORS from "src/utility/colors";
 
 type ViewMode = "editor" | "preview";
 
@@ -33,15 +35,19 @@ type Attachment = {
 };
 
 interface WhatsappWrapperProps {
+  showBody: boolean;
   onValueChange?: (values: { recipients: WhatsappRecipient[] }) => void;
   maxBlocks?: number;
 }
 
 export function WhatsappWrapper({
+  showBody,
   onValueChange,
   maxBlocks = 5,
 }: WhatsappWrapperProps) {
   const theme = useTheme();
+  const inputStyle = useInputStyles();
+  const textareaStyle = useTextareaStyles();
   const [recipients, setRecipients] = useAtom(whatsappSectionsAtom);
   const [attachmentInput, setAttachmentInput] = useState<
     Record<string, string>
@@ -54,16 +60,16 @@ export function WhatsappWrapper({
     error: templatesError,
   } = useTemplates("whatsapp");
 
-  const inputStyle: React.CSSProperties = {
-    backgroundColor: theme.vars?.palette.background.paper,
-    color: theme.vars?.palette.text.secondary,
-    border: `1px solid ${theme.vars?.palette.divider} !important`,
-    width: "100%",
-    height: 42,
-    marginBottom: 12,
-    padding: "0 12px",
-    borderRadius: 6,
-  };
+  // const inputStyle: React.CSSProperties = {
+  //   backgroundColor: theme.vars?.palette.background.paper,
+  //   color: theme.vars?.palette.text.secondary,
+  //   border: `1px solid ${theme.vars?.palette.divider} !important`,
+  //   width: "100%",
+  //   height: 42,
+  //   marginBottom: 12,
+  //   padding: "0 12px",
+  //   borderRadius: 6,
+  // };
   // Replace local state with atoms
 
   const [callbackData] = useAtom(whatsappCallbackDataAtom);
@@ -71,7 +77,7 @@ export function WhatsappWrapper({
   // Generate unique key for WhatsApp attachments
   const generateUniqueKey = (numbers: WhatsAppNumber[], index: number) => {
     const phoneNumber = formatNumbersForUniqueKey(numbers);
-    
+
     // If no phone number, use recipient ID for unique key
     if (!phoneNumber) return `whatsapp-recipient-${index + 1}`;
 
@@ -251,7 +257,7 @@ export function WhatsappWrapper({
         size: file.size,
         type: file.type,
         lastModified: file.lastModified,
-        isSameObject: file === files[index]
+        isSameObject: file === files[index],
       });
 
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
@@ -272,7 +278,7 @@ export function WhatsappWrapper({
       ...newAttachments,
     ];
 
-    console.log("newAttachment",newAttachment)
+    console.log("newAttachment", newAttachment);
 
     updateSection(recipientId, "attachments", newAttachment);
 
@@ -375,7 +381,7 @@ export function WhatsappWrapper({
       console.log("🔑 Generating uniqueKey for file attachments:", {
         recipientId,
         numbers: recipient.numbers,
-        generatedKey: uniqueKey
+        generatedKey: uniqueKey,
       });
       updateSection(recipientId, "uniqueKey", uniqueKey);
     }
@@ -473,7 +479,6 @@ export function WhatsappWrapper({
                 <Input
                   id={`whatsapp-number-${num.id}`}
                   type="tel"
-                  className="sms-input"
                   placeholder="Enter receiver number"
                   value={num.number}
                   inputMode="numeric"
@@ -486,7 +491,7 @@ export function WhatsappWrapper({
                       onlyNums,
                     );
                   }}
-                  style={{ color: "#fff", height: 40, marginTop: 12 }}
+                  style={{...inputStyle, height: 40, marginTop: 12 }}
                 />
                 {recipient.numbers.length > 1 && (
                   <button
@@ -697,8 +702,7 @@ export function WhatsappWrapper({
                       updateSection(recipient.id, "message", e.target.value)
                     }
                     placeholder="Separate Message"
-                    // style={inputStyle}
-                    className="sms-textarea"
+                    style={textareaStyle}
                     rows={6}
                   />
                 </>
@@ -766,7 +770,7 @@ export function WhatsappWrapper({
                       }}
                     >
                       <textarea
-                        className="sms-textarea"
+                        // className="sms-textarea"
                         placeholder="Enter attachment URLs separated by commas..."
                         value={attachmentInput[recipient.id] ?? ""}
                         onChange={(e) =>
@@ -775,17 +779,7 @@ export function WhatsappWrapper({
                             e.target.value,
                           )
                         }
-                        rows={3}
-                        style={{
-                          width: "100%",
-                          padding: "8px",
-                          border: `1px solid ${theme.vars?.palette.divider}`,
-                          borderRadius: "6px",
-                          backgroundColor: theme.vars?.palette.background.paper,
-                          color: theme.vars?.palette.text.secondary,
-                          fontSize: "12px",
-                          resize: "vertical",
-                        }}
+                        style={textareaStyle}
                       />
                       {recipient.attachments &&
                         recipient.attachments.length > 0 && (
