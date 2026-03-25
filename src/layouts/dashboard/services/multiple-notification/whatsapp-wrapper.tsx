@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
-import { useEmailService } from "src/hooks/useService";
-import Button from "src/components/button";
 import Input from "src/components/input";
-import { useSnackbar } from "src/provider/snackbar";
-import { logsKeys } from "src/api/queryKeys";
-import { EmailEditor } from "src/components/EmailEditor/tiptap-email-editor";
-import { EmailPreview } from "src/components/EmailEditor/email-preview";
 import { Toggle } from "src/components/toggle";
 
 import "../SMS/sms-composer.css";
@@ -23,7 +16,6 @@ import {
   whatsappSectionsAtom,
 } from "src/atoms/whatsappAtoms";
 import { useTemplates } from "src/hooks/useTemplates";
-import { Template } from "src/api/service.api";
 import { Select } from "src/components/select";
 import { CountryCodeSelect } from "../SMS/country-code-select";
 import {
@@ -88,10 +80,6 @@ export function WhatsappWrapper({
 
     return `${cleanNumber}-${index + 1}`;
   };
-
-  const queryClient = useQueryClient();
-  const { mutate } = useEmailService();
-  const showSnackbar = useSnackbar();
 
   // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
