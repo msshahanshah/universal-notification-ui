@@ -50,7 +50,6 @@ export const uploadFilesToS3 = async (items: S3Item[]) => {
         },
       });
 
-      console.log(`✅ Uploaded: ${item.fileName}`);
     } catch (error) {
       console.error(`❌ Failed: ${item.fileName}`, error);
       throw error; // stop if one fails

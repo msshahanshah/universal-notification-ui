@@ -20,6 +20,7 @@ import {
   type SMSSection,
 } from "src/atoms/smsAtoms";
 import { AddButton } from "./helper";
+import { useInputStyles } from "src/utility/styles";
 
 interface SMSWrapperProps {
   showMessage: boolean;
@@ -37,6 +38,7 @@ export function SMSWrapper({
   maxBlocks = 5,
 }: SMSWrapperProps) {
   const theme = useTheme();
+  const inputStyle = useInputStyles();
   // Replace local state with atoms
   const [sections, setSections] = useAtom(smsSectionsAtom);
   const [callbackData] = useAtom(smsCallbackDataAtom);
@@ -218,7 +220,7 @@ export function SMSWrapper({
               <Input
                 id={`sms-number-${num.id}`}
                 type="tel"
-                className="sms-input"
+                // className="sms-input"
                 placeholder="Enter receiver number"
                 value={num.number}
                 inputMode="numeric"
@@ -226,7 +228,7 @@ export function SMSWrapper({
                   const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
                   updateNumberInSection(section.id, num.id, "number", onlyNums);
                 }}
-                style={{ color: "#fff" }}
+                style={inputStyle}
               />
               {section.numbers.length > 1 && (
                 <button

@@ -47,8 +47,6 @@ export const Table = ({
 
   const gridStyle = useMemo(() => ({ height: hValue, width: wValue }), []);
 
-  console.log("logsData", logsData?.length);
-
   return (
     <div style={containerStyle} className="ag-theme-quartz grid-12-font">
       <div

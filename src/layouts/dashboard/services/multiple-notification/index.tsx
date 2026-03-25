@@ -22,6 +22,7 @@ import { logsKeys } from "src/api/queryKeys";
 import { isBodyEmpty } from "src/utility/helper";
 import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
 import { validateAllServices } from "src/utility/validation";
+import { formatNumbersForUniqueKey } from "src/utility/whatsapp";
 
 import { SMSWrapper } from "./sms-wrapper";
 import { EmailWrapper } from "./email-wrapper";
@@ -30,75 +31,89 @@ import { WhatsappWrapper } from "./whatsapp-wrapper";
 import { ServiceType, MultipleNotificationPayload } from "./types";
 
 import "./index.css";
+import { useTextareaStyles } from "src/utility/styles";
 
 export default function MultipleNotification() {
   const theme = useTheme();
   const queryClient = useQueryClient();
+  const textAreaStyle = useTextareaStyles();
 
   const { mutate: sendNotifications, isPending } =
     useMultipleNotificationService();
 
   const showSnackbar = useSnackbar();
 
-  //  const [smsErrors, setSmsErrors] = useAtom(smsErrorsAtom);
-
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
-    const preSignedUrls = data?.email?.preSignedUrls;
-    if (!preSignedUrls?.length) return;
+    const serviceKeys = Object.keys(data);
 
-    for (let i = 0; i < preSignedUrls.length; i++) {
-      const presigned = preSignedUrls[i];
+    // Iterate through each service that has pre-signed URLs
+    for (const serviceKey of serviceKeys) {
+      const preSignedUrls = data?.[serviceKey]?.preSignedUrls;
+      if (!preSignedUrls?.length) continue;
 
-      const urls = presigned?.urls;
+      for (let i = 0; i < preSignedUrls.length; i++) {
+        const presigned = preSignedUrls[i];
 
-      if (!urls?.length) continue;
+        const urls = presigned?.urls;
 
-      for (let j = 0; j < urls.length; j++) {
-        const urlEntry = urls[j];
+        if (!urls?.length) continue;
 
-        // Find the file that matches this URL's filename
-        const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
-        const fileObj = attachmentsCopy.find(
-          (file: any) => file.name === filenameFromUrl,
-        );
+        for (let j = 0; j < urls.length; j++) {
+          const urlEntry = urls[j];
 
-        if (!fileObj) {
-          console.warn(
-            `No file found for URL with filename: ${filenameFromUrl}`,
+          // Find the file that matches this URL's filename
+          const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
+          const fileObj = attachmentsCopy.find(
+            (file: any) => file.name === filenameFromUrl,
           );
-          continue;
-        }
 
-        const formData = new FormData();
+          if (!fileObj) {
+            console.warn(
+              `No file found for URL with filename: ${filenameFromUrl}`,
+            );
+            continue;
+          }
 
-        // Append S3 fields
-        Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
-          formData.append(key, value as string);
-        });
+          const formData = new FormData();
 
-        // File MUST be last
-        formData.append("file", fileObj);
-
-        try {
-          await api.post(urlEntry.s3.url, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: ``,
-            },
+          // Append S3 fields
+          Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
+            formData.append(key, value as string);
           });
-          queryClient.invalidateQueries({
-            queryKey: logsKeys.all,
-          });
-        } catch (err) {
-          console.error("❌ Upload failed:", fileObj.name, err);
 
-          setTimeout(() => {
-            showSnackbar("Email: Failed to upload attachments", "error");
-          }, 30000);
-          throw err;
+          // File MUST be last
+          formData.append("file", fileObj);
+
+          try {
+            await api.post(urlEntry.s3.url, formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: ``,
+              },
+            });
+          } catch (err) {
+            console.error(
+              `❌ Upload failed for ${serviceKey}:`,
+              fileObj.name,
+              err,
+            );
+
+            setTimeout(() => {
+              showSnackbar(
+                `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload attachments`,
+                "error",
+              );
+            }, 30000);
+            throw err;
+          }
         }
       }
     }
+
+    // Invalidate queries once all uploads are complete
+    queryClient.invalidateQueries({
+      queryKey: logsKeys.all,
+    });
   };
 
   const [selectedServices, setSelectedServices] = useState<ServiceType[]>([]);
@@ -506,8 +521,8 @@ export default function MultipleNotification() {
         if (recipient) {
           // Extract only the actual File objects from attachment objects
           const fileObjects = recipient.attachments
-            .map(att => att.file)
-            .filter(file => file instanceof File);
+            .map((att) => att.file)
+            .filter((file) => file instanceof File);
           allAttachments.push(...fileObjects);
         }
       }
@@ -515,21 +530,38 @@ export default function MultipleNotification() {
 
     // Collect WhatsApp attachments for upload
     payload.whatsapp?.forEach((whatsapp) => {
-      if (whatsapp.attachments && whatsapp.attachments.length > 0) {
-        // Find the corresponding recipient to get the actual file objects
-        const recipient = whatsappRawRecipients.find(
-          (rec) =>
-            rec.to === whatsapp.destination ||
-            rec.destination === whatsapp.destination,
-        );
+      if (
+        whatsapp.attachments &&
+        whatsapp.attachments.length > 0 &&
+        whatsapp.uniqueKey
+      ) {
+        // Extract the first phone number from destination string
+        const destinationNumbers = whatsapp.destination
+          .split(",")
+          .map((num) => num.trim());
+        const firstPhoneNumber = destinationNumbers[0]; // Take first number for matching
+
+        const recipient = whatsappRawRecipients.find((rec) => {
+          // Get the first number from the recipient's numbers array
+          const recipientFirstNumber = formatNumbersForUniqueKey(rec.numbers);
+
+          return recipientFirstNumber === firstPhoneNumber;
+        });
+
         if (recipient) {
           // Extract only the actual File objects from attachment objects
           const fileObjects = recipient.attachments
             .map((att) => att.file)
             .filter((file) => file instanceof File);
           allAttachments.push(...fileObjects);
-
-        }}})
+        } else {
+          console.warn(
+            "No matching recipient found for WhatsApp destination:",
+            whatsapp.destination,
+          );
+        }
+      }
+    });
 
     sendNotifications(payload, {
       onSuccess: async ({ data }) => {
@@ -592,7 +624,7 @@ export default function MultipleNotification() {
           queryClient.invalidateQueries({
             queryKey: logsKeys.all,
           });
-        } else if (data?.email?.success) {
+        } else if (data?.email?.success || data?.whatsapp?.success) {
           await uploadToS3FromAttachments(data, attachmentsCopy);
         }
       },
@@ -630,7 +662,7 @@ export default function MultipleNotification() {
             statusMessages.push(slackStatus);
           }
         }
-        
+
         if (selectedServices.includes("whatsapp")) {
           if (errorData?.whatsapp?.success === false) {
             const whatsappStatus = `Whatsapp: ${errorData?.whatsapp?.message || "Failed to send notification"}`;
@@ -702,6 +734,7 @@ export default function MultipleNotification() {
             placeholder="Enter message to be sent across all selected services"
             className="sms-textarea"
             rows={6}
+            style={textAreaStyle}
           />
         </div>
 

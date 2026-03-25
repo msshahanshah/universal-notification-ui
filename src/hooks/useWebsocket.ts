@@ -37,7 +37,6 @@ export const useWebsocket = <T>({
     };
 
     ws.onclose = (event) => {
-      console.log("event", event?.reason);
       if ([4001, 4002].includes(event.code)) {
         if (event.code === 4001) {
           localStorage.clear();

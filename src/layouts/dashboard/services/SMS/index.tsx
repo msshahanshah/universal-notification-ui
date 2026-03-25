@@ -10,6 +10,7 @@ import { logsKeys } from "src/api/queryKeys";
 import { CountryCodeSelect } from "./country-code-select";
 
 import "./sms-composer.css";
+import { useInputStyles } from "src/utility/styles";
 
 interface Recipient {
   id: string;
@@ -19,6 +20,7 @@ interface Recipient {
 
 export default function SMS() {
   const theme = useTheme();
+  const inputStyle = useInputStyles();
   const queryClient = useQueryClient();
   const showSnackbar = useSnackbar();
   const { mutate } = useSmsService();
@@ -141,7 +143,7 @@ export default function SMS() {
                 inputMode="numeric"
                 className="sms-input"
                 onChange={(e) => updateNumber(recipient.id, e.target.value)}
-                style={{ color: "#fff" }}
+                style={inputStyle}
               />
 
               {recipients.length > 1 && (
