@@ -243,7 +243,7 @@ export function WhatsappWrapper({
     id: string,
     field: keyof WhatsappRecipient,
     value: any,
-  ) => 
+  ) => {
     // ✅ prev is always the latest state, not a stale closure
     setRecipients((prev) =>
       prev.map((recipient) =>
