@@ -614,8 +614,8 @@ export default function MultipleNotification() {
       }
     });
 
-    console.log("allFinalAttachments", allFinalAttachments);
-    console.log("payload", payload);
+    // console.log("allFinalAttachments", allFinalAttachments);
+    // console.log("payload", payload);
 
     sendNotifications(payload, {
       onSuccess: async ({ data }) => {
