@@ -22,6 +22,7 @@ import { Mail, MessageSquare, SlackIcon, Send } from "lucide-react";
 import { useTheme, useColorScheme } from "@mui/material/styles";
 
 import COLORS from "src/utility/colors";
+import { useLogout } from "src/hooks/useLogout";
 
 const sidebarItems = [
   {
@@ -64,6 +65,7 @@ const Sidebar = ({
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:768px)");
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const [search, setSearch] = useState("");
 
@@ -256,18 +258,18 @@ const Sidebar = ({
       {/* BOTTOM */}
       <List sx={{ mt: "auto" }}>
         <ListItemButton
-          onClick={() => {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            localStorage.removeItem("clientId");
-            window.location.href = "/";
-          }}
+          onClick={() => logout()}
+          disabled={isLoggingOut}
           sx={getItemStyles("/logout")}
         >
           <ListItemIcon sx={{ color: "text.secondary" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
-          {open && <ListItemText primary="Logout" />}
+          {open && (
+            <ListItemText 
+              primary={isLoggingOut ? "Logging out..." : "Logout"} 
+            />
+          )}
         </ListItemButton>
       </List>
     </div>
