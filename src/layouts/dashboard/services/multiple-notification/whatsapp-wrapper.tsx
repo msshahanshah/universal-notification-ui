@@ -129,8 +129,8 @@ export function WhatsappWrapper({
 
     if (template) {
       // Update templateId and selectedTemplate
-      updateSection(recipientId, "templateId", templateId);
-      updateSection(recipientId, "selectedTemplate", template);
+      updateSection2(recipientId, "templateId", templateId);
+      updateSection2(recipientId, "selectedTemplate", template);
 
       // Generate variableValues from requiredFields
       const variableValues = template.requiredFields.reduce(
@@ -141,12 +141,12 @@ export function WhatsappWrapper({
         {} as Record<string, string>,
       );
 
-      updateSection(recipientId, "variableValues", variableValues);
+      updateSection2(recipientId, "variableValues", variableValues);
     } else {
       // Clear template and variables
-      updateSection(recipientId, "templateId", null);
-      updateSection(recipientId, "selectedTemplate", null);
-      updateSection(recipientId, "variableValues", {});
+      updateSection2(recipientId, "templateId", null);
+      updateSection2(recipientId, "selectedTemplate", null);
+      updateSection2(recipientId, "variableValues", {});
     }
   };
 
@@ -154,19 +154,19 @@ export function WhatsappWrapper({
     recipientId: string,
     toggleType: "template" | "non-template",
   ) => {
-    updateSection(recipientId, "toggleType", toggleType);
+    updateSection2(recipientId, "toggleType", toggleType);
 
     if (toggleType === "template") {
       // Clear non-template fields when switching to template mode
-      updateSection(recipientId, "message", "");
-      updateSection(recipientId, "attachments", []);
-      updateSection(recipientId, "separateMessage", false);
-      updateSection(recipientId, "uniqueKey", "");
+      updateSection2(recipientId, "message", "");
+      updateSection2(recipientId, "attachments", []);
+      updateSection2(recipientId, "separateMessage", false);
+      updateSection2(recipientId, "uniqueKey", "");
     } else {
       // Clear template fields when switching to non-template mode
-      updateSection(recipientId, "templateId", null);
-      updateSection(recipientId, "selectedTemplate", null);
-      updateSection(recipientId, "variableValues", {});
+      updateSection2(recipientId, "templateId", null);
+      updateSection2(recipientId, "selectedTemplate", null);
+      updateSection2(recipientId, "variableValues", {});
     }
   };
 
@@ -250,7 +250,7 @@ export function WhatsappWrapper({
     const renamedFiles = renameDuplicateFiles(files);
 
     const newAttachments = renamedFiles.map((file, index) => {
-      const isImage = file.type.startsWith("image/");
+      const isImage = file?.type?.startsWith("image/");
 
       console.log(`renamed file ${index}:`, {
         name: file.name,
@@ -284,7 +284,7 @@ export function WhatsappWrapper({
     e.target.value = "";
   };
 
-  const updateSection = (
+  const updateSection2 = (
     id: string,
     field: keyof WhatsappRecipient,
     value: any,
@@ -293,6 +293,18 @@ export function WhatsappWrapper({
     setRecipients((prev) =>
       prev.map((recipient) =>
         recipient.id == id ? { ...recipient, [field]: value } : recipient,
+      ),
+    );
+  };
+
+  const updateSection = (
+    id: string,
+    field: keyof WhatsappRecipient,
+    value: any,
+  ) => {
+    setRecipients(
+      recipients.map((recipient) =>
+        recipient.id === id ? { ...recipient, [field]: value } : recipient,
       ),
     );
   };
@@ -385,18 +397,27 @@ export function WhatsappWrapper({
     }
   };
 
-  const removeFileAttachment = (recipientId: string, attachmentId: string) => {
+  const removeAttachment = (recipientId: string, attachmentId: string) => {
+    // const recipient = recipients.find((r) => r.id === recipientId);
+    // if (recipient) {
+    //   const updatedAttachments = recipient.attachments.filter(
+    //     (a) => a.id !== attachmentId,
+    //   );
+    //   updateSection(recipientId, "attachments", updatedAttachments);
+
+    //   // Clear uniqueKey if no attachments remain
+    //   if (updatedAttachments.length === 0) {
+    //     updateSection(recipientId, "uniqueKey", "");
+    //   }
+    // }
+
     const recipient = recipients.find((r) => r.id === recipientId);
     if (recipient) {
-      const updatedAttachments = recipient.attachments.filter(
-        (a) => a.id !== attachmentId,
+      updateSection(
+        recipientId,
+        "attachments",
+        recipient.attachments.filter((a) => a.id !== attachmentId),
       );
-      updateSection(recipientId, "attachments", updatedAttachments);
-
-      // Clear uniqueKey if no attachments remain
-      if (updatedAttachments.length === 0) {
-        updateSection(recipientId, "uniqueKey", "");
-      }
     }
   };
 
@@ -489,7 +510,7 @@ export function WhatsappWrapper({
                       onlyNums,
                     );
                   }}
-                  style={{...inputStyle, height: 40, marginTop: 12 }}
+                  style={{ ...inputStyle, height: 40, marginTop: 12 }}
                 />
                 {recipient.numbers.length > 1 && (
                   <button
@@ -806,14 +827,16 @@ export function WhatsappWrapper({
                       </label>
                       <AttachmentSection
                         attachments={recipient.attachments}
-                        onAdd={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleFileAttachmentChange(
-                            recipient.id,
-                            e.target.files,
-                          )
+                        onAdd={
+                          (e: React.ChangeEvent<HTMLInputElement>) =>
+                            handleAttachmentChange(recipient.id, e)
+                          // handleFileAttachmentChange(
+                          //   recipient.id,
+                          //   e.target.files,
+                          // )
                         }
                         onRemove={(id: string) =>
-                          removeFileAttachment(recipient.id, id)
+                          removeAttachment(recipient.id, id)
                         }
                         hideBtn={recipient.attachments.length >= 10}
                       />

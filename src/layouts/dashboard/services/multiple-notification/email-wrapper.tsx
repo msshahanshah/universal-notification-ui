@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
 import { useEmailService } from "src/hooks/useService";
@@ -31,7 +30,6 @@ type Attachment = {
 };
 
 interface EmailWrapperProps {
-  showBody: boolean;
   onValueChange?: (values: {
     from: string;
     recipients: EmailRecipientType[];
@@ -40,7 +38,6 @@ interface EmailWrapperProps {
 }
 
 export function EmailWrapper({
-  showBody,
   onValueChange,
   maxBlocks = 5,
 }: EmailWrapperProps) {
@@ -51,43 +48,12 @@ export function EmailWrapper({
   const [callbackData] = useAtom(emailCallbackDataAtom);
   const [view, setView] = useState<ViewMode>("editor");
 
-  // Generate unique key for each recipient
-  const generateUniqueKey = (recipient: EmailRecipientType, index: number) => {
-    if (recipient.to && recipient.subject) {
-      // Extract email ID before @
-      const emailId = recipient.to
-        .split("@")[0]
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, "");
-      // Clean subject (remove special chars, replace spaces with hyphens)
-      const cleanSubject = recipient.subject
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, "-");
-      // Generate sequence number based on index + 1
-      const sequence = index + 1;
-      return `${cleanSubject}-${emailId}-${sequence}`;
-    }
-    return `email-${index + 1}`;
-  };
-
-  const queryClient = useQueryClient();
-  const { mutate } = useEmailService();
-  const showSnackbar = useSnackbar();
-
   // Pass values to parent whenever they change (using computed atom)
   useEffect(() => {
     if (onValueChange) {
       onValueChange(callbackData);
     }
   }, [callbackData, onValueChange]);
-
-  function isBodyEmpty(html: any) {
-    if (!html) return true;
-    const div = document.createElement("div");
-    div.innerHTML = html;
-    return div.textContent.trim().length === 0;
-  }
 
   const addSection = () => {
     if (recipients.length >= maxBlocks) {
@@ -139,9 +105,9 @@ export function EmailWrapper({
     if (!files.length) return;
 
     // Rename duplicate files to avoid conflicts
-    const renamedFiles = renameDuplicateFiles(files);
+    // const renamedFiles = renameDuplicateFiles(files);
 
-    const newAttachments = renamedFiles.map((file, index) => {
+    const newAttachments = files.map((file, index) => {
       const isImage = file.type.startsWith("image/");
 
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
