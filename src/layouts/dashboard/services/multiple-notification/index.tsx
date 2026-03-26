@@ -63,6 +63,7 @@ export default function MultipleNotification() {
 
           // Find the file that matches this URL's filename
           const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
+
           const fileObj = attachmentsCopy.find(
             (file: any) => file.name === filenameFromUrl,
           );
@@ -327,15 +328,6 @@ export default function MultipleNotification() {
 
   const isSendButtonDisabled = isPending || !validationResult.isFormValid;
 
-  const toggleSeparateMessage = (
-    service: "sms" | "email" | "slack" | "whatsapp",
-  ) => {
-    setSeparateMessages((prev) => ({
-      ...prev,
-      [service]: !prev[service],
-    }));
-  };
-
   // Callback handlers for wrapper value changes
   const handleSMSValueChange = useCallback(
     (values: { destination: string[]; message: string[]; sections: any[] }) => {
@@ -562,9 +554,8 @@ export default function MultipleNotification() {
 
           // const renamedFiles = renameDuplicateFiles(combinedFiles);
           email.attachments = renamedFiles.map((file) => file.name);
-          console.log("whatsapp.attachments", email.attachments);
-          console.log("recipient.attachments", recipient.attachments);
-          allFinalAttachments.push(...allAttachments); // Accumulate instead of overwrite
+
+          allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
           allAttachments.length = 0; // Clear allAttachments after updating recipient
         }
       }
@@ -602,8 +593,7 @@ export default function MultipleNotification() {
           const renamedFiles = renameDuplicateFiles(combinedFiles);
 
           whatsapp.attachments = renamedFiles.map((file) => file.name);
-          console.log("whatsapp.attachments", whatsapp.attachments);
-          allFinalAttachments.push(...allAttachments); // Accumulate instead of overwrite
+          allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
           allAttachments.length = 0; // Clear allAttachments after updating whatsapp
         } else {
           console.warn(
@@ -613,9 +603,6 @@ export default function MultipleNotification() {
         }
       }
     });
-
-    // console.log("allFinalAttachments", allFinalAttachments);
-    // console.log("payload", payload);
 
     sendNotifications(payload, {
       onSuccess: async ({ data }) => {
