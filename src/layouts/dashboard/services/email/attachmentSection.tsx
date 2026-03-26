@@ -10,15 +10,15 @@ function AttachmentSection({
   hideBtn,
 }: any) {
   const theme = useTheme();
-  const getFileIcon = (type: string, name: string) => {
-    if (type.startsWith("image/")) return "🖼️";
-    if (type.includes("pdf")) return "📕";
-    if (type.includes("zip") || type.includes("rar")) return "🗜️";
-    if (type.includes("word")) return "📘";
-    if (type.includes("excel") || type.includes("sheet")) return "📗";
-    if (type.includes("text")) return "📄";
-    if (type.includes("video")) return "🎬";
-    if (type.includes("audio")) return "🎵";
+  const getFileIcon = (type: string) => {
+    if (type?.startsWith("image/")) return "🖼️";
+    if (type?.includes("pdf")) return "📕";
+    if (type?.includes("zip") || type?.includes("rar")) return "🗜️";
+    if (type?.includes("word")) return "📘";
+    if (type?.includes("excel") || type?.includes("sheet")) return "📗";
+    if (type?.includes("text")) return "📄";
+    if (type?.includes("video")) return "🎬";
+    if (type?.includes("audio")) return "🎵";
     return "📎";
   };
 
@@ -44,28 +44,30 @@ function AttachmentSection({
       )}
 
       <div className="attach-preview">
-        {attachments.map((a: any) => (
-          <div key={a.id} className="attach-item">
-            {a.previewUrl ? (
-              <img src={a.previewUrl} alt={a.name} className="attach-img" />
-            ) : (
-              <div className="file-icon">{getFileIcon(a.type, a.name)}</div>
-            )}
+        {Array.isArray(attachments) &&
+          attachments?.length > 0 &&
+          attachments.map((a: any) => (
+            <div key={a.id} className="attach-item">
+              {a.previewUrl ? (
+                <img src={a.previewUrl} alt={a.name} className="attach-img" />
+              ) : (
+                <div className="file-icon">{getFileIcon(a.type)}</div>
+              )}
 
-            <div className="file-info">
-              <div className="file-name">{a.name}</div>
-              <div className="file-size">{formatSize(a.size)}</div>
+              <div className="file-info">
+                <div className="file-name">{a.name}</div>
+                <div className="file-size">{formatSize(a.size)}</div>
+              </div>
+
+              <button
+                className="remove-btn"
+                onClick={() => onRemove(a.id)}
+                style={{ display: hideBtn ? "none" : "block" }}
+              >
+                ✕
+              </button>
             </div>
-
-            <button
-              className="remove-btn"
-              onClick={() => onRemove(a.id)}
-              style={{ display: hideBtn ? "none" : "block" }}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );

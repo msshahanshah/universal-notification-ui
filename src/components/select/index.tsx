@@ -61,6 +61,7 @@ export function Select({
     if (multiple && Array.isArray(value)) {
       return value.includes(val);
     }
+    console.log("value", value, "val", val);
     return value === val;
   };
 
@@ -188,7 +189,7 @@ export function Select({
             backgroundColor: theme.vars?.palette.background.paper,
             border: `1px solid ${theme.vars?.palette.divider}`,
             zIndex: 9999,
-            ...dropdownStyle
+            ...dropdownStyle,
           }}
         >
           {options.map((option) => {
@@ -198,18 +199,18 @@ export function Select({
               <div
                 key={option.value}
                 role="option"
-                className={
-                  selected
-                    ? "item-active"
-                    : "item-inactive"
-                }
+                className={selected ? "item-active" : "item-inactive"}
                 onClick={() => handleSelect(option.value)}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   padding: 10,
-                  color: theme.vars?.palette.text.secondary,
-                  backgroundColor: selected ? theme.vars?.palette.background.default : "transparent",
+                  color: selected
+                    ? "hsl(210, 98%, 48%)"
+                    : theme.vars?.palette.text.secondary,
+                  backgroundColor: selected
+                    ? theme.vars?.palette.background.default
+                    : "transparent",
                 }}
               >
                 {multiple && (

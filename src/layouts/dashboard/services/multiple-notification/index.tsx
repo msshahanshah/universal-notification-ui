@@ -159,6 +159,34 @@ export default function MultipleNotification() {
     ]);
   }, [setSmsSections]);
 
+  function renameDuplicateFiles(files: File[]): File[] {
+    const nameCount = new Map<string, number>();
+
+    return files.map((file) => {
+      const originalName = file.name;
+      const dotIndex = originalName.lastIndexOf(".");
+
+      const baseName =
+        dotIndex !== -1 ? originalName.slice(0, dotIndex) : originalName;
+
+      const extension = dotIndex !== -1 ? originalName.slice(dotIndex) : "";
+
+      // Initialize counter
+      if (!nameCount.has(baseName)) {
+        nameCount.set(baseName, 0);
+        return file; // first occurrence stays same
+      }
+
+      // Increment count
+      const count = nameCount.get(baseName)! + 1;
+      nameCount.set(baseName, count);
+
+      const newName = `${baseName}${count}${extension}`;
+
+      return new File([file], newName, { type: file.type });
+    });
+  }
+
   const resetSlackFields = useCallback(() => {
     setSlackSections([
       {
@@ -397,7 +425,7 @@ export default function MultipleNotification() {
           .filter((rec: any) => rec?.destination?.trim() !== "")
           .map((rec: any, index: number) => {
             // Generate unique key for each recipient
-            const emailId = rec.destination
+            const des = rec.destination
               .split("@")[0]
               .toLowerCase()
               .replace(/[^a-z0-9]/g, "");
@@ -405,7 +433,7 @@ export default function MultipleNotification() {
               .toLowerCase()
               .replace(/[^a-z0-9\s]/g, "")
               .replace(/\s+/g, "-");
-            const uniqueKey = `${cleanSubject}-${emailId}-${index + 1}`;
+            const uniqueKey = `${cleanSubject}-${des}-${index + 1}`;
 
             const emailSection: any = {
               destination: rec.destination,
@@ -462,14 +490,15 @@ export default function MultipleNotification() {
               rec?.templateId ||
               rec?.separateMessage,
           )
-          .map((rec: any) => {
+          .map((rec: any, index: number) => {
             const whatsappSection: any = {
               destination: rec.destination,
             };
+            const uniqueKey = `${rec.destination}-${index + 1}`;
 
             // Only include uniqueKey if it exists
-            if (rec.uniqueKey) {
-              whatsappSection.uniqueKey = rec.uniqueKey;
+            if (uniqueKey) {
+              whatsappSection.uniqueKey = uniqueKey;
             }
 
             // Only include attachments if they exist and are not empty
@@ -509,6 +538,7 @@ export default function MultipleNotification() {
 
     // Collect all attachments for upload
     const allAttachments: any[] = [];
+    let allFinalAttachments: any[] = [];
 
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {
@@ -524,6 +554,18 @@ export default function MultipleNotification() {
             .map((att) => att.file)
             .filter((file) => file instanceof File);
           allAttachments.push(...fileObjects);
+
+          const combinedFiles = [...allAttachments.map((a) => a)];
+
+          const renamedFiles = renameDuplicateFiles(combinedFiles);
+          recipient.attachments = renamedFiles.map((file) => file.name);
+
+          // const renamedFiles = renameDuplicateFiles(combinedFiles);
+          email.attachments = renamedFiles.map((file) => file.name);
+          console.log("whatsapp.attachments", email.attachments);
+          console.log("recipient.attachments", recipient.attachments);
+          allFinalAttachments.push(...allAttachments); // Accumulate instead of overwrite
+          allAttachments.length = 0; // Clear allAttachments after updating recipient
         }
       }
     });
@@ -554,6 +596,15 @@ export default function MultipleNotification() {
             .map((att) => att.file)
             .filter((file) => file instanceof File);
           allAttachments.push(...fileObjects);
+
+          const combinedFiles = [...allAttachments.map((a) => a)];
+
+          const renamedFiles = renameDuplicateFiles(combinedFiles);
+
+          whatsapp.attachments = renamedFiles.map((file) => file.name);
+          console.log("whatsapp.attachments", whatsapp.attachments);
+          allFinalAttachments.push(...allAttachments); // Accumulate instead of overwrite
+          allAttachments.length = 0; // Clear allAttachments after updating whatsapp
         } else {
           console.warn(
             "No matching recipient found for WhatsApp destination:",
@@ -562,6 +613,9 @@ export default function MultipleNotification() {
         }
       }
     });
+
+    // console.log("allFinalAttachments", allFinalAttachments);
+    // console.log("payload", payload);
 
     sendNotifications(payload, {
       onSuccess: async ({ data }) => {
@@ -618,7 +672,7 @@ export default function MultipleNotification() {
           30000,
         );
 
-        const attachmentsCopy = [...allAttachments];
+        const attachmentsCopy = [...allFinalAttachments];
 
         if (!hasAttachments || attachmentsCopy.length === 0) {
           queryClient.invalidateQueries({
