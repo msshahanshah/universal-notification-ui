@@ -46,7 +46,6 @@ export function EmailPreview({
     .replace(/background-color:\s*#ffffff;?/gi, "")
     .replace(/background:\s*#ffffff;?/gi, "");
 
-    console.log("cleanEmailHtml",cleanEmailHtml)
   return (
     <div
       style={{
