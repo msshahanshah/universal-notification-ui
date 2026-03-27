@@ -478,7 +478,6 @@ export default function MultipleNotification() {
           .filter(
             (rec: any) =>
               rec?.destination?.trim() !== "" ||
-              // rec?.numbers?.some((num: any) => num.number.trim() !== "") ||
               rec?.templateId ||
               rec?.separateMessage,
           )
