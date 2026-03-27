@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 
-import LogsTable from "./mui/table";
+import LogsTable from "./mui/logs-table";
 
 export default function Dashboard() {
   const wValue = "100%";
@@ -8,7 +8,7 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ height: hValue, width: wValue }}>
-      <LogsTable />
+      <LogsTable/>
     </Box>
   );
 }

@@ -5,7 +5,7 @@ import { AgGridReact } from "ag-grid-react";
 import { myTheme } from "src/layouts/dashboard/logs/constant";
 import "./table.css";
 
-export const Table = ({
+export const Tablessss = ({
   isMobile,
   isLoading,
   columnDefs,

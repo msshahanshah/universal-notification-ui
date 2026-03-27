@@ -23,7 +23,7 @@ import { useDebounce } from "src/hooks/useDebounce";
 import { formatDateForTable, getStatusStyle } from "../../mui/utils";
 import COLORS from "src/utility/colors";
 import { useSnackbar } from "src/provider/snackbar";
-import { getSortLabelStyles, textFieldTheme } from "../../mui/table";
+import { getSortLabelStyles, textFieldTheme } from "../../mui/logs-table";
 import { truncateString } from "src/utility/helper";
 
 interface Log {
