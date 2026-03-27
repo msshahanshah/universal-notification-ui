@@ -48,6 +48,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
         py: 0.5,
         borderRadius: 1,
       };
+    case "queued":
     case "pending":
       return {
         color: "#FFC107",
