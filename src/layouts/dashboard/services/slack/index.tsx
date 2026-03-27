@@ -1,5 +1,5 @@
 import { Suspense, useState, lazy } from "react";
-import { Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useSlackService } from "src/hooks/useService";
@@ -13,6 +13,8 @@ import { slackRegex } from "src/utility/constants";
 
 import "./slack.css";
 import COLORS from "src/utility/colors";
+import LogsTable from "../../mui/logs-table";
+// import LogsTable from "../../logs/logs-table";
 
 const HistoryTable = lazy(() => import("./history-table"));
 
@@ -68,11 +70,12 @@ export default function Slack() {
     );
   };
 
-  const isDisabled = !channelID?.trim() || !message?.trim() || !!invalidChannelId;
+  const isDisabled =
+    !channelID?.trim() || !message?.trim() || !!invalidChannelId;
 
   return (
     <div className="slack-container">
-      <Typography variant="h6" sx={{ mb: 4 , color: "text.secondary"}}>
+      <Typography variant="h6" sx={{ mb: 4, color: "text.secondary" }}>
         New message
       </Typography>
       <div
@@ -125,11 +128,18 @@ export default function Slack() {
           />
         </div>
       </div>
-      <Typography variant="h6" sx={{ mt: 0, mb: "32px", color: "text.secondary"}}>
-        History (Last 10 messages)
+      <Typography
+        variant="h6"
+        sx={{ mt: 0, mb: "32px", color: "text.secondary" }}
+      >
+        History
       </Typography>
       <Suspense fallback={<FallbackLoader />}>
-        <HistoryTable />
+        {/* <HistoryTable /> */}
+
+        <Box sx={{ height: "50%", width: "100%" }}>
+          <LogsTable serviceType="slack" endpoint="/slack-logs" />
+        </Box>
       </Suspense>
     </div>
   );
