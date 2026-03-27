@@ -1,14 +1,14 @@
 import { useState, ChangeEvent, useEffect } from "react";
 // import axios from "axios";
 
-// import Input from "./components/input";
-
-import "../layouts/dashboard/services/slack/slack.css";
+// import "../layouts/dashboard/services/slack/slack.css";
 import Input from "src/components/input";
 import Button from "src/components/button";
 import { Select } from "src/components/select";
 import { useSnackbar } from "src/provider/snackbar";
 import MultipleSelectChip from "src/components/mui/select";
+import { useTheme } from "@mui/material/styles";
+import COLORS from "src/utility/colors";
 // import WebhookListItem from "src/components/WebhookListItem";
 import {
   useSaveWebhookDetails,
@@ -22,6 +22,7 @@ import {
   transformServiceTriggerToStatuses,
 } from "src/utility/webhook";
 import WebhookListItem from "./listItem";
+import { useInputStyles } from "src/utility/styles";
 // import Button from "./components/button";
 
 type StatusType = "success" | "failure" | "both";
@@ -39,15 +40,17 @@ export default function WebhookConfigPage() {
   const selectedData = { enabled: [], disabled: [] };
 
   const showSnackbar = useSnackbar();
-  const clientId =
-    typeof window !== "undefined" ? localStorage.getItem("clientId") : null;
+  const theme = useTheme();
+  const inputStyle = useInputStyles();
 
   const {
     data: webhooksList,
     isLoading: webhooksLoading,
     error: webhookError,
     isError,
-  } = useGetWebhookDetails(clientId);
+  } = useGetWebhookDetails();
+
+  const webhookData = webhooksList?.data?.configurations;
 
   const saveMutation = useSaveWebhookDetails();
   const updateMutation = useUpdateWebhookDetails();
@@ -96,13 +99,17 @@ export default function WebhookConfigPage() {
     setIsExistingConfig(true);
 
     if (webhook.service_trigger) {
-      const statuses = transformServiceTriggerToStatuses(webhook.service_trigger);
+      const statuses = transformServiceTriggerToStatuses(
+        webhook.service_trigger,
+      );
       setSelectedStatuses(statuses);
     }
 
     // Scroll to form
     setTimeout(() => {
-      document.querySelector("[data-webhook-form]")?.scrollIntoView({ behavior: "smooth" });
+      document
+        .querySelector("[data-webhook-form]")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
@@ -110,30 +117,25 @@ export default function WebhookConfigPage() {
     // clientId read from outer scope
     setError("");
 
-    if (!clientId) {
-      showSnackbar("Client ID is missing. Please login again.", "error");
-      return;
-    }
-
     const serviceTrigger = buildServiceTrigger(selectedStatuses);
 
-    // const existingSettings = webhooksList?.data?.settings || {};
-
-    // const settings = buildSettings(existingSettings, serviceTrigger);
 
     const payload = {
-      clientId: clientId,
       webhookUrl: webhookUrl,
       apiKey: apiKey,
       serviceTrigger: serviceTrigger,
-      // settings: settings,
+      retryEnabled: false,
+      isActive: true
     };
 
     try {
       setLoading(true);
 
       const res = editingWebhookId
-        ? await updateMutation.mutateAsync({ ...payload, webhookId: editingWebhookId } as any)
+        ? await updateMutation.mutateAsync({
+            ...payload,
+            webhookId: editingWebhookId,
+          } as any)
         : await saveMutation.mutateAsync(payload as any);
 
       const saved = res?.data ?? res;
@@ -143,7 +145,7 @@ export default function WebhookConfigPage() {
       showSnackbar(
         editingWebhookId
           ? "Webhook configuration updated successfully"
-          : "Webhook configuration saved successfully",
+          : "webhook configuration added successfully.",
         "success",
       );
 
@@ -210,14 +212,13 @@ export default function WebhookConfigPage() {
     // }
   };
 
-  const isDisabled = !webhookUrl?.trim() || !apiKey?.trim() || selectedStatuses.length === 0;
+  const isDisabled =
+    !webhookUrl?.trim() || !apiKey?.trim() || selectedStatuses.length === 0;
 
-  console.log("webhooksList",webhooksList)
-  const webhooksCount = Array.isArray(webhooksList?.data) 
-    ? webhooksList.data.length 
-    : 0;
+  // console.log("webhooksList", webhooksList);
+  const webhooksCount = Array.isArray(webhookData) ? webhookData.length : 0;
 
-  // const webhooksCount = webhooksList?.data&&1 
+  // const webhooksCount = webhooksList?.data&&1
   const maxWebhooksReached = webhooksCount >= 10;
 
   const emailStatusOptions = [
@@ -237,18 +238,18 @@ export default function WebhookConfigPage() {
       );
       return;
     }
-  }, [isError, webhooksList?.data, webhookError]);
+  }, [isError, webhookData, webhookError]);
 
-  console.log("webhooksList",webhooksList)
+  // console.log("webhooksList", webhooksList);
   return (
-    <div style={{ maxWidth: 800, margin: "40px auto", padding: 20 }}>
+    <div style={{ maxWidth: 900, margin: "40px auto", padding: 20 }}>
       {/* Form Section */}
       <div
         data-webhook-form
         style={{
-          maxWidth: 600,
+          maxWidth: 700,
           margin: "0 auto 40px",
-          padding: 20,
+          padding: 24,
           borderRadius: 8,
           background: "hsla(220, 35%, 3%, 0.4)",
           border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -256,7 +257,12 @@ export default function WebhookConfigPage() {
             "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
         }}
       >
-        <h2 style={{ marginBottom: 20 }}>
+        <h2
+          style={{
+            marginBottom: 20,
+            color: theme.vars?.palette.text.secondary,
+          }}
+        >
           {editingWebhookId ? "Edit Webhook" : "Create Webhook"}
         </h2>
 
@@ -269,7 +275,8 @@ export default function WebhookConfigPage() {
           }
           placeholder="Ex: https://webhook.site/your-test-url"
           showAsteric
-          className="sms-input"
+          // className="sms-input"
+          style={inputStyle}
         />
 
         <Input
@@ -280,12 +287,20 @@ export default function WebhookConfigPage() {
             setApiKey(e.target.value)
           }
           showAsteric
-          className="sms-input"
+          // className="sms-input"
+          style={inputStyle}
         />
 
         {/* Radio Buttons */}
         <div style={{ marginTop: 15 }}>
-          <label style={{ fontSize: 12, marginBottom: 6, display: "block" }}>
+          <label
+            style={{
+              fontSize: 12,
+              marginBottom: 6,
+              display: "block",
+              color: theme?.vars?.palette.text.secondary,
+            }}
+          >
             Trigger Type
           </label>
 
@@ -323,48 +338,65 @@ export default function WebhookConfigPage() {
         </div>
 
         {maxWebhooksReached && !editingWebhookId && (
-          <div style={{ marginTop: 12, fontSize: 12, color: "#fbbf24" }}>
-            ⚠️ Maximum 10 webhooks reached. Edit or delete existing webhooks to add more.
+          <div
+            style={{ marginTop: 12, fontSize: 12, color: COLORS.WARNING_COLOR }}
+          >
+            ⚠️ Maximum 10 webhooks reached. Edit or delete existing webhooks to
+            add more.
           </div>
         )}
       </div>
 
       {/* Webhooks List Section */}
       {webhooksLoading ? (
-        <div style={{ textAlign: "center", fontSize: 14, color: "rgba(255, 255, 255, 0.6)" }}>
+        <div
+          style={{
+            textAlign: "center",
+            fontSize: 14,
+            color: "rgba(255, 255, 255, 0.6)",
+          }}
+        >
           Loading webhooks...
         </div>
       ) : webhooksCount > 0 ? (
         <div
           style={{
-            maxWidth: 600,
+            maxWidth: 700,
             margin: "0 auto",
-            padding: 20,
+            padding: 24,
             borderRadius: 8,
             background: "hsla(220, 35%, 3%, 0.2)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
           }}
         >
-          <h3 style={{ marginBottom: 16, marginTop: 0 }}>
+          <h3
+            style={{
+              marginBottom: 16,
+              marginTop: 0,
+              color: theme.vars?.palette.text.secondary,
+            }}
+          >
             Webhooks ({webhooksCount}/10)
           </h3>
-          {(Array.isArray(webhooksList?.data) ? webhooksList.data : []).map((webhook: any) => (
+          {(Array.isArray(webhookData) ? webhookData : []).map(
+            (webhook: any) => (
               <WebhookListItem
                 key={webhook.id}
                 webhook={webhook}
                 onEdit={handleEditWebhook}
               />
-            ))}
+            ),
+          )}
         </div>
       ) : (
         <div
           style={{
-            maxWidth: 600,
+            maxWidth: 700,
             margin: "0 auto",
-            padding: 20,
+            padding: 24,
             textAlign: "center",
             fontSize: 14,
-            color: "rgba(255, 255, 255, 0.6)",
+            color: COLORS.PLACEHOLDER_TEXT,
           }}
         >
           No webhooks configured yet. Create one to get started!
@@ -373,4 +405,3 @@ export default function WebhookConfigPage() {
     </div>
   );
 }
-

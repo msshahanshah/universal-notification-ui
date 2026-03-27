@@ -4,15 +4,17 @@ import { useToggleWebhook, useDeleteWebhook } from "src/hooks/useWebhook";
 import { useSnackbar } from "src/provider/snackbar";
 import { transformServiceTriggerToStatuses } from "src/utility/webhook";
 import Switch from "src/components/switch";
+import { useTheme } from "@mui/material/styles";
 
 interface WebhookListItemProps {
   webhook: {
-    id: string;
+    _id: string;
     webhookUrl?: string;
     serviceTrigger?: Record<string, string[]>;
     isActive?: boolean;
     retryEnabled?: boolean;
     retryCount?: number;
+    updatedAt?: string;
   };
   onEdit: (webhook: any) => void;
 }
@@ -21,6 +23,9 @@ export default function WebhookListItem({
   webhook,
   onEdit,
 }: WebhookListItemProps) {
+  const webhookId = webhook._id;
+  console.log("rendered webhook", webhook);
+  const theme = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingActive, setIsTogglingActive] = useState(false);
   const [isTogglingRetry, setIsTogglingRetry] = useState(false);
@@ -35,11 +40,28 @@ export default function WebhookListItem({
     return services.join(", ");
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "Unknown";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      return "Invalid date";
+    }
+  };
+
   const handleActiveToggle = async () => {
     try {
+      console.log("webhook....", webhook);
       setIsTogglingActive(true);
       await toggleMutation.mutateAsync({
-        webhookId: webhook.id,
+        webhookId: webhookId,
         payload: { isActive: !webhook.isActive },
       });
       showSnackbar(
@@ -59,9 +81,9 @@ export default function WebhookListItem({
     try {
       setIsTogglingRetry(true);
       await toggleMutation.mutateAsync({
-        webhookId: webhook.id,
+        webhookId: webhookId,
         payload: {
-          retryEnabled: !webhook.retryEnabled
+          retryEnabled: !webhook.retryEnabled,
         },
       });
       showSnackbar(
@@ -85,7 +107,7 @@ export default function WebhookListItem({
 
     try {
       setIsDeleting(true);
-      await deleteMutation.mutateAsync(webhook.id);
+      await deleteMutation.mutateAsync(webhookId);
       showSnackbar("Webhook deleted successfully", "success");
     } catch (error: any) {
       showSnackbar(error?.message || "Failed to delete webhook", "error");
@@ -109,11 +131,27 @@ export default function WebhookListItem({
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 500,
+            marginBottom: 4,
+            color: theme.vars?.palette.text.secondary,
+          }}
+        >
           {webhook.webhookUrl}
         </div>
-        <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.6)" }}>
+        <div
+          style={{
+            fontSize: 12,
+            color: "rgba(255, 255, 255, 0.6)",
+            marginBottom: 2,
+          }}
+        >
           Services: {getServiceNames()}
+        </div>
+        <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.4)" }}>
+          Updated: {formatDate(webhook.updatedAt)}
         </div>
       </div>
 

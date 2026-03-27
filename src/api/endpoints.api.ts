@@ -30,11 +30,14 @@ export const ENDPOINTS = {
     TEMPLATES: "/templates",
   },
   WEBHOOK: {
-    SAVE: "/api/webhook/config",
-    GET: `/api/webhook/configs`,
-    UPDATE: ({ webhookId }: any) => `/api/webhook/${webhookId}`,
-    DELETE: (webhookId: string) => `/api/webhook/${webhookId}`,
-    TOGGLE: (webhookId: string) => `/api/webhook/${webhookId}`,
+    SAVE: "/webhooks",
+    GET: "/webhooks",
+    UPDATE: ({ webhookId }: any) => `/webhooks/${webhookId}`,
+    DELETE: (webhookId: string) => `/webhooks/${webhookId}`,
+    TOGGLE: (webhookId: string) => `/webhooks/${webhookId}`,
+  },
+  MULTIPLE_NOTIFICATION: {
+    SEND: "/v2/notify",
   },
   LOGS: {
     LIST: (params?: Record<string, any>) => {
