@@ -7,3 +7,6 @@ export const passwordRegex = /^[^\s]{8,12}$/;
 export const emailRegex =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const slackRegex = /^[CGD][A-Z0-9]{8,10}$/;
+
+export const MAX_WHATSAPP_SIZE = 16 * 1024 * 1024; // 16MB in bytes
+export const MAX_EMAIL_SIZE = 20 * 1024 * 1024; // 20MB in bytes

@@ -7,6 +7,8 @@ import { emailSectionsAtom } from "src/atoms/emailAtoms";
 import { slackSectionsAtom } from "src/atoms/slackAtoms";
 import { smsSectionsAtom } from "src/atoms/smsAtoms";
 import { whatsappSectionsAtom } from "src/atoms/whatsappAtoms";
+import { validateWhatsAppAttachmentSize } from "./whatsapp";
+import { validateEmailAttachmentSize } from "./email";
 
 export interface ValidationResult {
   isFormValid: boolean;
@@ -142,6 +144,24 @@ export const validateAllServices = (
           validation.email.isFormValid = false;
           emailErrors.push(
             `Email Section ${sectionIndex + 1}: Attachments must be a valid list`,
+          );
+        }
+
+        // Validate attachment sizes for email
+        if (
+          Array.isArray(section.attachments) &&
+          section.attachments.length > 0
+        ) {
+          section.attachments.forEach(
+            (attachment: any, attachmentIndex: number) => {
+              const sizeError = validateEmailAttachmentSize(attachment);
+              if (sizeError) {
+                validation.email.isFormValid = false;
+                emailErrors.push(
+                  `Email Section ${sectionIndex + 1}, Attachment ${attachmentIndex + 1}: ${sizeError}`,
+                );
+              }
+            },
           );
         }
       });
@@ -283,7 +303,6 @@ export const validateAllServices = (
       validation.whatsapp.isFormValid = false;
       whatsappErrors.push("WhatsApp service data is missing");
     } else {
-      const sections = (whatsappData as any).sections || [];
       // At least one destination must be provided
       const hasValidDestination = whatsappInputData?.some(
         ({ to }: any) => to?.trim() !== "",
@@ -337,13 +356,23 @@ export const validateAllServices = (
         }
 
         // attachments must be an array if present
+
+        // Validate attachment sizes for WhatsApp (only for file attachments)
         if (
-          section.attachments !== undefined &&
-          !Array.isArray(section.attachments)
+          Array.isArray(section.attachments) &&
+          section.attachments.length > 0 &&
+          section.attachmentType === "file"
         ) {
-          validation.whatsapp.isFormValid = false;
-          whatsappErrors.push(
-            `WhatsApp Section ${sectionIndex + 1}: Attachments must be a valid list`,
+          section.attachments.forEach(
+            (attachment: any, attachmentIndex: number) => {
+              const sizeError = validateWhatsAppAttachmentSize(attachment);
+              if (sizeError) {
+                validation.whatsapp.isFormValid = false;
+                whatsappErrors.push(
+                  `WhatsApp Section ${sectionIndex + 1}, Attachment ${attachmentIndex + 1}: ${sizeError}`,
+                );
+              }
+            },
           );
         }
 
