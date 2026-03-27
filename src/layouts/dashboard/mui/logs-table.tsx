@@ -23,6 +23,7 @@ import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
 import { useSnackbar } from "src/provider/snackbar";
 import { truncateString } from "src/utility/helper";
+import { formatUserReactions } from "src/utility/reactions";
 
 import { formatDateForTable, getStatusStyle } from "./utils";
 
@@ -34,6 +35,7 @@ interface Log {
   status: string;
   messageDate: string;
   attempts: number;
+  userRepliedMessages?: { reactions: string }[];
 }
 
 type Order = "asc" | "desc" | "";
@@ -67,7 +69,17 @@ export const textFieldTheme = (theme: any) => ({
   },
 });
 
-export default function LogsTable() {
+interface LogsTableProps {
+  styles?: React.CSSProperties;
+  serviceType?: string;
+  endpoint?: string;
+}
+
+export default function LogsTable({
+  styles,
+  serviceType,
+  endpoint,
+}: LogsTableProps = {}) {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -139,7 +151,12 @@ export default function LogsTable() {
     };
   }, [page, pageSize, sort, order, debouncedFilters, isDateFilterValid]);
 
-  const { data: response, isLoading, isError, error } = useLogs(queryParams);
+  const {
+    data: response,
+    isLoading,
+    isError,
+    error,
+  } = useLogs(queryParams, endpoint);
 
   const rows: Log[] = response?.data || [];
   const pagination = response?.pagination;
@@ -220,8 +237,13 @@ export default function LogsTable() {
     setOrder(isAsc ? "desc" : "asc");
   };
 
-  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+  const resetFilters = () => {
     setPage(0);
+    setPageSize(10);
+  };
+
+  const handleFilterChange = (key: keyof typeof filters, value: string) => {
+    resetFilters();
 
     setFilters((prev) => {
       const updated = { ...prev, [key]: value };
@@ -267,6 +289,7 @@ export default function LogsTable() {
         p: 2,
         backgroundColor: theme.vars?.palette.background.paper,
         border: `1px solid ${theme.vars?.palette.divider}`,
+        ...styles,
       }}
     >
       {/* Filters */}
@@ -341,16 +364,19 @@ export default function LogsTable() {
           flexWrap="wrap"
           marginTop={1}
         >
-          <TextField
-            size="small"
-            label="Service"
-            value={filters.service}
-            onChange={(e) => {
-              setPage(0);
-              setFilters((prev) => ({ ...prev, service: e.target.value }));
-            }}
-            sx={textFieldTheme(theme)}
-          />
+          {!serviceType && (
+            <TextField
+              size="small"
+              label="Service"
+              value={filters.service}
+              onChange={(e) => {
+                setPage(0);
+                resetFilters();
+                setFilters((prev) => ({ ...prev, service: e.target.value }));
+              }}
+              sx={textFieldTheme(theme)}
+            />
+          )}
 
           <TextField
             size="small"
@@ -358,6 +384,7 @@ export default function LogsTable() {
             value={filters.status}
             onChange={(e) => {
               setPage(0);
+              resetFilters();
               setFilters((prev) => ({ ...prev, status: e.target.value }));
             }}
             sx={textFieldTheme(theme)}
@@ -369,6 +396,7 @@ export default function LogsTable() {
             value={filters.destination}
             onChange={(e) => {
               setPage(0);
+              resetFilters();
               setFilters((prev) => ({ ...prev, destination: e.target.value }));
             }}
             sx={textFieldTheme(theme)}
@@ -380,6 +408,7 @@ export default function LogsTable() {
             value={filters.attempts}
             onChange={(e) => {
               setPage(0);
+              resetFilters();
               setFilters((prev) => ({ ...prev, attempts: e.target.value }));
             }}
             sx={textFieldTheme(theme)}
@@ -415,16 +444,20 @@ export default function LogsTable() {
                   </TableSortLabel>
                 </TableCell>
 
-                <TableCell>
-                  <TableSortLabel
-                    active={sort === "service"}
-                    direction={order as "asc" | "desc"}
-                    onClick={() => handleSort("service")}
-                    sx={getSortLabelStyles(theme, sort === "service")}
-                  >
-                    Service
-                  </TableSortLabel>
-                </TableCell>
+                {!serviceType && (
+                  <TableCell>
+                    <TableSortLabel
+                      active={sort === "service"}
+                      direction={order as "asc" | "desc"}
+                      onClick={() => handleSort("service")}
+                      sx={getSortLabelStyles(theme, sort === "service")}
+                    >
+                      Service
+                    </TableSortLabel>
+                  </TableCell>
+                )}
+
+                {serviceType === "slack" && <TableCell>Reactions</TableCell>}
 
                 <TableCell>
                   <TableSortLabel
@@ -474,7 +507,16 @@ export default function LogsTable() {
                     <TableCell>
                       {renderCell(formatDateForTable(row.messageDate))}
                     </TableCell>
-                    <TableCell>{renderCell(row.service)}</TableCell>
+                    {!serviceType && (
+                      <TableCell>{renderCell(row.service)}</TableCell>
+                    )}
+                    {serviceType === "slack" && (
+                      <TableCell>
+                        {renderCell(
+                          formatUserReactions(row.userRepliedMessages),
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {renderCell(
                         row.destination,

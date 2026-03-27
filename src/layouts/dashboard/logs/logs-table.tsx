@@ -35,8 +35,6 @@ export type LogMessage = {
 };
 
 const LogsTable = () => {
-  const wValue = "100%";
-  const hValue = "100%";
   const [page, setPage] = useState(2);
   const [pageSize, setPageSize] = useState(5);
   const [filters, setFilters] = useState<Record<string, any>>({});
@@ -61,7 +59,6 @@ const LogsTable = () => {
     isError,
     error,
   } = useLogs({ limit: pageSize, page, ...filters });
-  // , sort: sortModel
 
   useEffect(() => {
     if (isError) {
@@ -126,23 +123,6 @@ const LogsTable = () => {
         </div>
       </div>
     );
-  };
-
-  const buildFilterParams = (model: any) => {
-    const params: Record<string, any> = {};
-
-    Object.entries(model).forEach(([field, value]: any) => {
-      if (!value?.filter) return;
-
-      // Multi-select (set filter)
-      if (value.values) {
-        params[field] = value.values.join(",");
-      } else {
-        params[field] = value.filter;
-      }
-    });
-
-    return params;
   };
 
   const CustomTooltip = (props: any) => {
@@ -359,16 +339,6 @@ const LogsTable = () => {
     }
   };
 
-  // const onFilterChanged = () => {
-  //   if (!gridApiRef.current) return;
-
-  //   const model = gridApiRef.current.getFilterModel();
-  //   const apiFilters = buildFilterParams(model);
-
-  //   setFilters(apiFilters);
-  //   setPage(1); // reset page on filter
-  // };
-
   const onFilterChanged = useCallback(
     ({ api }: { api: GridApi }) => {
       const filterModel = api.getFilterModel();
@@ -403,22 +373,7 @@ const LogsTable = () => {
     setSortModel(sortQuery);
   };
 
-  //   const dataSource = {
-  //   getRows: async (params) => {
-  //     const { startRow, endRow } = params;
-
-  //     const response = await fetch(
-  //       `/api/users?start=${startRow}&limit=${endRow - startRow}`
-  //     );
-
-  //     const data = await response.json();
-
-  //     params.successCallback(data.rows, data.totalCount);
-  //   }
-  // };
-
   const totalRows = response?.pagination?.totalPages || 0;
-  console.log("totalRows", totalRows);
 
   useEffect(() => {
     if (gridApiRef.current && totalRows) {

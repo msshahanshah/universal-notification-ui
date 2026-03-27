@@ -2,11 +2,11 @@ import api from "src/lib/axios";
 
 import { cleanQueryParams, ENDPOINTS } from "./endpoints.api";
 
-export const fetchLogs = async (params?: Record<string, any>) => {
+export const fetchLogs = async (params?: Record<string, any>, endpoint?: string) => {
   try {
     const cleaned = cleanQueryParams(params);
 
-    const res = await api.get("/logs", {
+    const res = await api.get(endpoint || "/logs", {
       params: cleaned,
     });
 

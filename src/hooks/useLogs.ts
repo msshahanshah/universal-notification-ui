@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchLogs, fetchLogStatus } from "src/api/logs.api";
 import { logsKeys } from "src/api/queryKeys";
 
-export const useLogs = (params?: Record<string, any>) => {
+export const useLogs = (params?: Record<string, any>, endpoint?: string) => {
   return useQuery({
     queryKey: logsKeys.list(params as any),
-    queryFn: () => fetchLogs(params),
+    queryFn: () => fetchLogs(params, endpoint),
     refetchOnWindowFocus: true,
     staleTime: 0,
     keepPreviousData: true
