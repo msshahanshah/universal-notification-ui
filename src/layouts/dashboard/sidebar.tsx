@@ -32,6 +32,12 @@ const sidebarItems = [
     isDisabled: false,
   },
   {
+    label: "Slack Threads",
+    path: "/services/slack-threads",
+    icon: SlackIcon,
+    isDisabled: false,
+  },
+  {
     label: "Email",
     path: "/services/email-editor",
     icon: Mail,

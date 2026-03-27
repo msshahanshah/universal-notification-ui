@@ -11,7 +11,10 @@ const COLORS = {
 
   LIGHT_BLUE:"#4fc3f7",
   // active items
-  ACTIVE_BLUE: "hsla(220, 80%, 55%, 1)"
+  ACTIVE_BLUE: "hsla(220, 80%, 55%, 1)",
+  
+  // Modal/Overlay colors
+  BACKDROP_OVERLAY: "rgba(0, 0, 0, 0.5)",
 };
 
 export default COLORS;

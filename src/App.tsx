@@ -16,6 +16,7 @@ import ServicesAccordion from "./layouts/dashboard/services/demo/ServicesAccordi
 import Services1 from "./layouts/dashboard/services/demo/services";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
+import SlackThreads from "./layouts/dashboard/services/slack-threads";
 import ServiceGuard from "./routes/service-guard";
 import EmailComposer from "./layouts/dashboard/services/email";
 import SMS from "./layouts/dashboard/services/SMS";
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/services/email-editor" element={<EmailComposer />} />
         <Route path="/services/sms" element={<SMS />} />
         <Route path="/services/multiple-notification" element={<MultipleNotification />} />
+        <Route path="/services/slack-threads" element={<SlackThreads />} />
         <Route element={<ServiceGuard service="slack" />}>
           <Route path="/services/slack" element={<Slack />} />
         </Route>

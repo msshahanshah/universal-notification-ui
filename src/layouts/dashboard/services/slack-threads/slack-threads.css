@@ -1,0 +1,158 @@
+.slack-threads-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* min-height: 100vh; */
+}
+
+.slack-threads-wrapper {
+  min-width: 100%;
+  max-width: 100%;
+  padding: 20px;
+  border-radius: 14px;
+  background: hsla(220, 35%, 3%, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 20px;
+  box-shadow: rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px;
+}
+
+.thread-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.thread-row:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.thread-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+}
+
+.thread-sidebar-panel {
+  width: 500px;
+  max-width: 90vw;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.thread-sidebar-header {
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f5f5f5;
+}
+
+.thread-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.thread-sidebar-footer {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.thread-message {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.thread-message.original {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+}
+
+.thread-message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.thread-message-username {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.thread-message-reactions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.thread-message-reaction {
+  font-size: 16px;
+  background: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.thread-message-content {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.thread-message-empty {
+  margin: 0;
+  color: #999;
+  font-size: 14px;
+  font-style: italic;
+}
+
+.no-replies {
+  margin-top: 24px;
+  padding: 20px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.no-replies-text {
+  color: #666;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .thread-sidebar-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .slack-threads-wrapper {
+    padding: 16px;
+  }
+}
