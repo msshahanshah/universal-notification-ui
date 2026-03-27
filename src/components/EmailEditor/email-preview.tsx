@@ -14,6 +14,7 @@ type Props = {
   attachments: Attachment[];
   handleAttachmentChange: (files: FileList) => void;
   removeAttachment: (id: string) => void;
+  commonMessage?: string;
 };
 
 type Attachment = {
@@ -32,6 +33,7 @@ export function EmailPreview({
   attachments,
   handleAttachmentChange,
   removeAttachment,
+  commonMessage,
 }: any) {
   const theme = useTheme();
 
@@ -44,6 +46,7 @@ export function EmailPreview({
     .replace(/background-color:\s*#ffffff;?/gi, "")
     .replace(/background:\s*#ffffff;?/gi, "");
 
+    console.log("cleanEmailHtml",cleanEmailHtml)
   return (
     <div
       style={{
@@ -96,7 +99,7 @@ export function EmailPreview({
       </head>
       <body>
         <div style="max-width:600px;margin:auto">
-          ${cleanEmailHtml}
+          ${cleanEmailHtml && cleanEmailHtml.replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim() ? cleanEmailHtml : commonMessage}
         </div>
       </body>
     </html>

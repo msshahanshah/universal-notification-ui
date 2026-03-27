@@ -865,9 +865,9 @@ export default function MultipleNotification() {
               </button>
             </div>
             <EmailWrapper
-              showBody={separateMessages.email}
               onValueChange={handleEmailValueChange}
               maxBlocks={5}
+              commonMessage={commonMessage}
             />
             {validationResult?.email?.errors?.email &&
               Array.isArray(validationResult?.email?.errors?.email) &&

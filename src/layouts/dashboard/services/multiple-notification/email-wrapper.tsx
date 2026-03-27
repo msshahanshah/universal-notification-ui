@@ -35,11 +35,13 @@ interface EmailWrapperProps {
     recipients: EmailRecipientType[];
   }) => void;
   maxBlocks?: number;
+  commonMessage?: string;
 }
 
 export function EmailWrapper({
   onValueChange,
   maxBlocks = 5,
+  commonMessage
 }: EmailWrapperProps) {
   const theme = useTheme();
   const inputStyle = useInputStyles();
@@ -338,6 +340,7 @@ export function EmailWrapper({
                 cc={recipient.cc}
                 bcc={recipient.bcc}
                 attachments={recipient.attachments}
+                commonMessage={commonMessage}
               />
             </div>
           ))}
