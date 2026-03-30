@@ -296,13 +296,14 @@ export const validateAllServices = (
 
       // Per-section validations
       whatsappInputData.forEach((section: any, sectionIndex: number) => {
-        
         // Validate phone numbers with country codes
         section.numbers.forEach((num: any, numIndex: number) => {
-          
           const phonenNumberRegex = new RegExp(/^\+[0-9]+$/);
-         
-          if (num.number.trim() && !phonenNumberRegex.test(`${num.countryCode}${num.number.trim()}`)) {
+
+          if (
+            num.number.trim() &&
+            !phonenNumberRegex.test(`${num.countryCode}${num.number.trim()}`)
+          ) {
             validation.whatsapp.isFormValid = false;
             whatsappErrors.push(
               `WhatsApp Section ${sectionIndex + 1}, Number ${numIndex + 1}: Invalid phone number format`,
@@ -311,7 +312,9 @@ export const validateAllServices = (
         });
 
         // Ensure at least one valid number
-        const hasValidNumber = section.numbers.some((num: any) => num.number.trim() !== "");
+        const hasValidNumber = section.numbers.some(
+          (num: any) => num.number.trim() !== "",
+        );
         if (!hasValidNumber) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
@@ -323,11 +326,13 @@ export const validateAllServices = (
         if (
           !section.message?.trim() &&
           !commonMessage.trim() &&
-          section.toggleType !== "template"
+          !section.templateId &&
+          Array.isArray(section.attachments) &&
+          section?.attachments?.length === 0
         ) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
-            `WhatsApp Section ${sectionIndex + 1}: A "separate message" is required when "common message" is not provided`,
+            `WhatsApp Section ${sectionIndex + 1}: A "separate message/common message", "template" or attachments is required`,
           );
         }
 
@@ -341,7 +346,6 @@ export const validateAllServices = (
             `WhatsApp Section ${sectionIndex + 1}: Attachments must be a valid list`,
           );
         }
-
 
         // Validate variableValues structure
         if (
@@ -374,31 +378,46 @@ export const validateAllServices = (
         }
 
         // Validate WhatsApp URL attachments
-        if (section.attachments && section.attachments.length > 0 && section.attachmentType === 'url') {
-          const invalidAttachments = section.attachments.filter((attachment: any) => {
-            const url = attachment.url || attachment.name;
-            
-            // Check for HTTPS
-            if (url.startsWith("https://")) {
-              return false; // Valid
-            }
-            
-            // Check for valid file extensions (case insensitive)
-            const validExtensions = [
-              ".png", ".jpg", ".jpeg", ".gif", ".pdf", 
-              ".doc", ".docx", ".txt", ".zip", ".mp4", ".mp3"
-            ];
-            const hasValidExtension = validExtensions.some((ext) =>
-              url.toLowerCase().endsWith(ext)
-            );
-            
-            return !hasValidExtension; // Return true if invalid
-          });
+        if (
+          section.attachments &&
+          section.attachments.length > 0 &&
+          section.attachmentType === "url"
+        ) {
+          const invalidAttachments = section.attachments.filter(
+            (attachment: any) => {
+              const url = attachment.url || attachment.name;
+
+              // Check for HTTPS
+              if (url.startsWith("https://")) {
+                return false; // Valid
+              }
+
+              // Check for valid file extensions (case insensitive)
+              const validExtensions = [
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".gif",
+                ".pdf",
+                ".doc",
+                ".docx",
+                ".txt",
+                ".zip",
+                ".mp4",
+                ".mp3",
+              ];
+              const hasValidExtension = validExtensions.some((ext) =>
+                url.toLowerCase().endsWith(ext),
+              );
+
+              return !hasValidExtension; // Return true if invalid
+            },
+          );
 
           if (invalidAttachments.length > 0) {
             validation.whatsapp.isFormValid = false;
             whatsappErrors.push(
-              `WhatsApp Section ${sectionIndex + 1}: Invalid attachment URLs: ${invalidAttachments.map((a: any) => a.url || a.name).join(", ")}\nURLs must start with "https://" or have valid file extensions like .png, .jpg, .pdf, etc.`
+              `WhatsApp Section ${sectionIndex + 1}: Invalid attachment URLs: ${invalidAttachments.map((a: any) => a.url || a.name).join(", ")}\nURLs must start with "https://" or have valid file extensions like .png, .jpg, .pdf, etc.`,
             );
           }
         }

@@ -478,7 +478,6 @@ export default function MultipleNotification() {
           .filter(
             (rec: any) =>
               rec?.destination?.trim() !== "" ||
-              // rec?.numbers?.some((num: any) => num.number.trim() !== "") ||
               rec?.templateId ||
               rec?.separateMessage,
           )
@@ -865,9 +864,9 @@ export default function MultipleNotification() {
               </button>
             </div>
             <EmailWrapper
-              showBody={separateMessages.email}
               onValueChange={handleEmailValueChange}
               maxBlocks={5}
+              commonMessage={commonMessage}
             />
             {validationResult?.email?.errors?.email &&
               Array.isArray(validationResult?.email?.errors?.email) &&
