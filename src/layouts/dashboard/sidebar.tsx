@@ -186,6 +186,24 @@ const Sidebar = ({
           </ListItemButton>
         )}
 
+        <ListItemButton
+          onClick={() => navigate("/webhook-config")}
+          sx={getItemStyles("/webhook-config")}
+        >
+          <ListItemIcon
+            sx={{
+              minWidth: 0,
+              justifyContent: "center",
+              color: isActive("/webhook-config")
+                ? COLORS.LIGHT_BLUE
+                : COLORS.WHITE,
+            }}
+          >
+            <HomeRoundedIcon fontSize="small" />
+          </ListItemIcon>
+          {open && <ListItemText primary="Webhook Config" />}
+        </ListItemButton>
+
         {/* Services Parent */}
         {showServicesParent && (
           <ListItemButton
@@ -245,7 +263,11 @@ const Sidebar = ({
                       primaryTypographyProps={{
                         fontSize: 13,
                       }}
-                      style={{ marginLeft: 10, maxWidth: "min-content", minWidth: 100 }}
+                      style={{
+                        marginLeft: 10,
+                        maxWidth: "min-content",
+                        minWidth: 100,
+                      }}
                     />
                   </ListItemButton>
                 );
@@ -266,8 +288,8 @@ const Sidebar = ({
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           {open && (
-            <ListItemText 
-              primary={isLoggingOut ? "Logging out..." : "Logout"} 
+            <ListItemText
+              primary={isLoggingOut ? "Logging out..." : "Logout"}
             />
           )}
         </ListItemButton>

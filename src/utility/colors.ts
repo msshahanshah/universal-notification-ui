@@ -11,7 +11,12 @@ const COLORS = {
 
   LIGHT_BLUE:"#4fc3f7",
   // active items
-  ACTIVE_BLUE: "hsla(220, 80%, 55%, 1)"
+  ACTIVE_BLUE: "hsla(220, 80%, 55%, 1)",
+  
+  // Warning colors
+  WARNING_COLOR: "#fbbf24",
+
+  PLACEHOLDER_TEXT: "rgba(255, 255, 255, 0.6)",
 };
 
 export default COLORS;

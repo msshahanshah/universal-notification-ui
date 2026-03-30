@@ -13,8 +13,7 @@ export const useSaveWebhookDetails = () => {
     mutationFn: saveWebhookDetails,
     retry: false,
     onSuccess: () => {
-      const clientId = localStorage.getItem("clientId");
-      queryClient.invalidateQueries({ queryKey: ["webhooks", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     },
   });
 };
@@ -25,17 +24,15 @@ export const useUpdateWebhookDetails = () => {
     mutationFn: updateWebhookDetails,
     retry: false,
     onSuccess: () => {
-      const clientId = localStorage.getItem("clientId");
-      queryClient.invalidateQueries({ queryKey: ["webhooks", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     },
   });
 };
 
-export const useGetWebhookDetails = (clientId) => {
+export const useGetWebhookDetails = () => {
   return useQuery({
-    queryKey: ["webhooks", clientId],
-    queryFn: () => getWebhookDetails(clientId),
-    enabled: !!clientId,
+    queryKey: ["webhooks"],
+    queryFn: () => getWebhookDetails(),
     refetchOnWindowFocus: true,
   });
 };
@@ -46,8 +43,7 @@ export const useDeleteWebhook = () => {
     mutationFn: deleteWebhookConfig,
     retry: false,
     onSuccess: () => {
-      const clientId = localStorage.getItem("clientId");
-      queryClient.invalidateQueries({ queryKey: ["webhooks", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     },
   });
 };
@@ -55,12 +51,11 @@ export const useDeleteWebhook = () => {
 export const useToggleWebhook = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ webhookId,payload }: { webhookId: string;payload: any }) =>
-      toggleWebhookConfig(webhookId, payload),
+    mutationFn: (data: { webhookId: string; payload: any }) =>
+      toggleWebhookConfig(data.webhookId, data.payload),
     retry: false,
     onSuccess: () => {
-      const clientId = localStorage.getItem("clientId");
-      queryClient.invalidateQueries({ queryKey: ["webhooks", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["webhooks"] });
     },
   });
 };

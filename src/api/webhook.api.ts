@@ -1,56 +1,30 @@
-// import api from "src/lib/axios"; // do not remove
-import axios from "axios";
+import api from "src/lib/axios";
 import { ENDPOINTS } from "./endpoints.api";
 
-export const saveWebhookDetails = async (body) => {
+export const saveWebhookDetails = async (body: any) => {
   try {
-    const res = await axios.post(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.SAVE,
-      body,
-      {
-        // Remove after BE is completed
-        headers: {
-          Accept: "application/json", // bearer token
-          "X-Client-Id": localStorage.getItem("clientId") || "",
-        },
-      },
-    );
+    const res = await api.post(ENDPOINTS.WEBHOOK.SAVE, body);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
   }
 };
 
-export const updateWebhookDetails = async (body) => {
+export const updateWebhookDetails = async (body: any) => {
   try {
-    const res = await axios.patch(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.UPDATE(body),
-      body,
-      {
-        // Remove after BE is completed
-        headers: {
-          Accept: "application/json", // bearer token
-          "X-Client-Id": localStorage.getItem("clientId") || "",
-        },
-      },
-    );
+    if (!body?.webhookId) {
+      throw new Error("Webhook ID is required");
+    }
+    const res = await api.patch(ENDPOINTS.WEBHOOK.UPDATE(body), body);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
   }
 };
 
-export const getWebhookDetails = async (clientId: string) => {
+export const getWebhookDetails = async () => {
   try {
-    const res = await axios.get(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.GET,
-      {
-        // Remove after BE is completed
-        headers: {
-          "X-Client-Id": clientId || "",
-        },
-      },
-    );
+    const res = await api.get(ENDPOINTS.WEBHOOK.GET);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
@@ -59,31 +33,22 @@ export const getWebhookDetails = async (clientId: string) => {
 
 export const deleteWebhookConfig = async (webhookId: string) => {
   try {
-    const res = await axios.delete(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.DELETE(webhookId),
-      {
-        headers: {
-          "X-Client-Id": localStorage.getItem("clientId") || "",
-        },
-      },
-    );
+    if (!webhookId) {
+      throw new Error("Webhook ID is required");
+    }
+    const res = await api.delete(ENDPOINTS.WEBHOOK.DELETE(webhookId));
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
   }
 };
 
-export const toggleWebhookConfig = async (webhookId: string, payload) => {
+export const toggleWebhookConfig = async (webhookId: string, payload: any) => {
   try {
-    const res = await axios.patch(
-      "http://localhost:3000" + ENDPOINTS.WEBHOOK.TOGGLE(webhookId),
-      payload,
-      {
-        headers: {
-          "X-Client-Id": localStorage.getItem("clientId") || "",
-        },
-      },
-    );
+    if (!webhookId) {
+      throw new Error("Webhook ID is required");
+    }
+    const res = await api.patch(ENDPOINTS.WEBHOOK.TOGGLE(webhookId), payload);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
