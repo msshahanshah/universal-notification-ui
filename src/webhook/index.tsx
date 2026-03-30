@@ -124,8 +124,6 @@ export default function WebhookConfigPage() {
       webhookUrl: webhookUrl,
       apiKey: apiKey,
       serviceTrigger: serviceTrigger,
-      retryEnabled: false,
-      isActive: true
     };
 
     try {

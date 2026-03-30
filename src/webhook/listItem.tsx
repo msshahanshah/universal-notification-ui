@@ -1,14 +1,15 @@
 import { Edit2, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
+
 import { useToggleWebhook, useDeleteWebhook } from "src/hooks/useWebhook";
 import { useSnackbar } from "src/provider/snackbar";
 import { transformServiceTriggerToStatuses } from "src/utility/webhook";
 import Switch from "src/components/switch";
-import { useTheme } from "@mui/material/styles";
 
 interface WebhookListItemProps {
   webhook: {
-    _id: string;
+    id: string;
     webhookUrl?: string;
     serviceTrigger?: Record<string, string[]>;
     isActive?: boolean;
@@ -23,8 +24,7 @@ export default function WebhookListItem({
   webhook,
   onEdit,
 }: WebhookListItemProps) {
-  const webhookId = webhook._id;
-  console.log("rendered webhook", webhook);
+  const webhookId = webhook.id;
   const theme = useTheme();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingActive, setIsTogglingActive] = useState(false);
@@ -58,7 +58,6 @@ export default function WebhookListItem({
 
   const handleActiveToggle = async () => {
     try {
-      console.log("webhook....", webhook);
       setIsTogglingActive(true);
       await toggleMutation.mutateAsync({
         webhookId: webhookId,
@@ -93,7 +92,7 @@ export default function WebhookListItem({
         "success",
       );
     } catch (error: any) {
-      showSnackbar(error?.message || "Failed to toggle retry", "error");
+      showSnackbar(error?.message || "Failed to retry", "error");
     } finally {
       setIsTogglingRetry(false);
     }
@@ -108,14 +107,14 @@ export default function WebhookListItem({
     try {
       setIsDeleting(true);
       await deleteMutation.mutateAsync(webhookId);
-      showSnackbar("Webhook deleted successfully", "success");
+      showSnackbar("Webhook configuration deleted successfully.", "success");
     } catch (error: any) {
       showSnackbar(error?.message || "Failed to delete webhook", "error");
       setIsDeleting(false);
     }
   };
 
-  console.log("webhook", webhook);
+  console.log("webhook", webhook.webhookUrl, "enabled?", webhook.retryEnabled);
 
   return (
     <div
@@ -167,9 +166,7 @@ export default function WebhookListItem({
         <Switch
           checked={webhook.isActive || false}
           onChange={handleActiveToggle}
-          disabled={
-            isTogglingActive || isTogglingRetry || deleteMutation.isPending
-          }
+          disabled={isTogglingActive}
           label="Active"
           title="Toggle webhook active status"
         />
@@ -178,9 +175,7 @@ export default function WebhookListItem({
         <Switch
           checked={webhook.retryEnabled || false}
           onChange={handleToggleRetry}
-          disabled={
-            isTogglingRetry || isTogglingActive || deleteMutation.isPending
-          }
+          disabled={isTogglingRetry}
           label="Retry"
           title="Toggle retry mechanism"
         />
