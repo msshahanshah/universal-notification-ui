@@ -32,7 +32,7 @@
 .attach-item {
   position: relative;
   width: 70px;
-  height: 70px;
+  height: 82px;
   border-radius: 10px;
   overflow: hidden;
   background: rgba(255,255,255,0.05);
@@ -41,7 +41,7 @@
 }
 
 .attach-item img {
-  width: 100%;
+  width: auto;
   height: 100%;
   object-fit: contain;
 }
@@ -78,14 +78,18 @@
 }
 
 .attach-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  grid-template-rows: 40px auto;
+  grid-template-areas:
+    "left . right"
+    "bottom bottom bottom";
+  gap: 4px 8px;
   align-items: center;
-  gap: 10px;
-  /* background: #1e1e1e; */
   border: 1px solid #333;
-  padding: 8px 10px;
+  padding: 12px 20px;
   border-radius: 8px;
-  min-width: 180px;
+  min-width: 200px;
 }
 
 .attach-img {
@@ -95,13 +99,25 @@
   border-radius: 4px;
 }
 
-.file-icon {
-  font-size: 28px;
+.attach-left {
+  grid-area: left;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.file-info {
-  flex: 1;
-  overflow: hidden;
+.attach-right {
+  grid-area: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.attach-bottom {
+  grid-area: bottom;
+  text-align: center;
 }
 
 .file-name {

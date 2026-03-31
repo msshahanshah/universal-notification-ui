@@ -130,10 +130,10 @@ export function EmailWrapper({
 
       return {
         id: crypto.randomUUID(),
-        name: file.name, // This will now be the renamed filename
-        size: file.size,
+        name: file.name,
+        size: file.size ?? 0,
         type: file.type,
-        file, // store real File (with new name)
+        file,
         previewUrl,
       };
     });
