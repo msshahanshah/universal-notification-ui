@@ -292,7 +292,7 @@ export default function EmailComposer() {
         {view === "preview" && (
           <div style={{ display: view === "preview" ? "block" : "none" }}>
             <EmailPreview
-              html={body}
+              html={body || ""}
               from={from}
               to={to}
               cc={cc}
@@ -301,6 +301,7 @@ export default function EmailComposer() {
               attachments={attachments}
               handleAttachmentChange={handleAttachmentChange}
               removeAttachment={removeAttachment}
+              commonMessage=''
             />
           </div>
         )}

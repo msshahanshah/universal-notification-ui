@@ -549,13 +549,12 @@ export default function MultipleNotification() {
           const combinedFiles = [...allAttachments.map((a) => a)];
 
           const renamedFiles = renameDuplicateFiles(combinedFiles);
-          recipient.attachments = renamedFiles.map((file) => file.name);
-
-          // const renamedFiles = renameDuplicateFiles(combinedFiles);
+          // Don't modify original recipient.attachments - keep the full attachment objects for UI
+          // Just update the payload's attachment names for API
           email.attachments = renamedFiles.map((file) => file.name);
 
           allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
-          allAttachments.length = 0; // Clear allAttachments after updating recipient
+          allAttachments.length = 0; // Clear allAttachments after processing
         }
       }
     });
@@ -591,9 +590,10 @@ export default function MultipleNotification() {
 
           const renamedFiles = renameDuplicateFiles(combinedFiles);
 
+          // Don't modify original recipient.attachments - keep full objects for UI
           whatsapp.attachments = renamedFiles.map((file) => file.name);
           allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
-          allAttachments.length = 0; // Clear allAttachments after updating whatsapp
+          allAttachments.length = 0; // Clear allAttachments after processing
         } else {
           console.warn(
             "No matching recipient found for WhatsApp destination:",
@@ -614,6 +614,10 @@ export default function MultipleNotification() {
           slack: false,
           whatsapp: false,
         });
+        resetEmailFields();
+        resetSmsFields();
+        resetSlackFields();
+        resetWhatsappFields();
 
         // Create detailed status message for each service
         const statusMessages = [];

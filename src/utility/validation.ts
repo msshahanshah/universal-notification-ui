@@ -144,6 +144,14 @@ export const validateAllServices = (
             `Email Section ${sectionIndex + 1}: Attachments must be a valid list`,
           );
         }
+
+        // Limit number of attachments (max 10)
+        if (section.attachments && section.attachments.length > 10) {
+          validation.email.isFormValid = false;
+          emailErrors.push(
+            `Email Section ${sectionIndex + 1}: Maximum 10 attachments allowed`,
+          );
+        }
       });
     }
 

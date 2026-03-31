@@ -261,7 +261,6 @@ export function WhatsappWrapper({
       });
 
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
-      // console.log(`previewUrl for ${file.name}:`, previewUrl);
 
       return {
         id: crypto.randomUUID(),
@@ -839,6 +838,7 @@ export function WhatsappWrapper({
                           removeAttachment(recipient.id, id)
                         }
                         hideBtn={recipient.attachments.length >= 10}
+                        maxAttachments={10}
                       />
                     </>
                   )
