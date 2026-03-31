@@ -55,7 +55,16 @@ function AttachmentSection({
         {Array.isArray(attachments) &&
           attachments?.length > 0 &&
           attachments.map((a: any) => (
-            <div key={a.id} className="attach-item">
+            <div
+              key={a?.id}
+              className="attach-item"
+              onClick={() => {
+                if (a?.previewUrl) {
+                  window.open(a.previewUrl, "_blank");
+                }
+              }}
+              style={{ cursor: a.previewUrl ? "pointer" : "default" }}
+            >
               {a.previewUrl ? (
                 <img src={a.previewUrl} alt={a.name} className="attach-img" />
               ) : (
