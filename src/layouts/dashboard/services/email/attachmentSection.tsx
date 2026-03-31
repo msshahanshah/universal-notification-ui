@@ -44,10 +44,24 @@ function AttachmentSection({
             cursor: isMaxReached ? "not-allowed" : "pointer",
             pointerEvents: isMaxReached ? "none" : "auto",
           }}
-          title={isMaxReached ? `Maximum ${maxAttachments} attachments allowed` : ""}
+          title={
+            isMaxReached ? `Maximum ${maxAttachments} attachments allowed` : ""
+          }
         >
-          📎 Attach Files {attachments?.length > 0 && `(${attachments.length}/${maxAttachments})`}
-          <input type="file" multiple onChange={onAdd} hidden disabled={isMaxReached} />
+          📎 Attach Files{" "}
+          {maxAttachments && maxAttachments > 0 && (
+            <>
+              {attachments?.length > 0 &&
+                `(${attachments.length}/${maxAttachments})`}
+            </>
+          )}
+          <input
+            type="file"
+            multiple
+            onChange={onAdd}
+            hidden
+            disabled={isMaxReached}
+          />
         </label>
       )}
 
@@ -65,15 +79,20 @@ function AttachmentSection({
               }}
               style={{ cursor: a.previewUrl ? "pointer" : "default" }}
             >
-              {a.previewUrl ? (
-                <img src={a.previewUrl} alt={a.name} className="attach-img" />
-              ) : (
-                <div className="file-icon">{getFileIcon(a.type)}</div>
-              )}
+              <div className="attach-left">
+                {a.previewUrl ? (
+                  <img src={a.previewUrl} alt={a.name} className="attach-img" />
+                ) : (
+                  <div className="file-icon">{getFileIcon(a.type)}</div>
+                )}
+              </div>
 
-              <div className="file-info">
-                <div className="file-name">{a.name}</div>
-                <div className="file-size">{formatSize(a.size) || ""}</div>
+              <div className="attach-right">
+                <div className="file-size">{formatSize(a.size) || "-"}</div>
+              </div>
+
+              <div className="attach-bottom">
+                <div className="file-name" title={a.name}>{a.name}</div>
               </div>
 
               <button

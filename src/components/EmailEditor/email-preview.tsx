@@ -104,7 +104,7 @@ export function EmailPreview({
         </style>
       </head>
       <body>
-        <div style="max-width:600px;margin:auto">
+        <div style="max-width:600px;">
           ${forBody ? cleanEmailHtml : commonMessage}
         </div>
       </body>
