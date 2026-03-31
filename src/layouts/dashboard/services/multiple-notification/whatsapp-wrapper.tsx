@@ -839,6 +839,7 @@ export function WhatsappWrapper({
                           removeAttachment(recipient.id, id)
                         }
                         hideBtn={recipient.attachments.length >= 10}
+                        maxAttachments={10}
                       />
                     </>
                   )

@@ -46,6 +46,13 @@ export function EmailPreview({
     .replace(/background-color:\s*#ffffff;?/gi, "")
     .replace(/background:\s*#ffffff;?/gi, "");
 
+  const forBody =
+    cleanEmailHtml &&
+    cleanEmailHtml
+      .replace(/<p><\/p>/g, "")
+      .replace(/<p>\s*<\/p>/g, "")
+      .trim();
+
   return (
     <div
       style={{
@@ -98,7 +105,7 @@ export function EmailPreview({
       </head>
       <body>
         <div style="max-width:600px;margin:auto">
-          ${cleanEmailHtml && cleanEmailHtml.replace(/<p><\/p>/g, '').replace(/<p>\s*<\/p>/g, '').trim() ? cleanEmailHtml : commonMessage}
+          ${forBody ? cleanEmailHtml : commonMessage}
         </div>
       </body>
     </html>

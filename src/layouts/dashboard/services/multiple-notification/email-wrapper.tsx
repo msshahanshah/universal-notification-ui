@@ -106,6 +106,20 @@ export function EmailWrapper({
 
     if (!files.length) return;
 
+    const recipient = recipients.find((r) => r.id === recipientId);
+    const currentAttachments = recipient?.attachments || [];
+    // const maxAttachments = 10;
+
+    // Check if adding these files would exceed the limit
+    // if (currentAttachments.length + files.length > maxAttachments) {
+    //   // showSnackbar(
+    //   //   `Cannot add ${files.length} file(s). Maximum ${maxAttachments} attachments allowed. Currently have ${currentAttachments.length}.`,
+    //   //   "error",
+    //   // );
+    //   e.target.value = "";
+    //   return;
+    // }
+
     // Rename duplicate files to avoid conflicts
     // const renamedFiles = renameDuplicateFiles(files);
 
@@ -119,13 +133,13 @@ export function EmailWrapper({
         name: file.name, // This will now be the renamed filename
         size: file.size,
         type: file.type,
-        file, // 🔥 store real File (with new name)
+        file, // store real File (with new name)
         previewUrl,
       };
     });
 
     const newAttachment = [
-      ...(recipients.find((r) => r.id === recipientId)?.attachments || []),
+      ...currentAttachments,
       ...newAttachments,
     ];
 
@@ -137,12 +151,9 @@ export function EmailWrapper({
 
   const removeAttachment = (recipientId: string, attachmentId: string) => {
     const recipient = recipients.find((r) => r.id === recipientId);
-    if (recipient) {
-      updateSection(
-        recipientId,
-        "attachments",
-        recipient.attachments.filter((a) => a.id !== attachmentId),
-      );
+    if (recipient && recipient.attachments) {
+      const updatedAttachments = recipient.attachments.filter((a) => a.id !== attachmentId);
+      updateSection(recipientId, "attachments", updatedAttachments);
     }
   };
 
@@ -296,8 +307,11 @@ export function EmailWrapper({
               <div style={{ marginTop: 16 }}>
                 <AttachmentSection
                   attachments={recipient.attachments}
-                  onAdd={(e) => handleAttachmentChange(recipient.id, e)}
-                  onRemove={(id) => removeAttachment(recipient.id, id)}
+                  onAdd={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleAttachmentChange(recipient.id, e)
+                  }
+                  onRemove={(id: string) => removeAttachment(recipient.id, id)}
+                  maxAttachments={10}
                 />
               </div>
             </div>
