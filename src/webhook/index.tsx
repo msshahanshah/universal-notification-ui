@@ -200,7 +200,6 @@ export default function WebhookConfigPage() {
         : await saveMutation.mutateAsync(payload as any);
 
       const saved = res?.data ?? res;
-      console.log("res", res);
 
       applySavedConfig(saved);
 

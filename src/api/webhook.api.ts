@@ -17,7 +17,6 @@ export const updateWebhookDetails = async ({
   payload: any;
   webhookId: string;
 }) => {
-  console.log("payload",payload,'webhookId',webhookId)
   try {
     if (!webhookId) {
       throw new Error("Webhook ID is required");

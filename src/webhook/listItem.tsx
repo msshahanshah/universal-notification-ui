@@ -69,7 +69,6 @@ export default function WebhookListItem({
                       "rgba(34, 197, 94, 0.2)"
                     : theme.vars?.palette.error?.light ||
                       "rgba(239, 68, 68, 0.2)",
-                // color: trigger === "success" ? theme.vars?.palette.success?.main || "#22c55e" : theme.vars?.palette.error?.main || "#ef4444",
                 color: COLORS.WHITE,
                 border: `1px solid ${trigger === "success" ? theme.vars?.palette.success?.main || "rgba(34, 197, 94, 0.4)" : theme.vars?.palette.error?.main || "rgba(239, 68, 68, 0.4)"}`,
                 textTransform: "lowercase",
@@ -232,8 +231,6 @@ export default function WebhookListItem({
           }
           style={{
             padding: "6px 8px",
-            // background: "none",
-            // border: `1px solid ${theme.vars?.palette.divider}`,
             background: "none",
             borderRadius: 4,
             color: theme.vars?.palette.text.secondary,
