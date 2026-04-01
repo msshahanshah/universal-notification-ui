@@ -23,7 +23,6 @@ import {
 } from "src/utility/webhook";
 import WebhookListItem from "./listItem";
 import { useInputStyles } from "src/utility/styles";
-// import Button from "./components/button";
 
 type StatusType = "success" | "failure" | "both";
 
@@ -98,9 +97,9 @@ export default function WebhookConfigPage() {
     setEditingWebhookId(webhook.id);
     setIsExistingConfig(true);
 
-    if (webhook.service_trigger) {
+    if (webhook.serviceTrigger) {
       const statuses = transformServiceTriggerToStatuses(
-        webhook.service_trigger,
+        webhook.serviceTrigger,
       );
       setSelectedStatuses(statuses);
     }
@@ -113,12 +112,76 @@ export default function WebhookConfigPage() {
     }, 100);
   };
 
+  const validateWebhookUrl = async (url: string): Promise<boolean> => {
+    // Basic URL format validation
+    try {
+      new URL(url);
+    } catch {
+      showSnackbar(
+        "Please enter a valid URL format (e.g., https://example.com)",
+        "error",
+      );
+      return false;
+    }
+
+    // Check if URL uses http or https
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      showSnackbar("webhookUrl must be a valid HTTPS URL", "error");
+      return false;
+    }
+
+    // Try to check if URL is reachable
+    // try {
+    //   // Use a HEAD request with a timeout to check reachability
+    //   const controller = new AbortController();
+    //   const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    //   const response = await fetch(url, {
+    //     method: "HEAD",
+    //     signal: controller.signal,
+    //   });
+
+    //   console.log("response",response.status)
+    //   clearTimeout(timeoutId);
+
+    //   // Check for 404 Not Found
+    //   if (response.status === 404) {
+    //     showSnackbar(
+    //       "URL returned 404 Not Found. Please check the webhook endpoint.",
+    //       "error",
+    //       5000
+    //     );
+    //     return false;
+    //   }
+    // } catch (error: any) {
+    //   // CORS errors or network errors - allow save with warning since webhook
+    //   // endpoints often don't have CORS enabled for browser requests
+    //   if (error.name === "AbortError") {
+    //     showSnackbar(
+    //       "Request timed out. Please ensure the webhook endpoint is reachable.",
+    //       "error",
+    //       5000
+    //     );
+    //     return false;
+    //   }
+    //   // TypeError usually indicates CORS or network issues - allow save
+    // }
+
+    return true;
+  };
+
   const handleSave = async () => {
     // clientId read from outer scope
     setError("");
 
-    const serviceTrigger = buildServiceTrigger(selectedStatuses);
+    // Validate webhook URL before saving
+    const isUrlValid = await validateWebhookUrl(webhookUrl);
+    if (!isUrlValid) {
+      setLoading(false);
+      return;
+    }
 
+    const serviceTrigger = buildServiceTrigger(selectedStatuses);
 
     const payload = {
       webhookUrl: webhookUrl,
@@ -131,7 +194,7 @@ export default function WebhookConfigPage() {
 
       const res = editingWebhookId
         ? await updateMutation.mutateAsync({
-            ...payload,
+            payload,
             webhookId: editingWebhookId,
           } as any)
         : await saveMutation.mutateAsync(payload as any);
@@ -159,55 +222,6 @@ export default function WebhookConfigPage() {
     } finally {
       setLoading(false);
     }
-
-    // try {
-    //   setLoading(true);
-
-    //   if (isExistingConfig) {
-    //     console.log(" c id", clientId);
-    //     const res = await updateMutation.mutateAsync(payload);
-    //     const saved = res?.data ?? res;
-    //     if (saved) {
-    //       if (saved.webhookurl) setWebhookUrl(saved.webhookurl);
-    //       if (saved.encrypted_key) setApiKey(saved.encrypted_key);
-    //       if (saved.service_trigger) {
-    //         const convertToArrayOfStrings = Object.entries(
-    //           saved.service_trigger,
-    //         ).flatMap(([key, values]) =>
-    //           values.map((value) => `${key}_${value}`),
-    //         );
-
-    //         setStatus(convertToArrayOfStrings);
-    //       }
-    //     }
-    //     showSnackbar("Webhook configuration updated successfully", "success");
-    //   } else {
-    //     const res = await saveMutation.mutateAsync(payload as any);
-    //     const saved = res?.data ?? res;
-    //     if (saved) {
-    //       if (saved.webhookurl) setWebhookUrl(saved.webhookurl);
-    //       if (saved.encrypted_key) setApiKey(saved.encrypted_key);
-    //       if (saved.service_trigger) {
-    //         const convertToArrayOfStrings = Object.entries(
-    //           saved.service_trigger,
-    //         ).flatMap(([key, values]) =>
-    //           values.map((value) => `${key}_${value}`),
-    //         );
-
-    //         setStatus(convertToArrayOfStrings);
-    //       }
-
-    //       setIsExistingConfig(true);
-    //     }
-    //     showSnackbar("Webhook configuration saved successfully", "success");
-    //   }
-    // } catch (err: any) {
-    //   console.log(" err?.response?.data", err);
-    //   // const message = error?.message || "Something went wrong";
-    //   // showSnackbar(message, "error");
-    // } finally {
-    //   setLoading(false);
-    // }
   };
 
   const isDisabled =
@@ -238,19 +252,19 @@ export default function WebhookConfigPage() {
     }
   }, [isError, webhookData, webhookError]);
 
-  // console.log("webhooksList", webhooksList);
   return (
-    <div style={{ maxWidth: 900, margin: "40px auto", padding: 20 }}>
+    <div style={{ margin: "40px auto", marginTop: 0 }}>
       {/* Form Section */}
       <div
         data-webhook-form
         style={{
-          maxWidth: 700,
+          minWidth: "100%",
+          maxWidth: "100%",
           margin: "0 auto 40px",
           padding: 24,
           borderRadius: 8,
-          background: "hsla(220, 35%, 3%, 0.4)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          background: theme.vars?.palette.background.paper,
+          border: `1px solid ${theme.vars?.palette.divider}`,
           boxShadow:
             "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
         }}
@@ -273,7 +287,6 @@ export default function WebhookConfigPage() {
           }
           placeholder="Ex: https://webhook.site/your-test-url"
           showAsteric
-          // className="sms-input"
           style={inputStyle}
         />
 
@@ -285,7 +298,6 @@ export default function WebhookConfigPage() {
             setApiKey(e.target.value)
           }
           showAsteric
-          // className="sms-input"
           style={inputStyle}
         />
 
@@ -299,7 +311,7 @@ export default function WebhookConfigPage() {
               color: theme?.vars?.palette.text.secondary,
             }}
           >
-            Trigger Type
+            Enabled Services
           </label>
 
           <div style={{ display: "flex", gap: 20 }}>
@@ -351,7 +363,7 @@ export default function WebhookConfigPage() {
           style={{
             textAlign: "center",
             fontSize: 14,
-            color: "rgba(255, 255, 255, 0.6)",
+            color: theme.vars?.palette.text.disabled,
           }}
         >
           Loading webhooks...
@@ -359,12 +371,15 @@ export default function WebhookConfigPage() {
       ) : webhooksCount > 0 ? (
         <div
           style={{
-            maxWidth: 700,
+            minWidth: "100%",
+            maxWidth: "100%",
             margin: "0 auto",
             padding: 24,
             borderRadius: 8,
-            background: "hsla(220, 35%, 3%, 0.2)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
+            background: theme.vars?.palette.background.paper,
+            border: `1px solid ${theme.vars?.palette.divider}`,
+            boxShadow:
+              "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
           }}
         >
           <h3
@@ -376,15 +391,26 @@ export default function WebhookConfigPage() {
           >
             Webhooks ({webhooksCount}/10)
           </h3>
-          {(Array.isArray(webhookData) ? webhookData : []).map(
-            (webhook: any) => (
+          {(Array.isArray(webhookData) ? webhookData : [])
+            .sort((a: any, b: any) => {
+              // Convert UTC to IST (UTC+5:30) for sorting
+              const getISTTime = (dateStr: string) => {
+                if (!dateStr) return 0;
+                const date = new Date(dateStr);
+                // Add 5 hours 30 minutes for IST conversion
+                return date.getTime() + (5.5 * 60 * 60 * 1000);
+              };
+              const timeA = getISTTime(a.updatedAt);
+              const timeB = getISTTime(b.updatedAt);
+              return timeB - timeA; // Descending order (most recent first)
+            })
+            .map((webhook: any) => (
               <WebhookListItem
                 key={webhook.id}
                 webhook={webhook}
                 onEdit={handleEditWebhook}
               />
-            ),
-          )}
+            ))}
         </div>
       ) : (
         <div
@@ -394,7 +420,10 @@ export default function WebhookConfigPage() {
             padding: 24,
             textAlign: "center",
             fontSize: 14,
-            color: COLORS.PLACEHOLDER_TEXT,
+            color: theme.vars?.palette.text.disabled,
+            background: theme.vars?.palette.background.paper,
+            border: `1px solid ${theme.vars?.palette.divider}`,
+            borderRadius: 8,
           }}
         >
           No webhooks configured yet. Create one to get started!

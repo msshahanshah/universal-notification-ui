@@ -10,12 +10,18 @@ export const saveWebhookDetails = async (body: any) => {
   }
 };
 
-export const updateWebhookDetails = async (body: any) => {
+export const updateWebhookDetails = async ({
+  payload,
+  webhookId,
+}: {
+  payload: any;
+  webhookId: string;
+}) => {
   try {
-    if (!body?.webhookId) {
+    if (!webhookId) {
       throw new Error("Webhook ID is required");
     }
-    const res = await api.patch(ENDPOINTS.WEBHOOK.UPDATE(body), body);
+    const res = await api.patch(ENDPOINTS.WEBHOOK.UPDATE(webhookId), payload);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;
