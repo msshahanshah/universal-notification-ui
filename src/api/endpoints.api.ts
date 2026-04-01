@@ -32,7 +32,7 @@ export const ENDPOINTS = {
   WEBHOOK: {
     SAVE: "/webhooks",
     GET: "/webhooks",
-    UPDATE: ({ webhookId }: any) => `/webhooks/${webhookId}`,
+    UPDATE: (webhookId: string) => `/webhooks/${webhookId}`,
     DELETE: (webhookId: string) => `/webhooks/${webhookId}`,
     TOGGLE: (webhookId: string) => `/webhooks/${webhookId}`,
   },

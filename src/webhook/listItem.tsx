@@ -4,8 +4,8 @@ import { useTheme } from "@mui/material/styles";
 
 import { useToggleWebhook, useDeleteWebhook } from "src/hooks/useWebhook";
 import { useSnackbar } from "src/provider/snackbar";
-import { transformServiceTriggerToStatuses } from "src/utility/webhook";
 import Switch from "src/components/switch";
+import COLORS from "src/utility/colors";
 
 interface WebhookListItemProps {
   webhook: {
@@ -33,11 +33,54 @@ export default function WebhookListItem({
   const deleteMutation = useDeleteWebhook();
   const showSnackbar = useSnackbar();
 
-  const getServiceNames = () => {
+  const getServiceChips = () => {
     if (!webhook.serviceTrigger) return "No services";
-    const statuses = transformServiceTriggerToStatuses(webhook.serviceTrigger);
-    const services = [...new Set(statuses.map((s) => s.split("_")[0]))];
-    return services.join(", ");
+
+    return Object.entries(webhook.serviceTrigger).map(([service, triggers]) => (
+      <div
+        key={service}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginBottom: 4,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 12,
+            color: theme.vars?.palette.text.secondary,
+            textTransform: "lowercase",
+          }}
+        >
+          {service}:
+        </span>
+        <div style={{ display: "flex", gap: 4 }}>
+          {(triggers || []).map((trigger) => (
+            <span
+              key={trigger}
+              style={{
+                fontSize: 10,
+                padding: "2px 8px",
+                borderRadius: 12,
+                background:
+                  trigger === "success"
+                    ? theme.vars?.palette.success?.light ||
+                      "rgba(34, 197, 94, 0.2)"
+                    : theme.vars?.palette.error?.light ||
+                      "rgba(239, 68, 68, 0.2)",
+                // color: trigger === "success" ? theme.vars?.palette.success?.main || "#22c55e" : theme.vars?.palette.error?.main || "#ef4444",
+                color: COLORS.WHITE,
+                border: `1px solid ${trigger === "success" ? theme.vars?.palette.success?.main || "rgba(34, 197, 94, 0.4)" : theme.vars?.palette.error?.main || "rgba(239, 68, 68, 0.4)"}`,
+                textTransform: "lowercase",
+              }}
+            >
+              {trigger}
+            </span>
+          ))}
+        </div>
+      </div>
+    ));
   };
 
   const formatDate = (dateString?: string) => {
@@ -114,8 +157,6 @@ export default function WebhookListItem({
     }
   };
 
-  console.log("webhook", webhook.webhookUrl, "enabled?", webhook.retryEnabled);
-
   return (
     <div
       style={{
@@ -124,8 +165,8 @@ export default function WebhookListItem({
         justifyContent: "space-between",
         padding: "12px 16px",
         borderRadius: 8,
-        border: "1px solid rgba(255, 255, 255, 0.15)",
-        background: "hsla(220, 35%, 3%, 0.2)",
+        border: `1px solid ${theme.vars?.palette.divider}`,
+        background: theme.vars?.palette.background.paper,
         marginBottom: 8,
       }}
     >
@@ -143,13 +184,13 @@ export default function WebhookListItem({
         <div
           style={{
             fontSize: 12,
-            color: "rgba(255, 255, 255, 0.6)",
+            color: theme.vars?.palette.text.secondary,
             marginBottom: 2,
           }}
         >
-          Services: {getServiceNames()}
+          {getServiceChips()}
         </div>
-        <div style={{ fontSize: 12, color: "rgba(255, 255, 255, 0.4)" }}>
+        <div style={{ fontSize: 12, color: theme.vars?.palette.text.disabled }}>
           Updated: {formatDate(webhook.updatedAt)}
         </div>
       </div>
@@ -182,16 +223,20 @@ export default function WebhookListItem({
 
         {/* Edit button */}
         <button
-          onClick={() => onEdit(webhook)}
+          onClick={() => {
+            setIsDeleting(false);
+            onEdit(webhook);
+          }}
           disabled={
             deleteMutation.isPending || isTogglingActive || isTogglingRetry
           }
           style={{
             padding: "6px 8px",
+            // background: "none",
+            // border: `1px solid ${theme.vars?.palette.divider}`,
             background: "none",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
             borderRadius: 4,
-            color: "rgba(255, 255, 255, 0.7)",
+            color: theme.vars?.palette.text.secondary,
             cursor:
               deleteMutation.isPending || isTogglingActive || isTogglingRetry
                 ? "not-allowed"
@@ -202,6 +247,9 @@ export default function WebhookListItem({
               deleteMutation.isPending || isTogglingActive || isTogglingRetry
                 ? 0.5
                 : 1,
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            boxShadow:
+              "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
           }}
         >
           <Edit2 size={16} />
@@ -213,12 +261,11 @@ export default function WebhookListItem({
           disabled={isTogglingActive || isTogglingRetry}
           style={{
             padding: "6px 8px",
-            background: isDeleting ? "#ef4444" : "none",
-            border: isDeleting
-              ? "1px solid #ef4444"
-              : "1px solid rgba(255, 255, 255, 0.2)",
+            background: isDeleting
+              ? theme.vars?.palette.error?.main || "#ef4444"
+              : "none",
             borderRadius: 4,
-            color: isDeleting ? "white" : "rgba(255, 255, 255, 0.7)",
+            color: isDeleting ? "white" : theme.vars?.palette.text.secondary,
             cursor:
               isTogglingActive || isTogglingRetry ? "not-allowed" : "pointer",
             display: "flex",
@@ -226,6 +273,9 @@ export default function WebhookListItem({
             fontSize: 12,
             fontWeight: isDeleting ? 500 : 400,
             opacity: isTogglingActive || isTogglingRetry ? 0.5 : 1,
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            boxShadow:
+              "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
           }}
         >
           {isDeleting ? (

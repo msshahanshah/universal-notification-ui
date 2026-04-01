@@ -194,12 +194,9 @@ const Sidebar = ({
             sx={{
               minWidth: 0,
               justifyContent: "center",
-              color: isActive("/webhook-config")
-                ? COLORS.LIGHT_BLUE
-                : COLORS.WHITE,
             }}
           >
-            <HomeRoundedIcon fontSize="small" />
+            <HomeRoundedIcon fontSize="small" className="service-icon" />
           </ListItemIcon>
           {open && <ListItemText primary="Webhook Config" />}
         </ListItemButton>
