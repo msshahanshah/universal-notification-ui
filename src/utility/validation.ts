@@ -2,11 +2,11 @@
  * Validation utilities for multiple notification services
  */
 
-import { useAtom } from "jotai";
-import { emailSectionsAtom } from "src/atoms/emailAtoms";
-import { slackSectionsAtom } from "src/atoms/slackAtoms";
-import { smsSectionsAtom } from "src/atoms/smsAtoms";
-import { whatsappSectionsAtom } from "src/atoms/whatsappAtoms";
+import { useAtom } from 'jotai';
+import { emailSectionsAtom } from 'src/atoms/emailAtoms';
+import { slackSectionsAtom } from 'src/atoms/slackAtoms';
+import { smsSectionsAtom } from 'src/atoms/smsAtoms';
+import { whatsappSectionsAtom } from 'src/atoms/whatsappAtoms';
 
 export interface ValidationResult {
   isFormValid: boolean;
@@ -33,10 +33,10 @@ export const validateAllServices = (
   whatsappData: any,
   commonMessage: string,
 ): ServiceValidation => {
-  const [smsInputData, _] = useAtom(smsSectionsAtom);
-  const [slackInputData, __] = useAtom(slackSectionsAtom);
-  const [emailInputData, ___] = useAtom(emailSectionsAtom);
-  const [whatsappInputData, ____] = useAtom(whatsappSectionsAtom);
+  const [smsInputData] = useAtom(smsSectionsAtom);
+  const [slackInputData] = useAtom(slackSectionsAtom);
+  const [emailInputData] = useAtom(emailSectionsAtom);
+  const [whatsappInputData] = useAtom(whatsappSectionsAtom);
   const validation: ServiceValidation = {
     email: { isFormValid: true, errors: {} },
     sms: { isFormValid: true, errors: {} },
@@ -46,28 +46,25 @@ export const validateAllServices = (
     errors: {},
   };
 
-  if (selectedServices.includes("email")) {
+  if (selectedServices.includes('email')) {
     const emailErrors: string[] = [];
 
-    if (!emailData || typeof emailData !== "object") {
+    if (!emailData || typeof emailData !== 'object') {
       validation.email.isFormValid = false;
-      emailErrors.push("Email service data is missing");
+      emailErrors.push('Email service data is missing');
     } else {
-      const sections = (emailData as any).sections || [];
       // At least one destination must be provided
       const hasValidDestination = emailInputData?.some(
-        ({ to }: any) => to?.trim() !== "",
+        ({ to }: any) => to?.trim() !== '',
       );
 
       if (!hasValidDestination) {
         validation.email.isFormValid = false;
-        emailErrors.push("At least one recipient email address is required");
+        emailErrors.push('At least one recipient email address is required');
       }
 
       // Per-section validations
       emailInputData.forEach((section: any, sectionIndex: number) => {
-        // Destination (To) is required
-
         // Validate fromEmail format
         if (
           section?.from?.trim() &&
@@ -161,22 +158,22 @@ export const validateAllServices = (
   }
 
   // SMS validation
-  if (selectedServices.includes("sms")) {
+  if (selectedServices.includes('sms')) {
     const smsErrors: string[] = [];
 
-    if (!smsData || typeof smsData !== "object") {
+    if (!smsData || typeof smsData !== 'object') {
       validation.sms.isFormValid = false;
-      smsErrors.push("SMS service data is missing");
+      smsErrors.push('SMS service data is missing');
     } else {
       const sections = (smsData as any).sections || [];
 
       const hasValidDestination = sections?.some(
-        ({ destination }: any) => destination?.trim() !== "",
+        ({ destination }: any) => destination?.trim() !== '',
       );
 
       if (!hasValidDestination) {
         validation.sms.isFormValid = false;
-        smsErrors.push("At least one Phone Number is required");
+        smsErrors.push('At least one Phone Number is required');
       }
 
       // Check for sections with country code but missing phone number
@@ -184,8 +181,8 @@ export const validateAllServices = (
         if (section.numbers) {
           section.numbers.forEach((num: any, numIndex: number) => {
             const hasCountryCode =
-              num.countryCode && num.countryCode.trim() !== "";
-            const hasPhoneNumber = num.number && num.number.trim() !== "";
+              num.countryCode && num.countryCode.trim() !== '';
+            const hasPhoneNumber = num.number && num.number.trim() !== '';
 
             if (hasCountryCode && !hasPhoneNumber) {
               validation.sms.isFormValid = false;
@@ -206,7 +203,7 @@ export const validateAllServices = (
 
       // Validate phone number formats
       sections.forEach((section: any, sectionIndex: number) => {
-        section.numbers?.forEach((num: any, numIndex: number) => {
+        section.numbers?.forEach((num: any) => {
           if (num.number && !/^\d{8,15}$/.test(num.number)) {
             smsErrors.push(
               `SMS Section ${sectionIndex + 1}: Invalid phone number`,
@@ -222,24 +219,24 @@ export const validateAllServices = (
   }
 
   // Slack validation
-  if (selectedServices.includes("slack")) {
+  if (selectedServices.includes('slack')) {
     const slackErrors: string[] = [];
 
-    if (!slackData || typeof slackData !== "object") {
+    if (!slackData || typeof slackData !== 'object') {
       validation.slack.isFormValid = false;
-      slackErrors.push("Slack service data is missing");
+      slackErrors.push('Slack service data is missing');
     } else {
       const sections = (slackData as any).sections || [];
 
       // At least one destination must be provided
       const hasValidDestination = sections?.some(
         ({ destination, channelID }: any) =>
-          destination?.trim() !== "" || channelID?.trim() !== "",
+          destination?.trim() !== '' || channelID?.trim() !== '',
       );
 
       if (!hasValidDestination) {
         validation.slack.isFormValid = false;
-        slackErrors.push("At least one Channel ID is required");
+        slackErrors.push('At least one Channel ID is required');
       }
 
       // Each section must have a message, or commonMessage must be provided
@@ -263,7 +260,7 @@ export const validateAllServices = (
 
         if (destination?.trim()) {
           const channelIds = destination
-            .split(",")
+            .split(',')
             .map((id: string) => id.trim())
             .filter((id: string) => id.length > 0);
 
@@ -284,22 +281,21 @@ export const validateAllServices = (
   }
 
   // WhatsApp validation
-  if (selectedServices.includes("whatsapp")) {
+  if (selectedServices.includes('whatsapp')) {
     const whatsappErrors: string[] = [];
 
-    if (!whatsappData || typeof whatsappData !== "object") {
+    if (!whatsappData || typeof whatsappData !== 'object') {
       validation.whatsapp.isFormValid = false;
-      whatsappErrors.push("WhatsApp service data is missing");
+      whatsappErrors.push('WhatsApp service data is missing');
     } else {
-      const sections = (whatsappData as any).sections || [];
       // At least one destination must be provided
       const hasValidDestination = whatsappInputData?.some(
-        ({ to }: any) => to?.trim() !== "",
+        ({ to }: any) => to?.trim() !== '',
       );
 
       if (!hasValidDestination) {
         validation.whatsapp.isFormValid = false;
-        whatsappErrors.push("At least one recipient phone number is required");
+        whatsappErrors.push('At least one recipient phone number is required');
       }
 
       // Per-section validations
@@ -321,7 +317,7 @@ export const validateAllServices = (
 
         // Ensure at least one valid number
         const hasValidNumber = section.numbers.some(
-          (num: any) => num.number.trim() !== "",
+          (num: any) => num.number.trim() !== '',
         );
         if (!hasValidNumber) {
           validation.whatsapp.isFormValid = false;
@@ -358,7 +354,7 @@ export const validateAllServices = (
         // Validate variableValues structure
         if (
           section.variableValues &&
-          typeof section.variableValues !== "object"
+          typeof section.variableValues !== 'object'
         ) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
@@ -369,7 +365,7 @@ export const validateAllServices = (
         // Validate attachment type
         if (
           !section.attachmentType ||
-          !["file", "url"].includes(section.attachmentType)
+          !['file', 'url'].includes(section.attachmentType)
         ) {
           validation.whatsapp.isFormValid = false;
           whatsappErrors.push(
@@ -389,30 +385,30 @@ export const validateAllServices = (
         if (
           section.attachments &&
           section.attachments.length > 0 &&
-          section.attachmentType === "url"
+          section.attachmentType === 'url'
         ) {
           const invalidAttachments = section.attachments.filter(
             (attachment: any) => {
               const url = attachment.url || attachment.name;
 
               // Check for HTTPS
-              if (url.startsWith("https://")) {
+              if (url.startsWith('https://')) {
                 return false; // Valid
               }
 
               // Check for valid file extensions (case insensitive)
               const validExtensions = [
-                ".png",
-                ".jpg",
-                ".jpeg",
-                ".gif",
-                ".pdf",
-                ".doc",
-                ".docx",
-                ".txt",
-                ".zip",
-                ".mp4",
-                ".mp3",
+                '.png',
+                '.jpg',
+                '.jpeg',
+                '.gif',
+                '.pdf',
+                '.doc',
+                '.docx',
+                '.txt',
+                '.zip',
+                '.mp4',
+                '.mp3',
               ];
               const hasValidExtension = validExtensions.some((ext) =>
                 url.toLowerCase().endsWith(ext),
@@ -425,7 +421,7 @@ export const validateAllServices = (
           if (invalidAttachments.length > 0) {
             validation.whatsapp.isFormValid = false;
             whatsappErrors.push(
-              `WhatsApp Section ${sectionIndex + 1}: Invalid attachment URLs: ${invalidAttachments.map((a: any) => a.url || a.name).join(", ")}\nURLs must start with "https://" or have valid file extensions like .png, .jpg, .pdf, etc.`,
+              `WhatsApp Section ${sectionIndex + 1}: Invalid attachment URLs: ${invalidAttachments.map((a: any) => a.url || a.name).join(', ')}\nURLs must start with "https://" or have valid file extensions like .png, .jpg, .pdf, etc.`,
             );
           }
         }
@@ -436,13 +432,13 @@ export const validateAllServices = (
           const missingFields = requiredFields.filter(
             (field: any) =>
               !section.variableValues![field.name] ||
-              section.variableValues![field.name].trim() === "",
+              section.variableValues![field.name].trim() === '',
           );
 
           if (missingFields.length > 0) {
             validation.whatsapp.isFormValid = false;
             whatsappErrors.push(
-              `WhatsApp Section ${sectionIndex + 1}: Missing values for template variables: ${missingFields.map((f: any) => f.name).join(", ")}`,
+              `WhatsApp Section ${sectionIndex + 1}: Missing values for template variables: ${missingFields.map((f: any) => f.name).join(', ')}`,
             );
           }
         }

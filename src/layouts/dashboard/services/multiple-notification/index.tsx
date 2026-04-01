@@ -529,7 +529,7 @@ export default function MultipleNotification() {
 
     // Collect all attachments for upload
     const allAttachments: any[] = [];
-    let allFinalAttachments: any[] = [];
+    const allFinalAttachments: any[] = [];
 
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {

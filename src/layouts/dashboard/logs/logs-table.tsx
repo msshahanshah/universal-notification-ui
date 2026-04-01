@@ -5,7 +5,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import Loader from "src/components/loader";
 import { useSnackbar } from "src/provider/snackbar";
-import { Table } from "src/components/ag-grid-react/table";
+import { Tablessss } from "src/components/ag-grid-react/table";
 
 import "../../../App.css";
 import "./logs-table.css";
@@ -399,7 +399,7 @@ const LogsTable = () => {
   // }, []);
 
   return (
-    <Table
+    <Tablessss
       isMobile={isMobile}
       isLoading={isLoading}
       columnDefs={columnDefs}

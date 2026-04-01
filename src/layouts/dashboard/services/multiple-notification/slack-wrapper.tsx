@@ -151,7 +151,7 @@ export function SlackWrapper({
             placeholder="Eg. C0991E9E10R"
             value={channel.channelID}
             onChange={(e) => {
-              if (!!invalidChannelId) {
+              if (invalidChannelId) {
                 setInvalidChannelId("");
               }
               updateSection(channel.id, "channelID", e.target.value);

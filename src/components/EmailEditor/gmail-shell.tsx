@@ -153,7 +153,7 @@ export function GmailShell({
           if (value?.length > 255) {
             setSubjectError("Subject must not exceed 255 characters.");
           } else {
-            if (!!subjectError) {
+            if (subjectError) {
               setSubjectError("");
             }
           }

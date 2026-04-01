@@ -6,14 +6,6 @@ interface ValidationResult {
   errors: Record<string, string>;
 }
 
-interface ValidationMessages {
-  [key: string]: {
-    [errorKey: string]: {
-      [field: string]: string;
-    };
-  };
-}
-
 // ✅ Frontend validator — runs BEFORE API call
 export const runValidator = (
   serviceName: string,

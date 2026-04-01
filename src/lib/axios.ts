@@ -30,7 +30,7 @@ const getRefreshToken = async (originalRequest: any) => {
   }
   const refreshTokenData = await fetchRefreshToken({ refreshToken });
 
-  if (!!refreshTokenData?.data?.accessToken) {
+  if (refreshTokenData?.data?.accessToken) {
     localStorage.setItem("accessToken", refreshTokenData?.data?.accessToken);
   }
   if (refreshTokenData?.data?.accessToken) {

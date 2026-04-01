@@ -16,8 +16,8 @@ type Props = {
   placeholder?: string;
   dataTestId?: string;
   multiple?: boolean;
-  style?: Object;
-  dropdownStyle?: Object;
+  style?: object;
+  dropdownStyle?: object;
 };
 
 export function Select({
