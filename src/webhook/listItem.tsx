@@ -93,7 +93,7 @@ export default function WebhookListItem({
         hour: "2-digit",
         minute: "2-digit",
       });
-    } catch () {
+    } catch (error) {
       return "Invalid date";
     }
   };

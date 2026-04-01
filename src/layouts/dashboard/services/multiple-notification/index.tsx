@@ -43,75 +43,91 @@ export default function MultipleNotification() {
 
   const showSnackbar = useSnackbar();
 
-  const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
-    const serviceKeys = Object.keys(data);
+  const getFileFromUrl = (urlEntry: any, attachments: any[]) => {
+    const filename = urlEntry.s3.fields?.key?.split("/").pop();
 
-    // Iterate through each service that has pre-signed URLs
-    for (const serviceKey of serviceKeys) {
-      const preSignedUrls = data?.[serviceKey]?.preSignedUrls;
-      if (!preSignedUrls?.length) continue;
+    const file = attachments.find((f: any) => f.name === filename);
 
-      for (let i = 0; i < preSignedUrls.length; i++) {
-        const presigned = preSignedUrls[i];
-
-        const urls = presigned?.urls;
-
-        if (!urls?.length) continue;
-
-        for (let j = 0; j < urls.length; j++) {
-          const urlEntry = urls[j];
-
-          // Find the file that matches this URL's filename
-          const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
-
-          const fileObj = attachmentsCopy.find(
-            (file: any) => file.name === filenameFromUrl,
-          );
-
-          if (!fileObj) {
-            console.warn(
-              `No file found for URL with filename: ${filenameFromUrl}`,
-            );
-            continue;
-          }
-
-          const formData = new FormData();
-
-          // Append S3 fields
-          Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
-            formData.append(key, value as string);
-          });
-
-          // File MUST be last
-          formData.append("file", fileObj);
-
-          try {
-            await api.post(urlEntry.s3.url, formData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: ``,
-              },
-            });
-          } catch (err) {
-            console.error(
-              `❌ Upload failed for ${serviceKey}:`,
-              fileObj.name,
-              err,
-            );
-
-            setTimeout(() => {
-              showSnackbar(
-                `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload attachments`,
-                "error",
-              );
-            }, 30000);
-            throw err;
-          }
-        }
-      }
+    if (!file) {
+      console.warn(`No file found for URL with filename: ${filename}`);
+      return null;
     }
 
-    // Invalidate queries once all uploads are complete
+    return file;
+  };
+
+  const createFormData = (urlEntry: any, file: any) => {
+    const formData = new FormData();
+
+    Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
+      formData.append(key, value as string);
+    });
+
+    formData.append("file", file);
+
+    return formData;
+  };
+
+  const uploadFile = async (serviceKey: string, urlEntry: any, file: any) => {
+    const formData = createFormData(urlEntry, file);
+
+    try {
+      await api.post(urlEntry.s3.url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: ``,
+        },
+      });
+    } catch (err) {
+      console.error(`❌ Upload failed for ${serviceKey}:`, file.name, err);
+
+      setTimeout(() => {
+        showSnackbar(
+          `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload attachments`,
+          "error",
+        );
+      }, 30000);
+
+      throw err;
+    }
+  };
+
+  const processUrls = async (
+    serviceKey: string,
+    urls: any[],
+    attachments: any[],
+  ) => {
+    if (!urls?.length) return;
+
+    for (const urlEntry of urls) {
+      const file = getFileFromUrl(urlEntry, attachments);
+      if (!file) continue;
+
+      await uploadFile(serviceKey, urlEntry, file);
+    }
+  };
+
+  const processPreSigned = async (
+    serviceKey: string,
+    preSignedUrls: any[],
+    attachments: any[],
+  ) => {
+    if (!preSignedUrls?.length) return;
+
+    for (const presigned of preSignedUrls) {
+      await processUrls(serviceKey, presigned?.urls, attachments);
+    }
+  };
+
+  const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
+    for (const [serviceKey, serviceData] of Object.entries(data || {})) {
+      await processPreSigned(
+        serviceKey,
+        (serviceData as any)?.preSignedUrls,
+        attachmentsCopy,
+      );
+    }
+
     queryClient.invalidateQueries({
       queryKey: logsKeys.all,
     });
