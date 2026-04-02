@@ -80,8 +80,6 @@ export const Tablessss = ({
           onSortChanged={onSortChanged}
           onFirstDataRendered={onFirstDataRendered}
           rowModelType="infinite"
-          // datasource={datasource}
-          // onSortModelChange={onSortModelChange}
         />
       </div>
     </div>

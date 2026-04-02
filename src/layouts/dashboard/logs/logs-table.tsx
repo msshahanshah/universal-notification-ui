@@ -47,8 +47,6 @@ const LogsTable = () => {
     return "[" + params.value.toLocaleString() + "]";
   }, []);
 
-  const [data, setData] = useState<LogMessage[]>([]);
-
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
   const showSnackbar = useSnackbar();
@@ -239,8 +237,6 @@ const LogsTable = () => {
         filterOptions: ["contains", "equals"],
       },
       tooltipComponent: CustomTooltip,
-      // tooltipShowDelay: 500, // Show tooltip after 500ms
-      // tooltipMouseTrack: true, // Tooltip follows mouse
     },
     {
       field: "status",
@@ -361,8 +357,6 @@ const LogsTable = () => {
   const onSortChanged = () => {
     if (!gridApiRef.current) return;
 
-    // const sortModel = gridApiRef.current.getSortModel();
-
     gridApiRef.current.state.sorting.sortModel;
 
     console.log("sortModel", sortModel);
@@ -409,7 +403,6 @@ const LogsTable = () => {
         ...defaultColDef,
         tooltipComponent: "customTooltip",
       }}
-      // defaultColDef={defaultColDef}
       logsData={logsData}
       pageSize={pageSize}
       gridApiRef={gridApiRef}
@@ -424,12 +417,6 @@ const LogsTable = () => {
       onSortChanged={onSortChanged}
       sortModel={sortModel}
       onGridReady={onGridReady}
-      // datasource={datasource}
-      // onFirstDataRendered={onFirstDataRendered}
-      // onSortModelChange={(newModel) => {
-      //   setSortModel(newModel);
-      //   console.log(newModel);
-      // }}
     />
   );
 };

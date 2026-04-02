@@ -1,4 +1,3 @@
-// common MUI component
 import {
   Box,
   CircularProgress,
