@@ -125,9 +125,9 @@ export default function WebhookLogsDrawer({
             </Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
-            <IconButton onClick={handleRefresh} title="Refresh logs">
+            {/* <IconButton onClick={handleRefresh} title="Refresh logs">
               <RefreshIcon />
-            </IconButton>
+            </IconButton> */}
             <IconButton onClick={onClose} title="Close">
               <CloseIcon />
             </IconButton>
