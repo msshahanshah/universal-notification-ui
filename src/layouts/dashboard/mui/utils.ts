@@ -1,8 +1,13 @@
 export const formatDateForTable = (date: string) => {
+  if (!date) return "Invalid date";
+
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const d = new Date(date);
 
-  const parts = new Intl.DateTimeFormat('en-GB', {
+  // Check if date is invalid
+  if (isNaN(d.getTime())) return "Invalid date";
+
+  const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: userTimeZone,
     day: 'numeric',
     month: 'short',
@@ -34,7 +39,8 @@ export const getStatusStyle = (status: string) => {
     status?.split(':')?.length > 1 ? status?.split(':')?.[1]?.trim() : status;
 
   switch (statusText?.toLowerCase()) {
-    case 'sent':
+    case "success":
+    case "sent":
       return {
         color: '#04b34f',
         py: 0.5,

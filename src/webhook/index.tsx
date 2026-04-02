@@ -1,10 +1,9 @@
 import { useState, ChangeEvent, useEffect } from "react";
-import { useTheme } from "@mui/material/styles";
-
 import Input from "src/components/input";
 import Button from "src/components/button";
 import { Select } from "src/components/select";
 import { useSnackbar } from "src/provider/snackbar";
+import { useTheme } from "@mui/material/styles";
 import {
   useSaveWebhookDetails,
   useGetWebhookDetails,
@@ -14,10 +13,10 @@ import {
   buildServiceTrigger,
   transformServiceTriggerToStatuses,
 } from "src/utility/webhook";
+import WebhookListItem from "./listItem";
+import WebhookLogsDrawer from "./logs-drawer";
 import { useInputStyles } from "src/utility/styles";
 import COLORS from "src/utility/colors";
-
-import WebhookListItem from "./listItem";
 
 export default function WebhookConfigPage() {
   const [webhookUrl, setWebhookUrl] = useState("");
@@ -25,6 +24,10 @@ export default function WebhookConfigPage() {
 
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [editingWebhookId, setEditingWebhookId] = useState<string | null>(null);
+  const [showLogsDrawer, setShowLogsDrawer] = useState(false);
+  const [selectedWebhookId, setSelectedWebhookId] = useState<string | null>(
+    null,
+  );
 
   const showSnackbar = useSnackbar();
   const theme = useTheme();
@@ -86,6 +89,11 @@ export default function WebhookConfigPage() {
         .querySelector("[data-webhook-form]")
         ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
+  };
+
+  const handleViewLogs = (webhookId: string) => {
+    setSelectedWebhookId(webhookId);
+    setShowLogsDrawer(true);
   };
 
   const validateWebhookUrl = async (url: string): Promise<boolean> => {
@@ -313,15 +321,43 @@ export default function WebhookConfigPage() {
               "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
           }}
         >
-          <h3
+          <div
             style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               marginBottom: 16,
-              marginTop: 0,
-              color: theme.vars?.palette.text.secondary,
             }}
           >
-            Webhooks ({webhooksCount}/10)
-          </h3>
+            <h3
+              style={{
+                margin: 0,
+                color: theme.vars?.palette.text.secondary,
+              }}
+            >
+              Webhooks ({webhooksCount}/10)
+            </h3>
+            <Button
+              label="View All Logs"
+              onClick={() => {
+                if (webhookData && webhookData.length > 0) {
+                  handleViewLogs(webhookData[0].id); // Open logs for first webhook as default
+                }
+              }}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                background: COLORS.ACTIVE_BLUE,
+                color: COLORS.WHITE,
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: 500,
+                boxShadow:
+                  "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
+              }}
+            />
+          </div>
           {(Array.isArray(webhookData) ? webhookData : [])
             .sort((a: any, b: any) => {
               // Convert UTC to IST (UTC+5:30) for sorting
@@ -331,8 +367,8 @@ export default function WebhookConfigPage() {
                 // Add 5 hours 30 minutes for IST conversion
                 return date.getTime() + 5.5 * 60 * 60 * 1000;
               };
-              const timeA = getISTTime(a.updatedAt);
-              const timeB = getISTTime(b.updatedAt);
+              const timeA = getISTTime(a.createdAt);
+              const timeB = getISTTime(b.createdAt);
               return timeB - timeA; // Descending order (most recent first)
             })
             .map((webhook: any) => (
@@ -340,6 +376,7 @@ export default function WebhookConfigPage() {
                 key={webhook.id}
                 webhook={webhook}
                 onEdit={handleEditWebhook}
+                onViewLogs={handleViewLogs}
               />
             ))}
         </div>
@@ -360,6 +397,13 @@ export default function WebhookConfigPage() {
           No webhooks configured yet. Create one to get started!
         </div>
       )}
+
+      {/* Common Webhook Logs Drawer */}
+      <WebhookLogsDrawer
+        open={showLogsDrawer}
+        onClose={() => setShowLogsDrawer(false)}
+        webhookId={selectedWebhookId || ""}
+      />
     </div>
   );
 }

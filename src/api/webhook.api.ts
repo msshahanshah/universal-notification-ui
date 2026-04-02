@@ -30,7 +30,16 @@ export const updateWebhookDetails = async ({
 
 export const getWebhookDetails = async () => {
   try {
-    const res = await api.get(ENDPOINTS.WEBHOOK.GET);
+    const res = await api.get(`${ENDPOINTS.WEBHOOK.GET}?sort=createdAt&order=desc`);
+    return res.data;
+  } catch (error: any) {
+    throw error?.response?.data;
+  }
+};
+
+export const getWebhookLogs = async () => {
+  try {
+    const res = await api.get(`${ENDPOINTS.WEBHOOK.LOGS}`);
     return res.data;
   } catch (error: any) {
     throw error?.response?.data;

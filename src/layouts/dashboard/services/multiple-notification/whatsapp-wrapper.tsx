@@ -495,7 +495,8 @@ export function WhatsappWrapper({
                     marginBottom: "12px",
                   }}
                   dropdownStyle={{
-                    height: 100,
+                    height: 200,
+                    overflowY: "scroll",
                   }}
                 />
                 {templatesError && (

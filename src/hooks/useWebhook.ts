@@ -5,6 +5,7 @@ import {
   updateWebhookDetails,
   deleteWebhookConfig,
   toggleWebhookConfig,
+  getWebhookLogs,
 } from "src/api/webhook.api";
 
 export const useSaveWebhookDetails = () => {
@@ -34,6 +35,14 @@ export const useGetWebhookDetails = () => {
     queryKey: ["webhooks"],
     queryFn: () => getWebhookDetails(),
     refetchOnWindowFocus: true,
+  });
+};
+
+export const useWebhookLogs = () => {
+  return useQuery({
+    queryKey: ["webhookLogs"],
+    queryFn: () => getWebhookLogs(),
+    refetchOnWindowFocus: false,
   });
 };
 
