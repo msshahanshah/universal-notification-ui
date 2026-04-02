@@ -130,9 +130,9 @@ export function Select({
       >
         {multiple && Array.isArray(value) && value.length > 0 ? (
           <>
-            {getSelectedLabels().map((label, idx) => (
+            {getSelectedLabels().map((label) => (
               <span
-                key={idx}
+                key={label}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

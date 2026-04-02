@@ -1,0 +1,75 @@
+# 🌊 WINDSURF AI RULES
+
+## 🧠 CONTEXT
+- Project: React + Next.js
+- Data Fetching: React Query
+- UI: MUI
+- Architecture: Feature-based
+
+---
+
+## ⚙️ CORE RULES (STRICT)
+- ALWAYS follow existing folder structure
+- DO NOT introduce new libraries without justification
+- PREFER reusable and scalable patterns
+
+---
+
+## ⚛️ REACT RULES
+- MUST use functional components
+- MUST use hooks instead of classes
+- DO NOT create components larger than 200 lines
+- EXTRACT reusable logic into custom hooks or utility functions as needed
+- AVOID prop drilling
+
+---
+
+## 🔄 STATE MANAGEMENT
+- PREFER local state first
+- USE React Query for server state
+- USE Jotai for global state for multiple notifications and other places if needed
+
+---
+
+## 🌐 API RULES
+- ALL API calls MUST go through `services/`
+- USE async/await only
+- HANDLE errors with try/catch/finally
+- DO NOT call APIs inside components directly
+
+---
+
+## 🧾 NAMING
+- Components → PascalCase
+- Hooks → useCamelCase
+- Utils → camelCase
+- Constants → UPPER_CASE
+
+---
+
+## 🎨 STYLING
+- PREFER MUI components
+- AVOID inline styles
+- FOLLOW consistent theming, spacing and typography
+
+---
+
+## ⚡ PERFORMANCE
+- AVOID unnecessary re-renders
+- USE memoization when required
+- LAZY load heavy components
+
+---
+
+## 🚫 ANTI-PATTERNS
+- Business logic inside UI
+- Large monolithic components
+- Deep prop drilling
+- Direct API calls in JSX
+
+---
+
+## ✅ CODE STYLE
+- Write clean, readable code
+- Prefer explicit over clever
+- Optimize for maintainability
