@@ -30,11 +30,13 @@ export const ENDPOINTS = {
     TEMPLATES: "/templates",
   },
   WEBHOOK: {
+    BASE: "/webhooks",
     SAVE: "/webhooks",
     GET: "/webhooks",
     UPDATE: (webhookId: string) => `/webhooks/${webhookId}`,
     DELETE: (webhookId: string) => `/webhooks/${webhookId}`,
     TOGGLE: (webhookId: string) => `/webhooks/${webhookId}`,
+    LOGS: "/webhooks/logs",
   },
   MULTIPLE_NOTIFICATION: {
     SEND: "/v2/notify",

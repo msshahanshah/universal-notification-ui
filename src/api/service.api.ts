@@ -80,7 +80,7 @@ export const getTemplates = async (
 ): Promise<TemplatesResponse> => {
   try {
     const response = await api.get(ENDPOINTS.SERVICES.TEMPLATES, {
-      params: service ? { templates_service: service } : {},
+      params: service ? { service: service, limit: 100 } : { limit: 100 },
     });
     return response.data;
   } catch (error: any) {

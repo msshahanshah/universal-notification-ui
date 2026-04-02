@@ -11,10 +11,11 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const response = await api.post("/logout");
+      const refreshToken = localStorage.getItem("refreshToken");
+      const response = await api.post("/logout", { refreshToken });
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       // Clear local storage
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
