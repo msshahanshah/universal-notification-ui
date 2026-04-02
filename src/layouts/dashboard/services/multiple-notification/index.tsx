@@ -664,12 +664,11 @@ export default function MultipleNotification() {
 
     const { allFinalAttachments, hasAttachments } = processAttachments(payload);
 
-    console.log("payload",payload)
-    // sendNotifications(payload, {
-    //   onSuccess: (res) =>
-    //     handleSuccess(res, hasAttachments, allFinalAttachments),
-    //   onError: handleError,
-    // });
+    sendNotifications(payload, {
+      onSuccess: (res) =>
+        handleSuccess(res, hasAttachments, allFinalAttachments),
+      onError: handleError,
+    });
   };
 
   return (
