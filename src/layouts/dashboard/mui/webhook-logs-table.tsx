@@ -10,21 +10,16 @@ import {
   TableRow,
   TablePagination,
   TableSortLabel,
-  TextField,
   Typography,
   Tooltip,
-  IconButton,
   Chip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
-import RefreshIcon from "@mui/icons-material/Refresh";
 
-import { useLogs, useLogStatus } from "src/hooks/useLogs";
-import { useDebounce } from "src/hooks/useDebounce";
+import { useLogs } from "src/hooks/useLogs";
 import { useSnackbar } from "src/provider/snackbar";
 import { truncateString } from "src/utility/helper";
-import { formatUserReactions } from "src/utility/reactions";
 import COLORS from "src/utility/colors";
 
 import { formatDateForTable, getStatusStyle } from "./utils";
@@ -88,73 +83,16 @@ export default function WebhookLogsTable({
   const [sort, setSort] = useState<string>("updatedAt");
   const [order, setOrder] = useState<Order>("desc");
 
-  // Commented out filtering functionality
-  // const [filters, setFilters] = useState({
-  //   startDate: "",
-  //   startTime: "",
-  //   endDate: "",
-  //   endTime: "",
-  //   service: "",
-  //   status: "",
-  //   destination: "",
-  //   attempts: "",
-  // });
-
   const theme = useTheme();
 
-  // Commented out filtering functionality
-  // const buildUTCRange = (
-  //   startDate?: string,
-  //   startTime?: string,
-  //   endDate?: string,
-  //   endTime?: string,
-  // ) => {
-  //   const result: Record<string, string> = {};
-
-  //   if (startDate) {
-  //     const start = new Date(`${startDate}T${startTime || "00:00"}:00`);
-  //     result["from-date"] = start.toISOString().substring(0, 16) + ":00Z";
-  //   }
-
-  //   if (endDate) {
-  //     const end = new Date(`${endDate}T${endTime || "23:59"}:00`);
-  //     result["to-date"] = end.toISOString().substring(0, 16) + ":00Z";
-  //   }
-
-  //   return result;
-  // };
-
-  // Commented out filtering functionality
-  // const debouncedFilters = useDebounce(filters, 500);
   const showSnackbar = useSnackbar();
 
-  // Commented out filtering functionality
-  // // Check if date filter is valid: both selected or both empty
-  // const isDateFilterValid =
-  //   (debouncedFilters.startDate && debouncedFilters.endDate) ||
-  //   (!debouncedFilters.startDate && !debouncedFilters.endDate);
-
   const queryParams = useMemo(() => {
-    // Commented out filtering functionality
-    // const timeRange = isDateFilterValid
-    //   ? buildUTCRange(
-    //       debouncedFilters.startDate,
-    //       debouncedFilters.startTime,
-    //       debouncedFilters.endDate,
-    //       debouncedFilters.endTime,
-    //     )
-    //   : {};
-
     return {
       page: page + 1,
       limit: pageSize,
       sort,
       order,
-      // Commented out filtering functionality
-      // webhookUrl: debouncedFilters.destination || undefined,
-      // status: debouncedFilters.status || undefined,
-      // retryAttempts: debouncedFilters.attempts || undefined,
-      // ...timeRange,
     };
   }, [page, pageSize, sort, order]); // Removed debouncedFilters and isDateFilterValid dependencies
 
@@ -196,18 +134,22 @@ export default function WebhookLogsTable({
   };
 
   const renderServiceChips = (serviceTrigger: Record<string, string>) => {
-    const services = Object.keys(serviceTrigger || {});
+    const services = Object.entries(serviceTrigger || {});
     
     if (services.length === 0) {
-      return <Typography sx={{ color: theme.vars?.palette.text.secondary }}>N/A</Typography>;
+      return (
+        <Typography sx={{ color: theme.vars?.palette.text.secondary }}>
+          N/A
+        </Typography>
+      );
     }
 
     return (
       <Box display="flex" gap={0.5} flexWrap="wrap">
-        {services.map((service) => (
+        {services.map(([key, value]) => (
           <Chip
-            key={service}
-            label={service}
+            key={`${key}-${value}`}
+            label={`${key}: ${value}`}
             size="small"
             sx={{
               backgroundColor: COLORS.ACTIVE_BLUE + "20",
@@ -249,53 +191,6 @@ export default function WebhookLogsTable({
     setOrder(isAsc ? "desc" : "asc");
   };
 
-  // Commented out filter-related functions
-  // const resetFilters = () => {
-  //   setPage(0);
-  //   setPageSize(10);
-  // };
-
-  // const handleFilterChange = (key: keyof typeof filters, value: string) => {
-  //   resetFilters();
-
-  //   setFilters((prev) => {
-  //     const updated = { ...prev, [key]: value };
-
-  //     // 🔥 If start date cleared → clear start time
-  //     if (key === "startDate" && !value) {
-  //       updated.startTime = "";
-  //     }
-
-  //     // 🔥 If end date cleared → clear end time
-  //     if (key === "endDate" && !value) {
-  //       updated.endTime = "";
-  //     }
-
-  //     return updated;
-  //   });
-  // };
-
-  // const handleDateBlur = (key, e) => {
-  //   const value = e.target.value; // always get latest value from DOM
-
-  //   if (!value) {
-  //     // reset invalid/partial input
-  //     e.target.value = "";
-  //     setFilters((prev) => ({
-  //       ...prev,
-  //       [key]: "",
-  //     }));
-  //     return;
-  //   }
-
-  //   // valid date
-  //   setFilters((prev) => {
-  //     const updated = { ...prev, [key]: value };
-
-  //     return updated;
-  //   });
-  // };
-
   return (
     <Paper
       sx={{
@@ -305,121 +200,11 @@ export default function WebhookLogsTable({
         ...styles,
       }}
     >
-      {/* Filters - Commented Out */}
-      {/* <Box display="flex" flexDirection="column" gap={2} mb={2}>
-        {/* Row 1 → Date Time Range */}
-        {/* <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
-          <TextField
-            type="date"
-            size="small"
-            label="Start Date"
-            InputLabelProps={{ shrink: true }}
-            value={filters.startDate || ""}
-            onChange={(e) => handleFilterChange("startDate", e.target.value)}
-            onBlur={(e) => handleDateBlur("startDate", e)}
-            required
-            sx={{
-              ...textFieldTheme(theme),
-              "& .MuiFormLabel-asterisk": {
-                color: "red",
-              },
-            }}
-          />
-
-          <TextField
-            type="time"
-            size="small"
-            label="Start Time"
-            InputLabelProps={{ shrink: true }}
-            inputProps={{ step: 60 }}
-            value={filters.startTime}
-            onChange={(e) => handleFilterChange("startTime", e.target.value)}
-            sx={textFieldTheme(theme)}
-            onBlur={(e) => handleDateBlur("startTime", e)}
-          />
-
-          <TextField
-            type="date"
-            size="small"
-            label="End Date"
-            InputLabelProps={{ shrink: true }}
-            value={filters.endDate}
-            onChange={(e) => handleFilterChange("endDate", e.target.value)}
-            onBlur={(e) => handleDateBlur("endDate", e)}
-            required
-            sx={{
-              ...textFieldTheme(theme),
-              "& .MuiFormLabel-asterisk": {
-                color: "red",
-              },
-            }}
-          />
-
-          <TextField
-            type="time"
-            size="small"
-            label="End Time"
-            InputLabelProps={{ shrink: true }}
-            inputProps={{ step: 60 }}
-            value={filters.endTime}
-            onChange={(e) => handleFilterChange("endTime", e.target.value)}
-            sx={textFieldTheme(theme)}
-            onBlur={(e) => handleDateBlur("endTime", e)}
-          />
-        </Box>
-
-        {/* Row 2 → Other Filters */}
-        {/* <Box
-          display="flex"
-          gap={2}
-          alignItems="center"
-          flexWrap="wrap"
-          marginTop={1}
-        >
-          <TextField
-            size="small"
-            label="Status"
-            value={filters.status}
-            onChange={(e) => {
-              setPage(0);
-              resetFilters();
-              setFilters((prev) => ({ ...prev, status: e.target.value }));
-            }}
-            sx={textFieldTheme(theme)}
-          />
-
-          <TextField
-            size="small"
-            label="Webhook URL"
-            value={filters.destination}
-            onChange={(e) => {
-              setPage(0);
-              resetFilters();
-              setFilters((prev) => ({ ...prev, destination: e.target.value }));
-            }}
-            sx={textFieldTheme(theme)}
-          />
-
-          <TextField
-            size="small"
-            label="Retry Attempts"
-            value={filters.attempts}
-            onChange={(e) => {
-              setPage(0);
-              resetFilters();
-              setFilters((prev) => ({ ...prev, attempts: e.target.value }));
-            }}
-            sx={textFieldTheme(theme)}
-          />
-        </Box>
-      </Box> */}
-
-      {/* Table */}
       <Box position="relative">
         <TableContainer
           sx={{
             minHeight: "600px",
-            maxHeight: "600px", // control height here
+            maxHeight: "600px",
             border: `1px solid ${theme.vars?.palette.divider}`,
             borderRadius: 1,
             overflow: "auto",
@@ -451,18 +236,10 @@ export default function WebhookLogsTable({
                     Created Date
                   </TableSortLabel>
                 </TableCell>
-                <TableCell>
-                  Webhook URL
-                </TableCell>
-                <TableCell>
-                  Service
-                </TableCell>
-                <TableCell>
-                  Status
-                </TableCell>
-                <TableCell>
-                  Retry Attempts
-                </TableCell>
+                <TableCell>Webhook URL</TableCell>
+                <TableCell>Service</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Retry Attempts</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -519,7 +296,6 @@ export default function WebhookLogsTable({
         )}
       </Box>
 
-      {/* Pagination */}
       <TablePagination
         component="div"
         count={(pagination?.totalPages || 0) * pageSize}
