@@ -139,6 +139,7 @@ export default function WebhookConfigPage() {
     }
 
     const serviceTrigger = buildServiceTrigger(selectedStatuses);
+    // console.log("serviceTrigger",serviceTrigger)
 
     const payload = {
       webhookUrl: webhookUrl,
@@ -189,8 +190,8 @@ export default function WebhookConfigPage() {
   const maxWebhooksReached = webhooksCount >= 10;
 
   const emailStatusOptions = [
-    { label: "Twilio Queued", value: "TWILIO:queued" },
-    { label: "Twilio Read", value: "TWILIO : read" },
+    { label: "Twilio Queued", value: "sms_TWILIO:queued" },
+    { label: "Twilio Read", value: "sms_TWILIO : read" },
     { label: "Email Failed", value: "email_failed" },
     { label: "Email Success", value: "email_success" },
     { label: "SMS Failed", value: "sms_failed" },
