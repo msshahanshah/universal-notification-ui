@@ -1,7 +1,4 @@
 import { useState, ChangeEvent, useEffect } from "react";
-// import axios from "axios";
-
-// import "../layouts/dashboard/services/slack/slack.css";
 import Input from "src/components/input";
 import Button from "src/components/button";
 import { Select } from "src/components/select";
@@ -9,7 +6,6 @@ import { useSnackbar } from "src/provider/snackbar";
 import MultipleSelectChip from "src/components/mui/select";
 import { useTheme } from "@mui/material/styles";
 import COLORS from "src/utility/colors";
-// import WebhookListItem from "src/components/WebhookListItem";
 import {
   useSaveWebhookDetails,
   useGetWebhookDetails,
@@ -22,6 +18,7 @@ import {
   transformServiceTriggerToStatuses,
 } from "src/utility/webhook";
 import WebhookListItem from "./listItem";
+import WebhookLogsDrawer from "./logs-drawer";
 import { useInputStyles } from "src/utility/styles";
 
 type StatusType = "success" | "failure" | "both";
@@ -36,6 +33,10 @@ export default function WebhookConfigPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [isExistingConfig, setIsExistingConfig] = useState(false);
   const [editingWebhookId, setEditingWebhookId] = useState<string | null>(null);
+  const [showLogsDrawer, setShowLogsDrawer] = useState(false);
+  const [selectedWebhookId, setSelectedWebhookId] = useState<string | null>(
+    null,
+  );
   const selectedData = { enabled: [], disabled: [] };
 
   const showSnackbar = useSnackbar();
@@ -53,18 +54,6 @@ export default function WebhookConfigPage() {
 
   const saveMutation = useSaveWebhookDetails();
   const updateMutation = useUpdateWebhookDetails();
-
-  const extractServiceTrigger = (status: string[]) => {
-    const newStatus = status.map((data: string) => {
-      return { [data.split("_")?.[0]]: !!data.split("_")?.[0] };
-    });
-
-    return newStatus;
-  };
-
-  const extractServiceName = (status: string) => {
-    return status.split("_")?.[0];
-  };
 
   const applySavedConfig = (saved: any) => {
     if (!saved) return;
@@ -112,6 +101,11 @@ export default function WebhookConfigPage() {
     }, 100);
   };
 
+  const handleViewLogs = (webhookId: string) => {
+    setSelectedWebhookId(webhookId);
+    setShowLogsDrawer(true);
+  };
+
   const validateWebhookUrl = async (url: string): Promise<boolean> => {
     // Basic URL format validation
     try {
@@ -129,43 +123,6 @@ export default function WebhookConfigPage() {
       showSnackbar("webhookUrl must be a valid HTTPS URL", "error");
       return false;
     }
-
-    // Try to check if URL is reachable
-    // try {
-    //   // Use a HEAD request with a timeout to check reachability
-    //   const controller = new AbortController();
-    //   const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-    //   const response = await fetch(url, {
-    //     method: "HEAD",
-    //     signal: controller.signal,
-    //   });
-
-    //   console.log("response",response.status)
-    //   clearTimeout(timeoutId);
-
-    //   // Check for 404 Not Found
-    //   if (response.status === 404) {
-    //     showSnackbar(
-    //       "URL returned 404 Not Found. Please check the webhook endpoint.",
-    //       "error",
-    //       5000
-    //     );
-    //     return false;
-    //   }
-    // } catch (error: any) {
-    //   // CORS errors or network errors - allow save with warning since webhook
-    //   // endpoints often don't have CORS enabled for browser requests
-    //   if (error.name === "AbortError") {
-    //     showSnackbar(
-    //       "Request timed out. Please ensure the webhook endpoint is reachable.",
-    //       "error",
-    //       5000
-    //     );
-    //     return false;
-    //   }
-    //   // TypeError usually indicates CORS or network issues - allow save
-    // }
 
     return true;
   };
@@ -227,10 +184,8 @@ export default function WebhookConfigPage() {
   const isDisabled =
     !webhookUrl?.trim() || !apiKey?.trim() || selectedStatuses.length === 0;
 
-  // console.log("webhooksList", webhooksList);
   const webhooksCount = Array.isArray(webhookData) ? webhookData.length : 0;
 
-  // const webhooksCount = webhooksList?.data&&1
   const maxWebhooksReached = webhooksCount >= 10;
 
   const emailStatusOptions = [
@@ -382,15 +337,43 @@ export default function WebhookConfigPage() {
               "rgba(0, 0, 0, 0.6) 0px 4px 18px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
           }}
         >
-          <h3
+          <div
             style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
               marginBottom: 16,
-              marginTop: 0,
-              color: theme.vars?.palette.text.secondary,
             }}
           >
-            Webhooks ({webhooksCount}/10)
-          </h3>
+            <h3
+              style={{
+                margin: 0,
+                color: theme.vars?.palette.text.secondary,
+              }}
+            >
+              Webhooks ({webhooksCount}/10)
+            </h3>
+            <Button
+              label="View All Logs"
+              onClick={() => {
+                if (webhookData && webhookData.length > 0) {
+                  handleViewLogs(webhookData[0].id); // Open logs for first webhook as default
+                }
+              }}
+              style={{
+                padding: "8px 16px",
+                fontSize: "14px",
+                background: COLORS.ACTIVE_BLUE,
+                color: COLORS.WHITE,
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontWeight: 500,
+                boxShadow:
+                  "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
+              }}
+            />
+          </div>
           {(Array.isArray(webhookData) ? webhookData : [])
             .sort((a: any, b: any) => {
               // Convert UTC to IST (UTC+5:30) for sorting
@@ -398,10 +381,10 @@ export default function WebhookConfigPage() {
                 if (!dateStr) return 0;
                 const date = new Date(dateStr);
                 // Add 5 hours 30 minutes for IST conversion
-                return date.getTime() + (5.5 * 60 * 60 * 1000);
+                return date.getTime() + 5.5 * 60 * 60 * 1000;
               };
-              const timeA = getISTTime(a.updatedAt);
-              const timeB = getISTTime(b.updatedAt);
+              const timeA = getISTTime(a.createdAt);
+              const timeB = getISTTime(b.createdAt);
               return timeB - timeA; // Descending order (most recent first)
             })
             .map((webhook: any) => (
@@ -409,6 +392,7 @@ export default function WebhookConfigPage() {
                 key={webhook.id}
                 webhook={webhook}
                 onEdit={handleEditWebhook}
+                onViewLogs={handleViewLogs}
               />
             ))}
         </div>
@@ -429,6 +413,13 @@ export default function WebhookConfigPage() {
           No webhooks configured yet. Create one to get started!
         </div>
       )}
+
+      {/* Common Webhook Logs Drawer */}
+      <WebhookLogsDrawer
+        open={showLogsDrawer}
+        onClose={() => setShowLogsDrawer(false)}
+        webhookId={selectedWebhookId || ""}
+      />
     </div>
   );
 }

@@ -1,8 +1,13 @@
 import { Theme } from "@mui/material";
 
 export const formatDateForTable = (date: string) => {
+  if (!date) return "Invalid date";
+
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const d = new Date(date);
+
+  // Check if date is invalid
+  if (isNaN(d.getTime())) return "Invalid date";
 
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: userTimeZone,
@@ -36,6 +41,7 @@ export const getStatusStyle = (status: string, theme: Theme) => {
     status?.split(":")?.length > 1 ? status?.split(":")?.[1]?.trim() : status;
 
   switch (statusText?.toLowerCase()) {
+    case "success":
     case "sent":
       return {
         color: "#04b34f",
