@@ -189,6 +189,8 @@ export default function WebhookConfigPage() {
   const maxWebhooksReached = webhooksCount >= 10;
 
   const emailStatusOptions = [
+    { label: "Twilio Queued", value: "TWILIO:queued" },
+    { label: "Twilio Read", value: "TWILIO : read" },
     { label: "Email Failed", value: "email_failed" },
     { label: "Email Success", value: "email_success" },
     { label: "SMS Failed", value: "sms_failed" },
