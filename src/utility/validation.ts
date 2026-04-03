@@ -22,6 +22,33 @@ export interface ServiceValidation {
   errors: Record<string, string[]>;
 }
 
+// Reusable file size validation function
+const validateAttachmentFileSize = (
+  attachment: any,
+  maxSizeMB: number,
+  sectionIndex: number,
+  serviceName: string,
+  errors: string[],
+  markInvalid: () => void
+) => {
+  if (attachment.file && attachment.file.size) {
+    const isImage = attachment.file.type.startsWith('image/');
+    const isVideo = attachment.file.type.startsWith('video/');
+    
+    if (isImage || isVideo) {
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      const fileSizeMB = (attachment.file.size / (1024 * 1024)).toFixed(2);
+      
+      if (attachment.file.size > maxSizeBytes) {
+        markInvalid();
+        errors.push(
+          `${serviceName} Section ${sectionIndex + 1}: File "${attachment.file.name}" (${fileSizeMB}MB) exceeds ${maxSizeMB}MB limit. ${isImage ? 'Image' : 'Video'} files must be ${maxSizeMB}MB or smaller.`
+        );
+      }
+    }
+  }
+};
+
 /**
  * Validates all selected services and their requirements
  */
@@ -151,6 +178,20 @@ export const validateAllServices = (
           emailErrors.push(
             `Email Section ${sectionIndex + 1}: Maximum 10 attachments allowed`,
           );
+        }
+
+        // Validate file sizes for attachments (20MB limit)
+        if (section.attachments && section.attachments.length > 0) {
+          section.attachments.forEach((attachment: any, attachmentIndex: number) => {
+            validateAttachmentFileSize(
+              attachment,
+              20, // 20MB limit
+              sectionIndex,
+              "Email",
+              emailErrors,
+              () => (validation.email.isFormValid = false)
+            );
+          });
         }
       });
     }
@@ -364,6 +405,28 @@ export const validateAllServices = (
           whatsappErrors.push(
             `WhatsApp Section ${sectionIndex + 1}: Variable values must be an object`,
           );
+        }
+
+        // Limit number of attachments (max 10)
+        if (section.attachments && section.attachments.length > 10) {
+          validation.whatsapp.isFormValid = false;
+          whatsappErrors.push(
+            `WhatsApp Section ${sectionIndex + 1}: Maximum 10 attachments allowed`,
+          );
+        }
+
+        // Validate file sizes for images and videos (16MB limit)
+        if (section.attachments && section.attachments.length > 0) {
+          section.attachments.forEach((attachment: any) => {
+            validateAttachmentFileSize(
+              attachment,
+              16, // 16MB limit
+              sectionIndex,
+              "WhatsApp",
+              whatsappErrors,
+              () => (validation.whatsapp.isFormValid = false)
+            );
+          });
         }
 
         // Validate attachment type
