@@ -42,9 +42,34 @@ export default function MultipleNotification() {
     useMultipleNotificationService();
 
   const showSnackbar = useSnackbar();
+  const normalize = (name: string) => {
+    return name
+      .replace(/\p{Zs}/gu, " ") // replace ALL unicode spaces
+      .normalize("NFKC");
+  };
+
+  // Utility function to clean payload by removing empty/undefined/null keys
+  const cleanPayloadSection = (section: any) => {
+    const cleaned: any = {};
+    Object.keys(section).forEach(key => {
+      const value = section[key];
+      if (value !== undefined && value !== null && value !== "") {
+        // For arrays, only include if they have items
+        if (Array.isArray(value)) {
+          if (value.length > 0) {
+            cleaned[key] = value;
+          }
+        } else {
+          cleaned[key] = value;
+        }
+      }
+    });
+    return cleaned;
+  };
 
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
     const serviceKeys = Object.keys(data);
+    const uploadErrors: string[] = [];
 
     // Iterate through each service that has pre-signed URLs
     for (const serviceKey of serviceKeys) {
@@ -64,14 +89,39 @@ export default function MultipleNotification() {
           // Find the file that matches this URL's filename
           const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
 
-          const fileObj = attachmentsCopy.find(
-            (file: any) => file.name === filenameFromUrl,
-          );
+          if (!filenameFromUrl) {
+            console.warn(
+              "No filename found in S3 key:",
+              urlEntry.s3.fields?.key,
+            );
+            continue;
+          }
+
+          if (attachmentsCopy.length === 0) {
+            console.warn("attachmentsCopy is empty!");
+            continue;
+          }
+
+          const normalizedUrlName = normalize(filenameFromUrl);
+
+          const fileObj = attachmentsCopy.find((file: any) => {
+            const normalizedFileName = normalize(file.name);
+            const matches = normalizedFileName === normalizedUrlName;
+
+            return matches;
+          });
 
           if (!fileObj) {
             console.warn(
               `No file found for URL with filename: ${filenameFromUrl}`,
             );
+            continue;
+          }
+
+          // Extract the actual File object from the wrapper
+          const actualFile = fileObj;
+          if (!actualFile) {
+            console.error("❌ No actual file object found in fileObj.file");
             continue;
           }
 
@@ -82,8 +132,8 @@ export default function MultipleNotification() {
             formData.append(key, value as string);
           });
 
-          // File MUST be last
-          formData.append("file", fileObj);
+          // File MUST be last - use the actual File object
+          formData.append("file", actualFile);
 
           try {
             await api.post(urlEntry.s3.url, formData, {
@@ -95,20 +145,22 @@ export default function MultipleNotification() {
           } catch (err) {
             console.error(
               `❌ Upload failed for ${serviceKey}:`,
-              fileObj.name,
+              actualFile.name,
               err,
             );
 
-            setTimeout(() => {
-              showSnackbar(
-                `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload attachments`,
-                "error",
-              );
-            }, 30000);
-            throw err;
+            // Collect error instead of showing immediately
+            uploadErrors.push(
+              `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload "${actualFile.name}"`,
+            );
           }
         }
       }
+    }
+
+    // Show all upload errors after all S3 operations are complete
+    if (uploadErrors.length > 0) {
+      showSnackbar(uploadErrors.join("\n"), "error", 30000);
     }
 
     // Invalidate queries once all uploads are complete
@@ -400,12 +452,12 @@ export default function MultipleNotification() {
       }
       // Use the new section-based structure from SMS wrapper
       if (wrapperValues.sms && wrapperValues.sms.sections) {
-        payload.sms = wrapperValues.sms.sections.map(
-          (section: any, index: number) => ({
+        payload.sms = wrapperValues.sms.sections
+          .map((section: any, index: number) => ({
             destination: section.destination,
             message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
-          }),
-        );
+          }))
+          .map(section => cleanPayloadSection(section));
       }
     }
 
@@ -451,7 +503,8 @@ export default function MultipleNotification() {
             // If separateMessage is false and no common message, don't include body key
 
             return emailSection;
-          });
+          })
+          .map(section => cleanPayloadSection(section));
       }
     }
 
@@ -460,15 +513,17 @@ export default function MultipleNotification() {
       // !! Do not remove, need for staging branch
       // Use the new section-based structure from Slack wrapper
       if (wrapperValues?.slack?.sections) {
-        payload.slack = wrapperValues.slack.sections.map((section: any) => {
-          const slackSection: any = { destination: section.destination };
+        payload.slack = wrapperValues.slack.sections
+          .map((section: any) => {
+            const slackSection: any = { destination: section.destination };
 
-          if (section.message) {
-            slackSection.message = section.message;
-          }
+            if (section.message) {
+              slackSection.message = section.message;
+            }
 
-          return slackSection;
-        });
+            return slackSection;
+          })
+          .map(section => cleanPayloadSection(section));
       }
     }
     // Add WhatsApp to payload if selected
@@ -512,7 +567,8 @@ export default function MultipleNotification() {
             }
 
             return whatsappSection;
-          });
+          })
+          .map(section => cleanPayloadSection(section));
       }
     }
 
@@ -663,6 +719,8 @@ export default function MultipleNotification() {
         );
 
         const attachmentsCopy = [...allFinalAttachments];
+        console.log("attachmentsCopy", attachmentsCopy);
+        console.log("data?.whatsapp?.success", data?.whatsapp?.success);
 
         if (!hasAttachments || attachmentsCopy.length === 0) {
           queryClient.invalidateQueries({
