@@ -27,7 +27,7 @@ function getStyles(name: string, personName: readonly string[], theme: Theme) {
   };
 }
 
-export default function MultipleSelectChip(data, onChange,options) {
+export default function MultipleSelectChip(data, onChange, options) {
   const theme = useTheme();
   const [personName, setPersonName] = React.useState<string[]>(data);
 
@@ -55,7 +55,7 @@ export default function MultipleSelectChip(data, onChange,options) {
           renderValue={(selected) => (
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
               {Array.isArray(selected) &&
-                selected?.length &&
+                selected?.length > 0 &&
                 selected.map((value) => <Chip key={value} label={value} />)}
             </Box>
           )}

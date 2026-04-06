@@ -1,11 +1,6 @@
 import { useState, ChangeEvent, useEffect } from "react";
-import Input from "src/components/input";
-import Button from "src/components/button";
-import { Select } from "src/components/select";
-import { useSnackbar } from "src/provider/snackbar";
-import MultipleSelectChip from "src/components/mui/select";
 import { useTheme } from "@mui/material/styles";
-import COLORS from "src/utility/colors";
+
 import {
   useSaveWebhookDetails,
   useGetWebhookDetails,
@@ -13,31 +8,28 @@ import {
 } from "src/hooks/useWebhook";
 import {
   buildServiceTrigger,
-  buildSettings,
-  buildWebhookConfig,
   transformServiceTriggerToStatuses,
 } from "src/utility/webhook";
-import WebhookListItem from "./listItem";
-import WebhookLogsDrawer from "./logs-drawer";
 import { useInputStyles } from "src/utility/styles";
+import COLORS from "src/utility/colors";
+import Input from "src/components/input";
+import Button from "src/components/button";
+import { Select } from "src/components/select";
+import { useSnackbar } from "src/provider/snackbar";
 
-type StatusType = "success" | "failure" | "both";
+import WebhookLogsDrawer from "./logs-drawer";
+import WebhookListItem from "./listItem";
 
 export default function WebhookConfigPage() {
-  const [username, setUsername] = useState("");
   const [webhookUrl, setWebhookUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [statusType, setStatusType] = useState<StatusType>("success");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const [isExistingConfig, setIsExistingConfig] = useState(false);
   const [editingWebhookId, setEditingWebhookId] = useState<string | null>(null);
   const [showLogsDrawer, setShowLogsDrawer] = useState(false);
   const [selectedWebhookId, setSelectedWebhookId] = useState<string | null>(
     null,
   );
-  const selectedData = { enabled: [], disabled: [] };
 
   const showSnackbar = useSnackbar();
   const theme = useTheme();
@@ -76,7 +68,6 @@ export default function WebhookConfigPage() {
     setWebhookUrl("");
     setApiKey("");
     setSelectedStatuses([]);
-    setIsExistingConfig(false);
     setEditingWebhookId(null);
   };
 
@@ -84,7 +75,6 @@ export default function WebhookConfigPage() {
     setWebhookUrl(webhook.webhookUrl || "");
     setApiKey(webhook.apiKey || "");
     setEditingWebhookId(webhook.id);
-    setIsExistingConfig(true);
 
     if (webhook.serviceTrigger) {
       const statuses = transformServiceTriggerToStatuses(
@@ -128,18 +118,13 @@ export default function WebhookConfigPage() {
   };
 
   const handleSave = async () => {
-    // clientId read from outer scope
-    setError("");
-
     // Validate webhook URL before saving
     const isUrlValid = await validateWebhookUrl(webhookUrl);
     if (!isUrlValid) {
-      setLoading(false);
       return;
     }
 
     const serviceTrigger = buildServiceTrigger(selectedStatuses);
-    // console.log("serviceTrigger",serviceTrigger)
 
     const payload = {
       webhookUrl: webhookUrl,
@@ -148,8 +133,6 @@ export default function WebhookConfigPage() {
     };
 
     try {
-      setLoading(true);
-
       const res = editingWebhookId
         ? await updateMutation.mutateAsync({
             payload,
@@ -177,8 +160,6 @@ export default function WebhookConfigPage() {
         err?.response?.data?.error || err?.message || "Something went wrong";
 
       showSnackbar(message, "error");
-    } finally {
-      setLoading(false);
     }
   };
 
