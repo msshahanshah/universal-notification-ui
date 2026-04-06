@@ -61,7 +61,7 @@ export function Select({
     if (multiple && Array.isArray(value)) {
       return value.includes(val);
     }
-    console.log("value", value, "val", val);
+
     return value === val;
   };
 
