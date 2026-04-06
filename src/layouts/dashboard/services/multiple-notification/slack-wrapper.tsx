@@ -36,7 +36,6 @@ export function SlackWrapper({
 }: SlackWrapperProps) {
   const theme = useTheme();
   const inputStyle = useInputStyles();
-  // Replace local state with atoms
   const [channels, setChannels] = useAtom(slackSectionsAtom);
   const [callbackData] = useAtom(slackCallbackDataAtom);
 

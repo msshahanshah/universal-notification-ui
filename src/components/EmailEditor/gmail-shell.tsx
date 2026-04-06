@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
+import { useTheme } from "@mui/material";
+
 import {
   validateMultipleEmails,
   validateSingleEmail,
 } from "src/utility/helper";
 import Input from "../input";
-import { useTheme } from "@mui/material";
+
+type ErrorState = {
+  from: string;
+  to: string;
+  cc: string;
+  bcc: string;
+};
 
 type Props = {
   from: string;

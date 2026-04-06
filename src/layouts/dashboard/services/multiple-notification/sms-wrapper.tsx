@@ -220,12 +220,11 @@ export function SMSWrapper({
               <Input
                 id={`sms-number-${num.id}`}
                 type="tel"
-                // className="sms-input"
                 placeholder="Enter receiver number"
                 value={num.number}
                 inputMode="numeric"
                 onChange={(e) => {
-                  const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
+                  const onlyNums = e.target.value.replace(/\D/g, "");
                   updateNumberInSection(section.id, num.id, "number", onlyNums);
                 }}
                 style={inputStyle}

@@ -74,14 +74,14 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
       window.location.href = "/dashboard";
     } catch (err: any) {
       setErrorMessage(err?.response?.data?.message || "Login failed");
-      setHasApiError(true); // 🔥 disable button after API error
+      setHasApiError(true);
     }
   };
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
     setErrorMessage("");
-    setHasApiError(false); // ✅ re-enable button
+    setHasApiError(false);
   };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
