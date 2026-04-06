@@ -16,6 +16,10 @@
   text-overflow: ellipsis;
 }
 
+.ag-tooltip {
+  z-index: 99999 !important;
+}
+
 .ag-theme-quartz {
   position: relative;
   z-index: 1;

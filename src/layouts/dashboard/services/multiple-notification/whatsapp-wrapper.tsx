@@ -1,30 +1,38 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
-import { useTheme } from "@mui/material/styles";
 
 import Input from "src/components/input";
 import { Toggle } from "src/components/toggle";
 
+import "../SMS/sms-composer.css";
+import "./index.css";
+import { type WhatsappRecipient } from "src/atoms/whatsappAtoms";
+import { useTheme } from "@mui/material/styles";
+import { AddButton } from "./helper";
+import AttachmentSection from "../email/attachmentSection";
+import { useInputStyles, useTextareaStyles } from "src/utility/styles";
+import { renameDuplicateFiles } from "src/utility/helper";
 import {
-  type WhatsappRecipient,
   whatsappCallbackDataAtom,
   whatsappSectionsAtom,
 } from "src/atoms/whatsappAtoms";
-import { useInputStyles, useTextareaStyles } from "src/utility/styles";
-import { renameDuplicateFiles } from "src/utility/helper";
-
 import { useTemplates } from "src/hooks/useTemplates";
 import { Select } from "src/components/select";
+import { CountryCodeSelect } from "../SMS/country-code-select";
 import {
   formatNumbersForUniqueKey,
   WhatsAppNumber,
 } from "src/utility/whatsapp";
+import COLORS from "src/utility/colors";
 
-import { CountryCodeSelect } from "../SMS/country-code-select";
-import { AddButton } from "./helper";
-import AttachmentSection from "../email/attachmentSection";
-import "../SMS/sms-composer.css";
-import "./index.css";
+type ViewMode = "editor" | "preview";
+
+type Attachment = {
+  file: File;
+  id: string;
+  name: string;
+  previewUrl?: string;
+};
 
 interface WhatsappWrapperProps {
   showBody: boolean;
@@ -33,6 +41,7 @@ interface WhatsappWrapperProps {
 }
 
 export function WhatsappWrapper({
+  showBody,
   onValueChange,
   maxBlocks = 5,
 }: WhatsappWrapperProps) {
@@ -51,6 +60,16 @@ export function WhatsappWrapper({
     error: templatesError,
   } = useTemplates("whatsapp");
 
+  // const inputStyle: React.CSSProperties = {
+  //   backgroundColor: theme.vars?.palette.background.paper,
+  //   color: theme.vars?.palette.text.secondary,
+  //   border: `1px solid ${theme.vars?.palette.divider} !important`,
+  //   width: "100%",
+  //   height: 42,
+  //   marginBottom: 12,
+  //   padding: "0 12px",
+  //   borderRadius: 6,
+  // };
   // Replace local state with atoms
 
   const [callbackData] = useAtom(whatsappCallbackDataAtom);
@@ -233,6 +252,14 @@ export function WhatsappWrapper({
     const newAttachments = renamedFiles.map((file, index) => {
       const isImage = file?.type?.startsWith("image/");
 
+      console.log(`renamed file ${index}:`, {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        isSameObject: file === files[index],
+      });
+
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
 
       return {
@@ -322,7 +349,67 @@ export function WhatsappWrapper({
     }));
   };
 
+  const handleFileAttachmentChange = (recipientId: string, files: FileList) => {
+    const recipient = recipients.find((r) => r.id === recipientId);
+    if (!recipient) return;
+
+    // Check attachment limit (max 10)
+    const currentCount = recipient.attachments.length;
+    const newFilesCount = files.length;
+    if (currentCount + newFilesCount > 10) {
+      // Show error or limit to 10
+      const allowedFiles = Array.from(files).slice(0, 10 - currentCount);
+      processFiles(recipientId, allowedFiles);
+      return;
+    }
+
+    processFiles(recipientId, Array.from(files));
+  };
+
+  const processFiles = (recipientId: string, files: File[]) => {
+    const recipient = recipients.find((r) => r.id === recipientId);
+    if (!recipient) return;
+
+    // Rename duplicate files and create attachment objects
+    const renamedFiles = renameDuplicateFiles(files, recipient.attachments);
+    const attachmentObjects = renamedFiles.map((file) => ({
+      id: crypto.randomUUID(),
+      name: file.name,
+      file: file,
+      previewUrl: URL.createObjectURL(file),
+    }));
+
+    // Update attachments
+    const updatedAttachments = [...recipient.attachments, ...attachmentObjects];
+    updateSection(recipientId, "attachments", updatedAttachments);
+
+    // Auto-generate uniqueKey when attachments are added
+    if (recipient.numbers && updatedAttachments.length > 0) {
+      const index = recipients.findIndex((r) => r.id === recipientId);
+      const uniqueKey = generateUniqueKey(recipient.numbers, index);
+      console.log("🔑 Generating uniqueKey for file attachments:", {
+        recipientId,
+        numbers: recipient.numbers,
+        generatedKey: uniqueKey,
+      });
+      updateSection(recipientId, "uniqueKey", uniqueKey);
+    }
+  };
+
   const removeAttachment = (recipientId: string, attachmentId: string) => {
+    // const recipient = recipients.find((r) => r.id === recipientId);
+    // if (recipient) {
+    //   const updatedAttachments = recipient.attachments.filter(
+    //     (a) => a.id !== attachmentId,
+    //   );
+    //   updateSection(recipientId, "attachments", updatedAttachments);
+
+    //   // Clear uniqueKey if no attachments remain
+    //   if (updatedAttachments.length === 0) {
+    //     updateSection(recipientId, "uniqueKey", "");
+    //   }
+    // }
+
     const recipient = recipients.find((r) => r.id === recipientId);
     if (recipient) {
       updateSection(
@@ -336,6 +423,7 @@ export function WhatsappWrapper({
   return (
     <div className="email-wrapper">
       {recipients.map((recipient, index) => {
+        const hideFields = !recipient.selectedTemplate;
         return (
           <div
             key={recipient.id}
@@ -564,10 +652,12 @@ export function WhatsappWrapper({
                             value={`{{${field.name}}}`}
                             readOnly
                             style={{
+                              // flex: 1,
                               ...inputStyle,
                               backgroundColor:
                                 theme.vars?.palette.background.default,
                               cursor: "not-allowed",
+                              // height
                             }}
                           />
                           <Input
@@ -699,6 +789,7 @@ export function WhatsappWrapper({
                       }}
                     >
                       <textarea
+                        // className="sms-textarea"
                         placeholder="Enter attachment URLs separated by commas..."
                         value={attachmentInput[recipient.id] ?? ""}
                         onChange={(e) =>

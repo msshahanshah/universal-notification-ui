@@ -1,4 +1,4 @@
-import { LoginPayload } from "src/layouts/login/types";
+import { LoginPayload, LoginResponse } from "src/layouts/login/types";
 import api from "src/lib/axios";
 
 import { ENDPOINTS } from "./endpoints.api";

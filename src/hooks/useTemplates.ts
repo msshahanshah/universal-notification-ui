@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTemplates } from "src/api/service.api";
+import { getTemplates, Template } from "src/api/service.api";
 import { templatesKeys } from "src/api/queryKeys";
 
 export const useTemplates = (service: string = "whatsapp") => {

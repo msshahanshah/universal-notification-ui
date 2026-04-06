@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react";
+import { Suspense, useState, lazy } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -9,10 +9,14 @@ import { useSnackbar } from "src/provider/snackbar";
 import FallbackLoader from "src/components/fallback-loader/fallback-loader";
 import { logsKeys } from "src/api/queryKeys";
 import ErrorText from "src/components/error-text";
-import COLORS from "src/utility/colors";
-import LogsTable from "../../mui/logs-table";
+import { slackRegex } from "src/utility/constants";
 
 import "./slack.css";
+import COLORS from "src/utility/colors";
+import LogsTable from "../../mui/logs-table";
+// import LogsTable from "../../logs/logs-table";
+
+const HistoryTable = lazy(() => import("./history-table"));
 
 export default function Slack() {
   const [channelID, setChannelID] = useState<any>("");
@@ -31,6 +35,18 @@ export default function Slack() {
   };
 
   const handleSend = (channelID: string) => {
+    const channelIds = channelID
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean);
+
+    // const hasInvalid = channelIds.some((id) => !slackRegex.test(id));
+
+    // if (hasInvalid) {
+    //   setInvalidChannelId("One or more Channel IDs are invalid");
+    //   return;
+    // }
+
     mutate(
       {
         service: "slack",
@@ -74,7 +90,7 @@ export default function Slack() {
           placeholder="Eg. C0991E9E10R"
           value={channelID}
           onChange={(e) => {
-            if (invalidChannelId) {
+            if (!!invalidChannelId) {
               setInvalidChannelId("");
             }
             const trimmedValue = e.target.value;
@@ -119,6 +135,8 @@ export default function Slack() {
         History
       </Typography>
       <Suspense fallback={<FallbackLoader />}>
+        {/* <HistoryTable /> */}
+
         <Box sx={{ height: "50%", width: "100%" }}>
           <LogsTable serviceType="slack" endpoint="/slack-logs" />
         </Box>

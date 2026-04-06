@@ -75,6 +75,8 @@
   position: absolute;
   left: 0;
   width: 100%;
+  background: #0b1623;
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   z-index: 20;
   top: 40px;
