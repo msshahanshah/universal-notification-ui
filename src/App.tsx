@@ -1,11 +1,4 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import {
-  ModuleRegistry,
-  AllCommunityModule,
-  PaginationModule,
-  ClientSideRowModelModule,
-  TooltipModule,
-} from "ag-grid-community";
 
 import Login from "./layouts/login/login";
 import PublicRoute from "./routes/public-route";
@@ -20,13 +13,6 @@ import MultipleNotification from "./layouts/dashboard/services/multiple-notifica
 import WebhookConfigPage from "./webhook";
 
 export default function App() {
-  ModuleRegistry.registerModules([
-    AllCommunityModule,
-    TooltipModule,
-    PaginationModule,
-    ClientSideRowModelModule,
-  ]);
-
   return (
     <Routes>
       <Route element={<PublicRoute />}>
