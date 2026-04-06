@@ -21,7 +21,9 @@ import { useMultipleNotificationService } from "src/hooks/useService";
 import { logsKeys } from "src/api/queryKeys";
 import { isBodyEmpty } from "src/utility/helper";
 import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
+import { validateAllServices } from "./validation";
 import { formatNumbersForUniqueKey } from "src/utility/whatsapp";
+import { SERVICE_CONFIG } from "src/utility/constants";
 
 import { SMSWrapper } from "./sms-wrapper";
 import { EmailWrapper } from "./email-wrapper";
@@ -31,7 +33,6 @@ import { ServiceType, MultipleNotificationPayload } from "./types";
 
 import "./index.css";
 import { useTextareaStyles } from "src/utility/styles";
-import { validateAllServices } from "./validation";
 
 export default function MultipleNotification() {
   const theme = useTheme();
@@ -67,103 +68,127 @@ export default function MultipleNotification() {
     return cleaned;
   };
 
+  const findMatchingFile = (filename: string, attachments: any[]) => {
+    const normalizedUrlName = normalize(filename);
+
+    return attachments.find((file: any) => {
+      const normalizedFileName = normalize(file.name);
+      return normalizedFileName === normalizedUrlName;
+    });
+  };
+
+  const getFilenameFromUrl = (urlEntry: any) => {
+    const filename = urlEntry.s3.fields?.key?.split("/").pop();
+
+    if (!filename) {
+      console.warn("No filename found in S3 key:", urlEntry.s3.fields?.key);
+      return null;
+    }
+
+    return filename;
+  };
+
+  const processSingleUpload = async (
+    serviceKey: string,
+    urlEntry: any,
+    attachmentsCopy: any[],
+    uploadErrors: string[],
+  ) => {
+    const filenameFromUrl = getFilenameFromUrl(urlEntry);
+
+    if (!filenameFromUrl) return;
+
+    if (attachmentsCopy.length === 0) {
+      console.warn("attachmentsCopy is empty!");
+      return;
+    }
+
+    const fileObj = findMatchingFile(filenameFromUrl, attachmentsCopy);
+
+    if (!fileObj) {
+      console.warn(`No file found for URL with filename: ${filenameFromUrl}`);
+      return;
+    }
+
+    const handleUploadError = (
+      serviceKey: string,
+      file: File,
+      err: any,
+      uploadErrors: string[],
+    ) => {
+      console.error(`❌ Upload failed for ${serviceKey}:`, file.name, err);
+
+      uploadErrors.push(
+        `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload "${file.name}"`,
+      );
+    };
+
+    const buildFormData = (urlEntry: any, file: File) => {
+      const formData = new FormData();
+
+      Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+
+      formData.append("file", file);
+
+      return formData;
+    };
+
+    const formData = buildFormData(urlEntry, fileObj);
+
+    try {
+      await api.post(urlEntry.s3.url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: ``,
+        },
+      });
+    } catch (err) {
+      handleUploadError(serviceKey, fileObj, err, uploadErrors);
+    }
+  };
+
+  const processServiceUploads = async (
+    serviceKey: string,
+    preSignedUrls: any[],
+    attachmentsCopy: any[],
+    uploadErrors: string[],
+  ) => {
+    for (const presigned of preSignedUrls) {
+      const urls = presigned?.urls;
+      if (!urls?.length) continue;
+
+      for (const urlEntry of urls) {
+        await processSingleUpload(
+          serviceKey,
+          urlEntry,
+          attachmentsCopy,
+          uploadErrors,
+        );
+      }
+    }
+  };
+
   const uploadToS3FromAttachments = async (data: any, attachmentsCopy: any) => {
-    const serviceKeys = Object.keys(data);
     const uploadErrors: string[] = [];
 
-    // Iterate through each service that has pre-signed URLs
-    for (const serviceKey of serviceKeys) {
+    for (const serviceKey of Object.keys(data)) {
       const preSignedUrls = data?.[serviceKey]?.preSignedUrls;
       if (!preSignedUrls?.length) continue;
 
-      for (let i = 0; i < preSignedUrls.length; i++) {
-        const presigned = preSignedUrls[i];
-
-        const urls = presigned?.urls;
-
-        if (!urls?.length) continue;
-
-        for (let j = 0; j < urls.length; j++) {
-          const urlEntry = urls[j];
-
-          // Find the file that matches this URL's filename
-          const filenameFromUrl = urlEntry.s3.fields?.key?.split("/").pop();
-
-          if (!filenameFromUrl) {
-            console.warn(
-              "No filename found in S3 key:",
-              urlEntry.s3.fields?.key,
-            );
-            continue;
-          }
-
-          if (attachmentsCopy.length === 0) {
-            console.warn("attachmentsCopy is empty!");
-            continue;
-          }
-
-          const normalizedUrlName = normalize(filenameFromUrl);
-
-          const fileObj = attachmentsCopy.find((file: any) => {
-            const normalizedFileName = normalize(file.name);
-            const matches = normalizedFileName === normalizedUrlName;
-
-            return matches;
-          });
-
-          if (!fileObj) {
-            console.warn(
-              `No file found for URL with filename: ${filenameFromUrl}`,
-            );
-            continue;
-          }
-
-          // Extract the actual File object from the wrapper
-          const actualFile = fileObj;
-          if (!actualFile) {
-            console.error("❌ No actual file object found in fileObj.file");
-            continue;
-          }
-
-          const formData = new FormData();
-
-          // Append S3 fields
-          Object.entries(urlEntry.s3.fields).forEach(([key, value]) => {
-            formData.append(key, value as string);
-          });
-
-          // File MUST be last - use the actual File object
-          formData.append("file", actualFile);
-
-          try {
-            await api.post(urlEntry.s3.url, formData, {
-              headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: ``,
-              },
-            });
-          } catch (err) {
-            console.error(
-              `❌ Upload failed for ${serviceKey}:`,
-              actualFile.name,
-              err,
-            );
-
-            // Collect error instead of showing immediately
-            uploadErrors.push(
-              `${serviceKey.charAt(0).toUpperCase() + serviceKey.slice(1)}: Failed to upload "${actualFile.name}"`,
-            );
-          }
-        }
-      }
+      await processServiceUploads(
+        serviceKey,
+        preSignedUrls,
+        attachmentsCopy,
+        uploadErrors,
+      );
     }
 
-    // Show all upload errors after all S3 operations are complete
     if (uploadErrors.length > 0) {
       showSnackbar(uploadErrors.join("\n"), "error", 30000);
     }
 
-    // Invalidate queries once all uploads are complete
     queryClient.invalidateQueries({
       queryKey: logsKeys.all,
     });
@@ -434,351 +459,6 @@ export default function MultipleNotification() {
     [],
   );
 
-  // const handleSendToAllServices = () => {
-  //   const payload: MultipleNotificationPayload = {
-  //     commonMessage,
-  //   };
-
-  //   // Add SMS to payload if selected
-  //   if (selectedServices.includes("sms")) {
-  //     const isDisabled = checkValidRecipientsforSMSWrapper(
-  //       wrapperValues.sms?.sections || [],
-  //       commonMessage,
-  //     );
-
-  //     if (isDisabled) {
-  //       showSnackbar("SMS validations failed", "error");
-  //       return;
-  //     }
-  //     // Use the new section-based structure from SMS wrapper
-  //     if (wrapperValues.sms && wrapperValues.sms.sections) {
-  //       payload.sms = wrapperValues.sms.sections
-  //         .map((section: any, index: number) => ({
-  //           destination: section.destination,
-  //           message: section.message, // Use section message directly since it's already filtered by separateMessage in atoms
-  //         }))
-  //         .map(section => cleanPayloadSection(section));
-  //     }
-  //   }
-
-  //   // Add Email to payload if selected
-  //   if (selectedServices.includes("email")) {
-  //     // Use the new section-based structure from Email wrapper
-  //     if (wrapperValues.email && wrapperValues.email.recipients) {
-  //       payload.email = wrapperValues.email.recipients
-  //         .filter((rec: any) => rec?.destination?.trim() !== "")
-  //         .map((rec: any, index: number) => {
-  //           // Generate unique key for each recipient
-  //           const des = rec.destination
-  //             .split("@")[0]
-  //             .toLowerCase()
-  //             .replace(/[^a-z0-9]/g, "");
-  //           const cleanSubject = rec.subject
-  //             .toLowerCase()
-  //             .replace(/[^a-z0-9\s]/g, "")
-  //             .replace(/\s+/g, "-");
-  //           const uniqueKey = `${cleanSubject}-${des}-${index + 1}`;
-
-  //           const emailSection: any = {
-  //             destination: rec.destination,
-  //             subject: rec.subject,
-  //             fromEmail: rec.fromEmail,
-  //             uniqueKey,
-  //             cc: rec.cc,
-  //             bcc: rec.bcc,
-  //             attachments:
-  //               rec.attachments?.map(
-  //                 (att: any) => typeof att === "string" && att,
-  //               ) || [],
-  //           };
-
-  //           // Always include body key if separateMessage is true (even if empty)
-
-  //           if (isBodyEmpty(rec.body)) {
-  //             emailSection.body = "";
-  //           } else {
-  //             emailSection.body = rec.body;
-  //           }
-
-  //           // If separateMessage is false and no common message, don't include body key
-
-  //           return emailSection;
-  //         })
-  //         .map(section => cleanPayloadSection(section));
-  //     }
-  //   }
-
-  //   // Add Slack to payload if selected
-  //   if (selectedServices.includes("slack")) {
-  //     // !! Do not remove, need for staging branch
-  //     // Use the new section-based structure from Slack wrapper
-  //     if (wrapperValues?.slack?.sections) {
-  //       payload.slack = wrapperValues.slack.sections
-  //         .map((section: any) => {
-  //           const slackSection: any = { destination: section.destination };
-
-  //           if (section.message) {
-  //             slackSection.message = section.message;
-  //           }
-
-  //           return slackSection;
-  //         })
-  //         .map(section => cleanPayloadSection(section));
-  //     }
-  //   }
-  //   // Add WhatsApp to payload if selected
-  //   if (selectedServices.includes("whatsapp")) {
-  //     if (wrapperValues.whatsapp && wrapperValues.whatsapp.recipients) {
-  //       payload.whatsapp = wrapperValues.whatsapp.recipients
-  //         .filter(
-  //           (rec: any) =>
-  //             rec?.destination?.trim() !== "" ||
-  //             rec?.templateId ||
-  //             rec?.separateMessage,
-  //         )
-  //         .map((rec: any, index: number) => {
-  //           const whatsappSection: any = {
-  //             destination: rec.destination,
-  //           };
-  //           const uniqueKey = `${rec.destination}-${index + 1}`;
-
-  //           // Only include uniqueKey if it exists
-  //           if (uniqueKey) {
-  //             whatsappSection.uniqueKey = uniqueKey;
-  //           }
-
-  //           // Only include attachments if they exist and are not empty
-  //           if (rec.attachments && rec.attachments.length > 0) {
-  //             whatsappSection.attachments = rec.attachments.map(
-  //               (att: any) => att.url || att,
-  //             );
-  //           }
-
-  //           // Add body if separateMessage is true or if no common message
-  //           if (
-  //             !rec?.templateId &&
-  //             (rec.separateMessage || !commonMessage.trim())
-  //           ) {
-  //             whatsappSection.message = rec.message || "";
-  //           }
-  //           if (rec?.templateId) {
-  //             whatsappSection.templateId = rec.templateId;
-  //             whatsappSection.variableValues = rec.variableValues;
-  //           }
-
-  //           return whatsappSection;
-  //         })
-  //         .map(section => cleanPayloadSection(section));
-  //     }
-  //   }
-
-  //   // // Check if there are any attachments in the payload
-  //   const hasAttachments =
-  //     payload.email?.some(
-  //       (email) => email.attachments && email.attachments.length > 0,
-  //     ) ||
-  //     false ||
-  //     payload.whatsapp?.some(
-  //       (whatsapp) => whatsapp.attachments && whatsapp.attachments.length > 0,
-  //     ) ||
-  //     false;
-
-  //   // Collect all attachments for upload
-  //   const allAttachments: any[] = [];
-  //   let allFinalAttachments: any[] = [];
-
-  //   payload.email?.forEach((email) => {
-  //     if (email.attachments && email.attachments.length > 0) {
-  //       // Find the corresponding recipient to get the actual file objects
-  //       const recipient = emailRawRecipients.find(
-  //         (rec) =>
-  //           rec.to === email.destination ||
-  //           rec.destination === email.destination,
-  //       );
-  //       if (recipient) {
-  //         // Extract only the actual File objects from attachment objects
-  //         const fileObjects = recipient.attachments
-  //           .map((att) => att.file)
-  //           .filter((file) => file instanceof File);
-  //         allAttachments.push(...fileObjects);
-
-  //         const combinedFiles = [...allAttachments.map((a) => a)];
-
-  //         const renamedFiles = renameDuplicateFiles(combinedFiles);
-  //         // Don't modify original recipient.attachments - keep the full attachment objects for UI
-  //         // Just update the payload's attachment names for API
-  //         email.attachments = renamedFiles.map((file) => file.name);
-
-  //         allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
-  //         allAttachments.length = 0; // Clear allAttachments after processing
-  //       }
-  //     }
-  //   });
-
-  //   // Collect WhatsApp attachments for upload
-  //   payload.whatsapp?.forEach((whatsapp) => {
-  //     if (
-  //       whatsapp.attachments &&
-  //       whatsapp.attachments.length > 0 &&
-  //       whatsapp.uniqueKey
-  //     ) {
-  //       // Extract the first phone number from destination string
-  //       const destinationNumbers = whatsapp.destination
-  //         .split(",")
-  //         .map((num) => num.trim());
-  //       const firstPhoneNumber = destinationNumbers[0]; // Take first number for matching
-
-  //       const recipient = whatsappRawRecipients.find((rec) => {
-  //         // Get the first number from the recipient's numbers array
-  //         const recipientFirstNumber = formatNumbersForUniqueKey(rec.numbers);
-
-  //         return recipientFirstNumber === firstPhoneNumber;
-  //       });
-
-  //       if (recipient) {
-  //         // Extract only the actual File objects from attachment objects
-  //         const fileObjects = recipient.attachments
-  //           .map((att) => att.file)
-  //           .filter((file) => file instanceof File);
-  //         allAttachments.push(...fileObjects);
-
-  //         const combinedFiles = [...allAttachments.map((a) => a)];
-
-  //         const renamedFiles = renameDuplicateFiles(combinedFiles);
-
-  //         // Don't modify original recipient.attachments - keep full objects for UI
-  //         whatsapp.attachments = renamedFiles.map((file) => file.name);
-  //         allFinalAttachments.push(...renamedFiles); // Accumulate instead of overwrite
-  //         allAttachments.length = 0; // Clear allAttachments after processing
-  //       } else {
-  //         console.warn(
-  //           "No matching recipient found for WhatsApp destination:",
-  //           whatsapp.destination,
-  //         );
-  //       }
-  //     }
-  //   });
-
-  //   sendNotifications(payload, {
-  //     onSuccess: async ({ data }) => {
-  //       // Reset form
-  //       setCommonMessage("");
-  //       setSelectedServices([]);
-  //       setSeparateMessages({
-  //         sms: false,
-  //         email: false,
-  //         slack: false,
-  //         whatsapp: false,
-  //       });
-  //       resetEmailFields();
-  //       resetSmsFields();
-  //       resetSlackFields();
-  //       resetWhatsappFields();
-
-  //       // Create detailed status message for each service
-  //       const statusMessages = [];
-
-  //       if (selectedServices.includes("sms")) {
-  //         const smsStatus = data?.sms?.success
-  //           ? `SMS: ${data?.sms?.message || "Notification request accepted and queued."}`
-  //           : `SMS: ${data?.sms?.message || "Failed to send notification"}`;
-  //         statusMessages.push(smsStatus);
-  //       }
-
-  //       if (selectedServices.includes("email")) {
-  //         const emailStatus = data?.email?.success
-  //           ? `Email: ${data?.email?.message || "Notification request accepted and queued."}`
-  //           : `Email: ${data?.email?.message || "Failed to send notification"}`;
-  //         statusMessages.push(emailStatus);
-  //       }
-
-  //       if (selectedServices.includes("slack")) {
-  //         const slackStatus = data?.slack?.success
-  //           ? `Slack: ${data?.slack?.message || "Notification request accepted and queued."}`
-  //           : `Slack: ${data?.slack?.message || "Failed to send notification"}`;
-  //         statusMessages.push(slackStatus);
-  //       }
-
-  //       if (selectedServices.includes("whatsapp")) {
-  //         const whatsappStatus = data?.whatsapp?.success
-  //           ? `Whatsapp: ${data?.whatsapp?.message || "Notification request accepted and queued."}`
-  //           : `Whatsapp: ${data?.whatsapp?.message || "Failed to send notification"}`;
-  //         statusMessages.push(whatsappStatus);
-  //       }
-
-  //       // Show combined status message
-  //       const combinedMessage = statusMessages.join("\n");
-  //       const hasAnyFailure = statusMessages.some((msg) =>
-  //         msg.includes("Failed"),
-  //       );
-
-  //       showSnackbar(
-  //         combinedMessage,
-  //         hasAnyFailure ? "error" : "success",
-  //         30000,
-  //       );
-
-  //       const attachmentsCopy = [...allFinalAttachments];
-  //       console.log("attachmentsCopy", attachmentsCopy);
-  //       console.log("data?.whatsapp?.success", data?.whatsapp?.success);
-
-  //       if (!hasAttachments || attachmentsCopy.length === 0) {
-  //         queryClient.invalidateQueries({
-  //           queryKey: logsKeys.all,
-  //         });
-  //       } else if (data?.email?.success || data?.whatsapp?.success) {
-  //         await uploadToS3FromAttachments(data, attachmentsCopy);
-  //       }
-  //     },
-  //     onError: (error: any) => {
-  //       console.info(
-  //         "error",
-  //         error?.data?.email,
-  //         "error?.response?.data",
-  //         "error?.response?.data",
-  //         "error?.message",
-  //         error?.message,
-  //       );
-
-  //       // Handle error case with detailed service status
-  //       const errorData = error?.data || {};
-  //       const statusMessages = [];
-
-  //       if (selectedServices.includes("sms")) {
-  //         if (errorData?.sms?.success === false) {
-  //           const smsStatus = `SMS: ${errorData?.sms?.message || "Failed to send notification"}`;
-  //           statusMessages.push(smsStatus);
-  //         }
-  //       }
-
-  //       if (selectedServices.includes("email")) {
-  //         if (errorData?.email?.success === false) {
-  //           const emailStatus = `Email: ${errorData?.email?.message || "Failed to send notification"}`;
-  //           statusMessages.push(emailStatus);
-  //         }
-  //       }
-
-  //       if (selectedServices.includes("slack")) {
-  //         if (errorData?.slack?.success === false) {
-  //           const slackStatus = `Slack: ${errorData?.slack?.message || "Failed to send notification"}`;
-  //           statusMessages.push(slackStatus);
-  //         }
-  //       }
-
-  //       if (selectedServices.includes("whatsapp")) {
-  //         if (errorData?.whatsapp?.success === false) {
-  //           const whatsappStatus = `Whatsapp: ${errorData?.whatsapp?.message || "Failed to send notification"}`;
-  //           statusMessages.push(whatsappStatus);
-  //         }
-  //       }
-
-  //       const combinedMessage = statusMessages.join("\n");
-
-  //       showSnackbar(combinedMessage, "error", 30000);
-  //     },
-  //   });
-  // };
-
   const handleError = (error: any) => {
     const messages = buildErrorMessages(error?.data || {});
     showSnackbar(messages.join("\n"), "error", 30000);
@@ -851,75 +531,31 @@ export default function MultipleNotification() {
   };
 
   const buildErrorMessages = (errorData: any) => {
-    const statusMessages: string[] = [];
-
-    if (selectedServices.includes("sms")) {
-      if (errorData?.sms?.success === false) {
-        statusMessages.push(
-          `SMS: ${errorData?.sms?.message || "Failed to send notification"}`,
+    return SERVICE_CONFIG.filter(({ key }) =>
+      selectedServices.includes(key),
+    ).reduce((messages: string[], { key, label }) => {
+      if (errorData?.[key]?.success === false) {
+        messages.push(
+          `${label}: ${errorData?.[key]?.message || "Failed to send notification"}`,
         );
       }
-    }
-
-    if (selectedServices.includes("email")) {
-      if (errorData?.email?.success === false) {
-        statusMessages.push(
-          `Email: ${errorData?.email?.message || "Failed to send notification"}`,
-        );
-      }
-    }
-
-    if (selectedServices.includes("slack")) {
-      if (errorData?.slack?.success === false) {
-        statusMessages.push(
-          `Slack: ${errorData?.slack?.message || "Failed to send notification"}`,
-        );
-      }
-    }
-
-    if (selectedServices.includes("whatsapp")) {
-      if (errorData?.whatsapp?.success === false) {
-        statusMessages.push(
-          `Whatsapp: ${errorData?.whatsapp?.message || "Failed to send notification"}`,
-        );
-      }
-    }
-
-    return statusMessages;
+      return messages;
+    }, []);
   };
 
   const buildStatusMessages = (data: any) => {
-    const statusMessages: string[] = [];
+    return SERVICE_CONFIG.filter(({ key }) =>
+      selectedServices.includes(key),
+    ).map(({ key, label }) => {
+      const serviceData = data?.[key];
+      const isSuccess = serviceData?.success;
 
-    if (selectedServices.includes("sms")) {
-      const smsStatus = data?.sms?.success
-        ? `SMS: ${data?.sms?.message || "Notification request accepted and queued."}`
-        : `SMS: ${data?.sms?.message || "Failed to send notification"}`;
-      statusMessages.push(smsStatus);
-    }
-
-    if (selectedServices.includes("email")) {
-      const emailStatus = data?.email?.success
-        ? `Email: ${data?.email?.message || "Notification request accepted and queued."}`
-        : `Email: ${data?.email?.message || "Failed to send notification"}`;
-      statusMessages.push(emailStatus);
-    }
-
-    if (selectedServices.includes("slack")) {
-      const slackStatus = data?.slack?.success
-        ? `Slack: ${data?.slack?.message || "Notification request accepted and queued."}`
-        : `Slack: ${data?.slack?.message || "Failed to send notification"}`;
-      statusMessages.push(slackStatus);
-    }
-
-    if (selectedServices.includes("whatsapp")) {
-      const whatsappStatus = data?.whatsapp?.success
-        ? `Whatsapp: ${data?.whatsapp?.message || "Notification request accepted and queued."}`
-        : `Whatsapp: ${data?.whatsapp?.message || "Failed to send notification"}`;
-      statusMessages.push(whatsappStatus);
-    }
-
-    return statusMessages;
+      return `${label}: ${
+        isSuccess
+          ? serviceData?.message || "Notification request accepted and queued."
+          : serviceData?.message || "Failed to send notification"
+      }`;
+    });
   };
 
   const buildEmailPayload = () =>

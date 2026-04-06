@@ -18,6 +18,7 @@ import { Select } from "src/components/select";
 import { useSnackbar } from "src/provider/snackbar";
 
 import WebhookLogsDrawer from "./logs-drawer";
+import WebhookListItem from "./listItem";
 
 export default function WebhookConfigPage() {
   const [webhookUrl, setWebhookUrl] = useState("");
