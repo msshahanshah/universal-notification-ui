@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react";
-import { styled, Typography, useColorScheme, useTheme } from "@mui/material";
+import { styled, Typography, useTheme } from "@mui/material";
 import MuiCard from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 
@@ -38,7 +38,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const Login = (props: { disableCustomTheme?: boolean }) => {
+const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -46,7 +46,7 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
 
   const theme = useTheme();
 
-  const { mutateAsync, isPending, isError, reset } = useAuthenticate();
+  const { mutateAsync, isPending } = useAuthenticate();
 
   const isDisabled =
     username === "" || password === "" || isPending || hasApiError;
@@ -74,14 +74,14 @@ const Login = (props: { disableCustomTheme?: boolean }) => {
       window.location.href = "/dashboard";
     } catch (err: any) {
       setErrorMessage(err?.response?.data?.message || "Login failed");
-      setHasApiError(true); // 🔥 disable button after API error
+      setHasApiError(true);
     }
   };
 
   const handleUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUsername(e.target.value);
     setErrorMessage("");
-    setHasApiError(false); // ✅ re-enable button
+    setHasApiError(false);
   };
 
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {

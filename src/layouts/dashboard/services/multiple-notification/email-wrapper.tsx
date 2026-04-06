@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAtom } from "jotai";
-
-import { useEmailService } from "src/hooks/useService";
 import Input from "src/components/input";
-import { useSnackbar } from "src/provider/snackbar";
 import { EmailEditor } from "src/components/EmailEditor/tiptap-email-editor";
 import { EmailPreview } from "src/components/EmailEditor/email-preview";
 import { Toggle } from "src/components/toggle";
@@ -19,15 +16,8 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { AddButton } from "./helper";
 import { useInputStyles } from "src/utility/styles";
-import { renameDuplicateFiles } from "src/utility/helper";
 
 type ViewMode = "editor" | "preview";
-
-type Attachment = {
-  file: File;
-  id: string;
-  previewUrl?: string;
-};
 
 interface EmailWrapperProps {
   onValueChange?: (values: {
@@ -41,7 +31,7 @@ interface EmailWrapperProps {
 export function EmailWrapper({
   onValueChange,
   maxBlocks = 5,
-  commonMessage
+  commonMessage,
 }: EmailWrapperProps) {
   const theme = useTheme();
   const inputStyle = useInputStyles();
@@ -108,22 +98,8 @@ export function EmailWrapper({
 
     const recipient = recipients.find((r) => r.id === recipientId);
     const currentAttachments = recipient?.attachments || [];
-    // const maxAttachments = 10;
 
-    // Check if adding these files would exceed the limit
-    // if (currentAttachments.length + files.length > maxAttachments) {
-    //   // showSnackbar(
-    //   //   `Cannot add ${files.length} file(s). Maximum ${maxAttachments} attachments allowed. Currently have ${currentAttachments.length}.`,
-    //   //   "error",
-    //   // );
-    //   e.target.value = "";
-    //   return;
-    // }
-
-    // Rename duplicate files to avoid conflicts
-    // const renamedFiles = renameDuplicateFiles(files);
-
-    const newAttachments = files.map((file, index) => {
+    const newAttachments = files.map((file) => {
       const isImage = file.type.startsWith("image/");
 
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
@@ -138,10 +114,7 @@ export function EmailWrapper({
       };
     });
 
-    const newAttachment = [
-      ...currentAttachments,
-      ...newAttachments,
-    ];
+    const newAttachment = [...currentAttachments, ...newAttachments];
 
     updateSection(recipientId, "attachments", newAttachment);
 
@@ -152,7 +125,9 @@ export function EmailWrapper({
   const removeAttachment = (recipientId: string, attachmentId: string) => {
     const recipient = recipients.find((r) => r.id === recipientId);
     if (recipient && recipient.attachments) {
-      const updatedAttachments = recipient.attachments.filter((a) => a.id !== attachmentId);
+      const updatedAttachments = recipient.attachments.filter(
+        (a) => a.id !== attachmentId,
+      );
       updateSection(recipientId, "attachments", updatedAttachments);
     }
   };
@@ -166,7 +141,7 @@ export function EmailWrapper({
             { label: "Preview", value: "preview" },
           ]}
           value={view}
-          onChange={(value) => setView(value as ViewMode)}
+          onChange={(value) => setView(value)}
         />
       </div>
 

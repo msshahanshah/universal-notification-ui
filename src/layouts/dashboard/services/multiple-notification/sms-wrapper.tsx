@@ -1,26 +1,21 @@
 import { useEffect } from "react";
-import { Typography, useTheme } from "@mui/material";
-// import { useTheme } from "@mui/material/styles";
-import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "@mui/material";
 import { useAtom } from "jotai";
 
-import { useSmsService } from "src/hooks/useService";
 import Button from "src/components/button";
 import Input from "src/components/input";
-import { useSnackbar } from "src/provider/snackbar";
-import { logsKeys } from "src/api/queryKeys";
-
-import "../SMS/sms-composer.css";
-import "./index.css";
-import { CountryCodeSelect } from "../SMS/country-code-select";
 import {
   smsSectionsAtom,
   smsCallbackDataAtom,
   type SMSNumber,
   type SMSSection,
 } from "src/atoms/smsAtoms";
-import { AddButton } from "./helper";
 import { useInputStyles } from "src/utility/styles";
+
+import { CountryCodeSelect } from "../SMS/country-code-select";
+import { AddButton } from "./helper";
+import "../SMS/sms-composer.css";
+import "./index.css";
 
 interface SMSWrapperProps {
   showMessage: boolean;
@@ -32,11 +27,7 @@ interface SMSWrapperProps {
   maxBlocks?: number;
 }
 
-export function SMSWrapper({
-  showMessage,
-  onValueChange,
-  maxBlocks = 5,
-}: SMSWrapperProps) {
+export function SMSWrapper({ onValueChange, maxBlocks = 5 }: SMSWrapperProps) {
   const theme = useTheme();
   const inputStyle = useInputStyles();
   // Replace local state with atoms
@@ -48,10 +39,6 @@ export function SMSWrapper({
       onValueChange(callbackData);
     }
   }, [callbackData, onValueChange]);
-
-  const { mutate } = useSmsService();
-  const showSnackbar = useSnackbar();
-  const queryClient = useQueryClient();
 
   // Section management functions
   const addSection = () => {
@@ -220,12 +207,11 @@ export function SMSWrapper({
               <Input
                 id={`sms-number-${num.id}`}
                 type="tel"
-                // className="sms-input"
                 placeholder="Enter receiver number"
                 value={num.number}
                 inputMode="numeric"
                 onChange={(e) => {
-                  const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
+                  const onlyNums = e.target.value.replace(/\D/g, "");
                   updateNumberInSection(section.id, num.id, "number", onlyNums);
                 }}
                 style={inputStyle}
