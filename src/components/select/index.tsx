@@ -16,8 +16,8 @@ type Props = {
   placeholder?: string;
   dataTestId?: string;
   multiple?: boolean;
-  style?: object;
-  dropdownStyle?: object;
+  style?: Object;
+  dropdownStyle?: Object;
 };
 
 export function Select({
@@ -124,15 +124,16 @@ export function Select({
           flexWrap: "wrap",
           gap: "6px",
           minHeight: "2.5rem",
-          paddingTop: "0px",
+          paddingTop:
+            multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0",
           justifyContent: "space-between",
         }}
       >
         {multiple && Array.isArray(value) && value.length > 0 ? (
           <>
-            {getSelectedLabels().map((label) => (
+            {getSelectedLabels().map((label, idx) => (
               <span
-                key={label}
+                key={idx}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

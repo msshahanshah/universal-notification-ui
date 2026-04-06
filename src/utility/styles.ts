@@ -36,7 +36,7 @@ export const getTextareaStyles = (theme: any): CSSProperties => ({
   padding: "8px",
   width: "100%",
   minHeight: "80px",
-  fontFamily: "inherit",
+  fontFamily: "Inter, sans-serif",
 });
 
 /**

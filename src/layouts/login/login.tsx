@@ -1,5 +1,5 @@
 import { ChangeEvent, useState } from "react";
-import { styled, Typography, useTheme } from "@mui/material";
+import { styled, Typography, useColorScheme, useTheme } from "@mui/material";
 import MuiCard from "@mui/material/Card";
 import Stack from "@mui/material/Stack";
 
@@ -38,7 +38,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-const Login = () => {
+const Login = (props: { disableCustomTheme?: boolean }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -46,7 +46,7 @@ const Login = () => {
 
   const theme = useTheme();
 
-  const { mutateAsync, isPending } = useAuthenticate();
+  const { mutateAsync, isPending, isError, reset } = useAuthenticate();
 
   const isDisabled =
     username === "" || password === "" || isPending || hasApiError;

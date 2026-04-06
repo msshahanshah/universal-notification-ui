@@ -981,7 +981,6 @@ export default function MultipleNotification() {
           </div>
         )}
 
-        {/* Common Send Button */}
         {selectedServices.length > 0 && (
           <div
             style={{
@@ -998,8 +997,6 @@ export default function MultipleNotification() {
             />
           </div>
         )}
-
-        {/* WhatsApp Section */}
       </div>
     </div>
   );

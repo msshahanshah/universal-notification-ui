@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTheme } from "@mui/material";
 
 import {
   validateMultipleEmails,
   validateSingleEmail,
 } from "src/utility/helper";
-
 import Input from "../input";
-import { useTheme } from "@mui/material";
 
 type ErrorState = {
   from: string;
@@ -29,8 +28,6 @@ type Props = {
   onValidationChange: (hasErrors: boolean) => void;
   attachments: Attachment[];
   setAttachments: (attachments: Attachment[]) => void;
-  errors: ErrorState,
-  setErrors: React.Dispatch<React.SetStateAction<ErrorState>>;
 };
 
 type Attachment = {
@@ -38,6 +35,18 @@ type Attachment = {
   id: string;
   previewUrl?: string; // for images
 };
+
+const ErrorText = ({ children }: { children: string }) => (
+  <div
+    style={{
+      fontSize: 11,
+      color: "#d32f2f",
+      marginTop: -4,
+    }}
+  >
+    {children}
+  </div>
+);
 
 export function GmailShell({
   from,
@@ -51,8 +60,6 @@ export function GmailShell({
   setBcc,
   setSubject,
   onValidationChange,
-  errors,
-  setErrors
 }: Props) {
   const theme = useTheme();
 
@@ -60,6 +67,12 @@ export function GmailShell({
     backgroundColor: theme.vars?.palette.background.paper,
     color: theme.vars?.palette.text.secondary,
   };
+  const [errors, setErrors] = useState({
+    from: "",
+    to: "",
+    cc: "",
+    bcc: "",
+  });
 
   const [subjectError, setSubjectError] = useState("");
 
@@ -90,18 +103,6 @@ export function GmailShell({
           : "",
     }));
   };
-
-  const ErrorText = ({ children }: { children: string }) => (
-    <div
-      style={{
-        fontSize: 11,
-        color: "#d32f2f",
-        marginTop: -4,
-      }}
-    >
-      {children}
-    </div>
-  );
 
   return (
     <div style={shellStyle}>
