@@ -49,6 +49,7 @@ export const uploadFilesToS3 = async (items: S3Item[]) => {
           "Content-Type": "multipart/form-data",
         },
       });
+
     } catch (error) {
       console.error(`❌ Failed: ${item.fileName}`, error);
       throw error; // stop if one fails
@@ -241,13 +242,6 @@ export default function EmailComposer() {
   const isDisabled =
     !subject?.trim() || !to?.trim() || isBodyEmpty(body) || hasErrors;
 
-  const [errors, setErrors] = useState({
-    from: "",
-    to: "",
-    cc: "",
-    bcc: "",
-  });
-
   return (
     <div style={pageStyle}>
       {/* Left column */}
@@ -285,8 +279,6 @@ export default function EmailComposer() {
               onValidationChange={setHasErrors}
               attachments={attachments}
               setAttachments={setAttachments}
-              errors={errors}
-              setErrors={setErrors}
             />
             <EmailEditor value={body} onChange={setBody} />
             <AttachmentSection
@@ -309,7 +301,7 @@ export default function EmailComposer() {
               attachments={attachments}
               handleAttachmentChange={handleAttachmentChange}
               removeAttachment={removeAttachment}
-              commonMessage=""
+              commonMessage=''
             />
           </div>
         )}

@@ -1,9 +1,19 @@
+import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import {
+  ModuleRegistry,
+  AllCommunityModule,
+  PaginationModule,
+  ClientSideRowModelModule,
+} from "ag-grid-community";
+import { TooltipModule } from "ag-grid-community";
 
 import Login from "./layouts/login/login";
 import PublicRoute from "./routes/public-route";
 import PrivateRoute from "./routes/private-route";
 import Dashboard from "./layouts/dashboard";
+import ServicesAccordion from "./layouts/dashboard/services/demo/ServicesAccordion";
+import Services1 from "./layouts/dashboard/services/demo/services";
 import Services from "./layouts/dashboard/services";
 import Slack from "./layouts/dashboard/services/slack";
 import ServiceGuard from "./routes/service-guard";
@@ -13,6 +23,13 @@ import MultipleNotification from "./layouts/dashboard/services/multiple-notifica
 import WebhookConfigPage from "./webhook";
 
 export default function App() {
+  ModuleRegistry.registerModules([
+    AllCommunityModule,
+    TooltipModule,
+    PaginationModule,
+    ClientSideRowModelModule,
+  ]);
+
   return (
     <Routes>
       <Route element={<PublicRoute />}>
@@ -22,12 +39,11 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/webhook-config" element={<WebhookConfigPage />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/services/demo1" element={<Services1 />} />
+        <Route path="/services/demo2" element={<ServicesAccordion />} />
         <Route path="/services/email-editor" element={<EmailComposer />} />
         <Route path="/services/sms" element={<SMS />} />
-        <Route
-          path="/services/multiple-notification"
-          element={<MultipleNotification />}
-        />
+        <Route path="/services/multiple-notification" element={<MultipleNotification />} />
         <Route element={<ServiceGuard service="slack" />}>
           <Route path="/services/slack" element={<Slack />} />
         </Route>

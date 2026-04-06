@@ -6,7 +6,6 @@ export default defineConfig({
   resolve: {
     alias: {
       src: "/src",
-      "@": "/src",
     },
   },
   server: {
@@ -16,10 +15,5 @@ export default defineConfig({
      hmr: {
       clientPort: 443,
     },
-  },
-  test: {
-    globals: true,
-    environment: "jsdom",
-    setupFiles: ["./src/test/setup.ts"],
   },
 });

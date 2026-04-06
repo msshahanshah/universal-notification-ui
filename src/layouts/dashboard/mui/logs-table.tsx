@@ -40,7 +40,7 @@ interface Log {
 
 type Order = "asc" | "desc" | "";
 
-export const getSortLabelStyles = (theme: any, isActive?: boolean) => ({
+export const getSortLabelStyles = (theme: any, isActive: boolean) => ({
   "&.Mui-active": {
     color: isActive ? "#027AF2" : theme.vars?.palette.text.secondary,
     fontWeight: 600,

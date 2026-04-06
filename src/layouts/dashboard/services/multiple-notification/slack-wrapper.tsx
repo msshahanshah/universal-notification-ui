@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { useTheme } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 
+import { useSlackService } from "src/hooks/useService";
+import Button from "src/components/button";
 import Input from "src/components/input";
+import { useSnackbar } from "src/provider/snackbar";
+import { logsKeys } from "src/api/queryKeys";
 import ErrorText from "src/components/error-text";
+import { slackRegex } from "src/utility/constants";
+
+import "../slack/slack.css";
 import {
   slackSectionsAtom,
   slackCallbackDataAtom,
   type SlackChannel,
 } from "src/atoms/slackAtoms";
-import { useInputStyles } from "src/utility/styles";
-
+import COLORS from "src/utility/colors";
 import { AddButton } from "./helper";
-import "../slack/slack.css";
+import { useInputStyles } from "src/utility/styles";
 
 interface SlackWrapperProps {
   onValueChange?: (values: {
@@ -40,6 +47,9 @@ export function SlackWrapper({
     }
   }, [callbackData, onValueChange]);
 
+  const { mutate } = useSlackService();
+  const showSnackbar = useSnackbar();
+  const queryClient = useQueryClient();
   const [invalidChannelId, setInvalidChannelId] = useState("");
 
   const addSection = () => {
@@ -141,7 +151,7 @@ export function SlackWrapper({
             placeholder="Eg. C0991E9E10R"
             value={channel.channelID}
             onChange={(e) => {
-              if (invalidChannelId) {
+              if (!!invalidChannelId) {
                 setInvalidChannelId("");
               }
               updateSection(channel.id, "channelID", e.target.value);

@@ -8,7 +8,7 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ height: hValue, width: wValue }}>
-      <LogsTable />
+      <LogsTable/>
     </Box>
   );
 }
