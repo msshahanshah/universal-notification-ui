@@ -1,7 +1,0 @@
-node_modules
-dist
-.eslintrc.cjs
-sonar-project.js
-*.config.js
-*.cjs
-*sonar-project.js

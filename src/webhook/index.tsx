@@ -19,8 +19,6 @@ import { useSnackbar } from "src/provider/snackbar";
 
 import WebhookLogsDrawer from "./logs-drawer";
 
-import WebhookListItem from "./listItem";
-
 export default function WebhookConfigPage() {
   const [webhookUrl, setWebhookUrl] = useState("");
   const [apiKey, setApiKey] = useState("");
@@ -119,8 +117,6 @@ export default function WebhookConfigPage() {
   };
 
   const handleSave = async () => {
-    // clientId read from outer scope
-
     // Validate webhook URL before saving
     const isUrlValid = await validateWebhookUrl(webhookUrl);
     if (!isUrlValid) {

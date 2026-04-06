@@ -124,8 +124,7 @@ export function Select({
           flexWrap: "wrap",
           gap: "6px",
           minHeight: "2.5rem",
-          paddingTop:
-            multiple && Array.isArray(value) && value.length > 0 ? "4px" : "0",
+          paddingTop: "0px",
           justifyContent: "space-between",
         }}
       >

@@ -16,6 +16,20 @@ export default defineConfig([
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   {
+    ignores: [
+      "node_modules",
+      "dist",
+      "build",
+      "*.config.js",
+      ".next",
+      "sonar-project.js",
+      "*.cjs",
+      ".eslintrc.cjs",
+      ".scannerwork",
+      ".husky",
+    ],
+  },
+  {
     settings: {
       react: {
         version: "detect",

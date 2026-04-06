@@ -21,7 +21,6 @@ import { useMultipleNotificationService } from "src/hooks/useService";
 import { logsKeys } from "src/api/queryKeys";
 import { isBodyEmpty } from "src/utility/helper";
 import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
-import { validateAllServices } from "src/utility/validation";
 import { formatNumbersForUniqueKey } from "src/utility/whatsapp";
 
 import { SMSWrapper } from "./sms-wrapper";
@@ -32,6 +31,7 @@ import { ServiceType, MultipleNotificationPayload } from "./types";
 
 import "./index.css";
 import { useTextareaStyles } from "src/utility/styles";
+import { validateAllServices } from "./validation";
 
 export default function MultipleNotification() {
   const theme = useTheme();
@@ -585,7 +585,7 @@ export default function MultipleNotification() {
 
     // Collect all attachments for upload
     const allAttachments: any[] = [];
-    const allFinalAttachments: any[] = [];
+    let allFinalAttachments: any[] = [];
 
     payload.email?.forEach((email) => {
       if (email.attachments && email.attachments.length > 0) {
