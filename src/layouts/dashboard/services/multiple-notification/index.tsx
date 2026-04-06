@@ -21,7 +21,6 @@ import { useMultipleNotificationService } from "src/hooks/useService";
 import { logsKeys } from "src/api/queryKeys";
 import { isBodyEmpty } from "src/utility/helper";
 import { checkValidRecipientsforSMSWrapper } from "src/utility/sms";
-// import { validateAllServices } from "src/utility/validation";
 import { formatNumbersForUniqueKey } from "src/utility/whatsapp";
 
 import { SMSWrapper } from "./sms-wrapper";
