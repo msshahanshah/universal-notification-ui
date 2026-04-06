@@ -1,9 +1,6 @@
 import { useState, ChangeEvent, useEffect } from "react";
-import Input from "src/components/input";
-import Button from "src/components/button";
-import { Select } from "src/components/select";
-import { useSnackbar } from "src/provider/snackbar";
 import { useTheme } from "@mui/material/styles";
+
 import {
   useSaveWebhookDetails,
   useGetWebhookDetails,
@@ -13,10 +10,14 @@ import {
   buildServiceTrigger,
   transformServiceTriggerToStatuses,
 } from "src/utility/webhook";
-import WebhookListItem from "./listItem";
-import WebhookLogsDrawer from "./logs-drawer";
 import { useInputStyles } from "src/utility/styles";
 import COLORS from "src/utility/colors";
+import Input from "src/components/input";
+import Button from "src/components/button";
+import { Select } from "src/components/select";
+import { useSnackbar } from "src/provider/snackbar";
+
+import WebhookLogsDrawer from "./logs-drawer";
 
 export default function WebhookConfigPage() {
   const [webhookUrl, setWebhookUrl] = useState("");
@@ -66,7 +67,6 @@ export default function WebhookConfigPage() {
     setWebhookUrl("");
     setApiKey("");
     setSelectedStatuses([]);
-    // setIsExistingConfig(false);
     setEditingWebhookId(null);
   };
 
@@ -74,7 +74,6 @@ export default function WebhookConfigPage() {
     setWebhookUrl(webhook.webhookUrl || "");
     setApiKey(webhook.apiKey || "");
     setEditingWebhookId(webhook.id);
-    // setIsExistingConfig(true);
 
     if (webhook.serviceTrigger) {
       const statuses = transformServiceTriggerToStatuses(
@@ -118,8 +117,6 @@ export default function WebhookConfigPage() {
   };
 
   const handleSave = async () => {
-    // clientId read from outer scope
-
     // Validate webhook URL before saving
     const isUrlValid = await validateWebhookUrl(webhookUrl);
     if (!isUrlValid) {
@@ -173,8 +170,8 @@ export default function WebhookConfigPage() {
   const maxWebhooksReached = webhooksCount >= 10;
 
   const emailStatusOptions = [
-    { label: "Twilio Queued", value: "TWILIO:queued" },
-    { label: "Twilio Read", value: "TWILIO : read" },
+    { label: "Twilio Queued", value: "sms_TWILIO:queued" },
+    { label: "Twilio Read", value: "sms_TWILIO : read" },
     { label: "Email Failed", value: "email_failed" },
     { label: "Email Success", value: "email_success" },
     { label: "SMS Failed", value: "sms_failed" },

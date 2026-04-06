@@ -23,6 +23,35 @@ export interface ServiceValidation {
   errors: Record<string, string[]>;
 }
 
+/* ===================== UTILITIES ===================== */
+
+// Reusable file size validation function
+const validateAttachmentFileSize = (
+  attachment: any,
+  maxSizeMB: number,
+  sectionIndex: number,
+  serviceName: string,
+  errors: string[],
+  markInvalid: () => void,
+) => {
+  if (attachment.file && attachment.file.size) {
+    const isImage = attachment.file.type.startsWith("image/");
+    const isVideo = attachment.file.type.startsWith("video/");
+
+    if (isImage || isVideo) {
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      const fileSizeMB = (attachment.file.size / (1024 * 1024)).toFixed(2);
+
+      if (attachment.file.size > maxSizeBytes) {
+        markInvalid();
+        errors.push(
+          `${serviceName} Section ${sectionIndex + 1}: File "${attachment.file.name}" (${fileSizeMB}MB) exceeds ${maxSizeMB}MB limit. ${isImage ? "Image" : "Video"} files must be ${maxSizeMB}MB or smaller.`,
+        );
+      }
+    }
+  }
+};
+
 /* ===================== MAIN ===================== */
 
 export const validateAllServices = (
@@ -31,7 +60,7 @@ export const validateAllServices = (
   smsData: any,
   slackData: any,
   whatsappData: any,
-  commonMessage: string
+  commonMessage: string,
 ): ServiceValidation => {
   const atoms = useValidationAtoms();
 
@@ -82,7 +111,7 @@ const buildFinalValidation = (
   email: ValidationResult,
   sms: ValidationResult,
   slack: ValidationResult,
-  whatsapp: ValidationResult
+  whatsapp: ValidationResult,
 ): ServiceValidation => {
   const isFormValid =
     email.isFormValid &&
@@ -110,7 +139,7 @@ const buildFinalValidation = (
 const validateEmail = (
   emailData: any,
   sections: any[],
-  commonMessage: string
+  commonMessage: string,
 ): ValidationResult => {
   const errors: string[] = [];
   let isFormValid = true;
@@ -123,7 +152,7 @@ const validateEmail = (
   }
 
   const hasValidDestination = sections?.some(
-    ({ to }: any) => to?.trim() !== ""
+    ({ to }: any) => to?.trim() !== "",
   );
 
   if (!hasValidDestination) {
@@ -132,7 +161,13 @@ const validateEmail = (
   }
 
   sections.forEach((section: any, i: number) => {
-    validateEmailSection(section, i, errors, () => (isFormValid = false), commonMessage);
+    validateEmailSection(
+      section,
+      i,
+      errors,
+      () => (isFormValid = false),
+      commonMessage,
+    );
   });
 
   return {
@@ -146,7 +181,7 @@ const validateEmailSection = (
   index: number,
   errors: string[],
   markInvalid: () => void,
-  commonMessage: string
+  commonMessage: string,
 ) => {
   const i = index + 1;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -186,7 +221,10 @@ const validateEmailSection = (
     errors.push(`Email Section ${i}: Body required`);
   }
 
-  if (section.attachments !== undefined && !Array.isArray(section.attachments)) {
+  if (
+    section.attachments !== undefined &&
+    !Array.isArray(section.attachments)
+  ) {
     markInvalid();
     errors.push(`Email Section ${i}: Attachments must be list`);
   }
@@ -195,6 +233,20 @@ const validateEmailSection = (
     markInvalid();
     errors.push(`Email Section ${i}: Maximum 10 attachments allowed`);
   }
+
+  // Validate file sizes for attachments (20MB limit)
+  if (section.attachments && section.attachments.length > 0) {
+    section.attachments.forEach((attachment: any, attachmentIndex: number) => {
+      validateAttachmentFileSize(
+        attachment,
+        20, // 20MB limit
+        index,
+        "Email",
+        errors,
+        markInvalid,
+      );
+    });
+  }
 };
 
 /* ===================== SMS ===================== */
@@ -202,7 +254,7 @@ const validateEmailSection = (
 const validateSms = (
   smsData: any,
   sections: any[],
-  commonMessage: string
+  commonMessage: string,
 ): ValidationResult => {
   const errors: string[] = [];
   let isFormValid = true;
@@ -215,7 +267,7 @@ const validateSms = (
   }
 
   const hasValidDestination = smsData.sections?.some(
-    ({ destination }: any) => destination?.trim() !== ""
+    ({ destination }: any) => destination?.trim() !== "",
   );
 
   if (!hasValidDestination) {
@@ -224,7 +276,13 @@ const validateSms = (
   }
 
   sections.forEach((section: any, i: number) => {
-    validateSmsSection(section, i, errors, () => (isFormValid = false), commonMessage);
+    validateSmsSection(
+      section,
+      i,
+      errors,
+      () => (isFormValid = false),
+      commonMessage,
+    );
   });
 
   return {
@@ -240,7 +298,7 @@ const validateSmsSection = (
   index: number,
   errors: string[],
   markInvalid: () => void,
-  commonMessage: string
+  commonMessage: string,
 ) => {
   section.numbers?.forEach((num: any, j: number) => {
     if (num.countryCode?.trim() && !num.number?.trim()) {
@@ -251,7 +309,9 @@ const validateSmsSection = (
 
   if (!section.message?.trim() && !commonMessage.trim()) {
     markInvalid();
-    errors.push(`SMS Section ${index + 1}: A message is required when common message is not provided`);
+    errors.push(
+      `SMS Section ${index + 1}: A message is required when common message is not provided`,
+    );
   }
 };
 
@@ -260,7 +320,7 @@ const validateSmsSection = (
 const validateSlack = (
   slackData: any,
   sections: any[],
-  commonMessage: string
+  commonMessage: string,
 ): ValidationResult => {
   const errors: string[] = [];
   let isFormValid = true;
@@ -274,7 +334,7 @@ const validateSlack = (
 
   const hasValidDestination = slackData.sections?.some(
     ({ destination, channelID }: any) =>
-      destination?.trim() || channelID?.trim()
+      destination?.trim() || channelID?.trim(),
   );
 
   if (!hasValidDestination) {
@@ -283,7 +343,13 @@ const validateSlack = (
   }
 
   sections.forEach((section: any, i: number) => {
-    validateSlackSection(section, i, errors, () => (isFormValid = false), commonMessage);
+    validateSlackSection(
+      section,
+      i,
+      errors,
+      () => (isFormValid = false),
+      commonMessage,
+    );
   });
 
   return {
@@ -297,11 +363,13 @@ const validateSlackSection = (
   index: number,
   errors: string[],
   markInvalid: () => void,
-  commonMessage: string
+  commonMessage: string,
 ) => {
   if (!section.message?.trim() && !commonMessage.trim()) {
     markInvalid();
-    errors.push(`Slack Section ${index + 1}: A message is required when common message is not provided`);
+    errors.push(
+      `Slack Section ${index + 1}: A message is required when common message is not provided`,
+    );
   }
 
   if (!section.destination?.trim() && !section.channelID?.trim()) {
@@ -313,12 +381,16 @@ const validateSlackSection = (
   const channelId = section.destination?.trim() || section.channelID?.trim();
   if (channelId) {
     // Handle comma-separated channel IDs
-    const channelIds = channelId.split(',').map((id: string) => id.trim());
-    const invalidChannelIds = channelIds.filter((id: string) => id && !slackRegex.test(id));
-    
+    const channelIds = channelId.split(",").map((id: string) => id.trim());
+    const invalidChannelIds = channelIds.filter(
+      (id: string) => id && !slackRegex.test(id),
+    );
+
     if (invalidChannelIds.length > 0) {
       markInvalid();
-      errors.push(`Slack Section ${index + 1}: Invalid Slack channel ID: ${invalidChannelIds.join(', ')}`);
+      errors.push(
+        `Slack Section ${index + 1}: Invalid Slack channel ID: ${invalidChannelIds.join(", ")}`,
+      );
     }
   }
 };
@@ -328,7 +400,7 @@ const validateSlackSection = (
 const validateWhatsapp = (
   whatsappData: any,
   sections: any[],
-  commonMessage: string
+  commonMessage: string,
 ): ValidationResult => {
   const errors: string[] = [];
   let isFormValid = true;
@@ -341,7 +413,7 @@ const validateWhatsapp = (
   }
 
   const hasValidDestination = sections?.some(
-    ({ to }: any) => to?.trim() !== ""
+    ({ to }: any) => to?.trim() !== "",
   );
 
   if (!hasValidDestination) {
@@ -350,7 +422,13 @@ const validateWhatsapp = (
   }
 
   sections.forEach((section: any, i: number) => {
-    validateWhatsappSection(section, i, errors, () => (isFormValid = false), commonMessage);
+    validateWhatsappSection(
+      section,
+      i,
+      errors,
+      () => (isFormValid = false),
+      commonMessage,
+    );
   });
 
   return {
@@ -364,15 +442,44 @@ const validateWhatsappSection = (
   index: number,
   errors: string[],
   markInvalid: () => void,
-  commonMessage: string
+  commonMessage: string,
 ) => {
-  if (!section.message?.trim() && !commonMessage.trim()) {
+  section.numbers?.forEach((num: any, j: number) => {
+    if (num.countryCode?.trim() && !num.number?.trim()) {
+      markInvalid();
+      errors.push(`WhatsApp ${index + 1}-${j + 1}: Invalid phone number`);
+    }
+  });
+
+  if (
+    !section.message?.trim() &&
+    !commonMessage.trim() &&
+    section?.attachments?.length === 0
+  ) {
     markInvalid();
-    errors.push(`WhatsApp Section ${index + 1}: A "separate message/common message", "template" or attachments is required`);
+    errors.push(
+      `WhatsApp Section ${index + 1}: A "separate message/common message", "template" or attachments is required`,
+    );
   }
 
   if (section.attachments && section.attachments.length > 10) {
     markInvalid();
-    errors.push(`WhatsApp Section ${index + 1}: Maximum 10 attachments allowed`);
+    errors.push(
+      `WhatsApp Section ${index + 1}: Maximum 10 attachments allowed`,
+    );
+  }
+
+  // Validate file sizes for images and videos (16MB limit)
+  if (section.attachments && section.attachments.length > 0) {
+    section.attachments.forEach((attachment: any) => {
+      validateAttachmentFileSize(
+        attachment,
+        16, // 16MB limit
+        index,
+        "WhatsApp",
+        errors,
+        markInvalid,
+      );
+    });
   }
 };
