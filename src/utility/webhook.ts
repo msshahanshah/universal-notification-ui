@@ -30,11 +30,11 @@ export const transformServiceTriggerToStatuses = (
 };
 
 
-export const buildServiceTrigger = (statuses) => {
-  const result = {};
+export const buildServiceTrigger = (statuses: string[]) => {
+  const result: Record<string, string[]> = {};
 
   statuses.forEach((status) => {
-    const [service, event] = status.split("_");
+    const [service, event] = status.split("_") || [status, ""];
 
     if (!result[service]) {
       result[service] = [];

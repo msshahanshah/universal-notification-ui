@@ -583,7 +583,8 @@ export function WhatsappWrapper({
                     marginBottom: "12px",
                   }}
                   dropdownStyle={{
-                    height: 100,
+                    height: 200,
+                    overflowY: "scroll",
                   }}
                 />
                 {templatesError && (
@@ -826,18 +827,13 @@ export function WhatsappWrapper({
                       </label>
                       <AttachmentSection
                         attachments={recipient.attachments}
-                        onAdd={
-                          (e: React.ChangeEvent<HTMLInputElement>) =>
-                            handleAttachmentChange(recipient.id, e)
-                          // handleFileAttachmentChange(
-                          //   recipient.id,
-                          //   e.target.files,
-                          // )
+                        onAdd={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          handleAttachmentChange(recipient.id, e)
                         }
                         onRemove={(id: string) =>
                           removeAttachment(recipient.id, id)
                         }
-                        hideBtn={recipient.attachments.length >= 10}
+                        // hideBtn={recipient.attachments.length >= 10}
                         maxAttachments={10}
                       />
                     </>

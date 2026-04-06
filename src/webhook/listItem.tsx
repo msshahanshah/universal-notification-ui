@@ -1,6 +1,13 @@
 import { Edit2, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+} from "@mui/material";
 
 import { useToggleWebhook, useDeleteWebhook } from "src/hooks/useWebhook";
 import { useSnackbar } from "src/provider/snackbar";
@@ -29,6 +36,7 @@ export default function WebhookListItem({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingActive, setIsTogglingActive] = useState(false);
   const [isTogglingRetry, setIsTogglingRetry] = useState(false);
+  const [showDeactivateConfirm, setShowDeactivateConfirm] = useState(false);
   const toggleMutation = useToggleWebhook();
   const deleteMutation = useDeleteWebhook();
   const showSnackbar = useSnackbar();
@@ -65,12 +73,14 @@ export default function WebhookListItem({
                 borderRadius: 12,
                 background:
                   trigger === "success"
-                    ? theme.vars?.palette.success?.light ||
-                      "rgba(34, 197, 94, 0.2)"
-                    : theme.vars?.palette.error?.light ||
-                      "rgba(239, 68, 68, 0.2)",
+                    ? COLORS.SUCCESS_COLOR + "20"
+                    : COLORS.ERROR_COLOR + "20",
                 color: COLORS.WHITE,
-                border: `1px solid ${trigger === "success" ? theme.vars?.palette.success?.main || "rgba(34, 197, 94, 0.4)" : theme.vars?.palette.error?.main || "rgba(239, 68, 68, 0.4)"}`,
+                border: `1px solid ${
+                  trigger === "success"
+                    ? COLORS.SUCCESS_COLOR + "40"
+                    : COLORS.ERROR_COLOR + "40"
+                }`,
                 textTransform: "lowercase",
               }}
             >
@@ -99,6 +109,17 @@ export default function WebhookListItem({
   };
 
   const handleActiveToggle = async () => {
+    // If trying to deactivate (currently active), show confirmation
+    if (webhook.isActive) {
+      setShowDeactivateConfirm(true);
+      return;
+    }
+
+    // If activating, proceed directly
+    await performActiveToggle();
+  };
+
+  const performActiveToggle = async () => {
     try {
       setIsTogglingActive(true);
       await toggleMutation.mutateAsync({
@@ -115,7 +136,12 @@ export default function WebhookListItem({
       showSnackbar(error?.message || "Failed to toggle webhook", "error");
     } finally {
       setIsTogglingActive(false);
+      setShowDeactivateConfirm(false);
     }
+  };
+
+  const handleCancelDeactivate = () => {
+    setShowDeactivateConfirm(false);
   };
 
   const handleToggleRetry = async () => {
@@ -258,9 +284,7 @@ export default function WebhookListItem({
           disabled={isTogglingActive || isTogglingRetry}
           style={{
             padding: "6px 8px",
-            background: isDeleting
-              ? theme.vars?.palette.error?.main || "#ef4444"
-              : "none",
+            background: isDeleting ? COLORS.ERROR_COLOR : "none",
             borderRadius: 4,
             color: isDeleting ? "white" : theme.vars?.palette.text.secondary,
             cursor:
@@ -285,6 +309,65 @@ export default function WebhookListItem({
           )}
         </button>
       </div>
+
+      {/* Deactivation Confirmation Modal */}
+      <Dialog
+        open={showDeactivateConfirm}
+        onClose={handleCancelDeactivate}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            backgroundColor: theme.vars?.palette.background.paper,
+            border: `1px solid ${theme.vars?.palette.divider}`,
+          },
+        }}
+      >
+        <DialogTitle sx={{ color: theme.vars?.palette.text.secondary }}>
+          Confirm Webhook Deactivation
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: theme.vars?.palette.text.secondary, mb: 2 }}>
+            Are you sure you want to deactivate this webhook?
+          </Typography>
+          <Typography sx={{ color: theme.vars?.palette.text.secondary, mb: 1 }}>
+            <strong>Important:</strong> We will be processing existing services and after this action we will not process future changes.
+          </Typography>
+          <Typography sx={{ color: theme.vars?.palette.text.secondary }}>
+            This will stop all webhook processing for this URL.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <button
+            onClick={handleCancelDeactivate}
+            style={{
+              padding: "8px 16px",
+              background: "none",
+              borderRadius: 4,
+              color: theme.vars?.palette.text.secondary,
+              border: `1px solid ${theme.vars?.palette.divider}`,
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={performActiveToggle}
+            disabled={isTogglingActive}
+            style={{
+              padding: "8px 16px",
+              backgroundColor: COLORS.ERROR_COLOR,
+              borderRadius: 4,
+              color: "white",
+              border: "none",
+              cursor: isTogglingActive ? "not-allowed" : "pointer",
+              opacity: isTogglingActive ? 0.5 : 1,
+            }}
+          >
+            {isTogglingActive ? "Deactivating..." : "Deactivate"}
+          </button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

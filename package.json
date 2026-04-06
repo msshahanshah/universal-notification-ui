@@ -41,17 +41,10 @@
     "preview": "vite preview",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "prepare": "husky",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
     "lint:file": "eslint",
     "sonar": "sonarqube-scanner"
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx}": [
-      "eslint --fix || true",
-      "prettier --write"
-    ]
   },
   "eslintConfig": {
     "extends": [
@@ -82,10 +75,8 @@
     "eslint": "~9.39.4",
     "eslint-plugin-react": "~7.37.5",
     "globals": "~17.4.0",
-    "husky": "^9.1.7",
     "jiti": "~2.6.1",
     "jsdom": "^26.1.0",
-    "lint-staged": "^16.4.0",
     "prettier": "^3.8.1",
     "sonarqube-scanner": "~4.3.5",
     "typescript-eslint": "~8.58.0",

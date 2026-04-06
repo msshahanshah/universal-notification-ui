@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-
 import {
   validateMultipleEmails,
   validateSingleEmail,
 } from "src/utility/helper";
-
 import Input from "../input";
 import { useTheme } from "@mui/material";
 
@@ -29,6 +27,18 @@ type Attachment = {
   id: string;
   previewUrl?: string; // for images
 };
+
+const ErrorText = ({ children }: { children: string }) => (
+  <div
+    style={{
+      fontSize: 11,
+      color: "#d32f2f",
+      marginTop: -4,
+    }}
+  >
+    {children}
+  </div>
+);
 
 export function GmailShell({
   from,
@@ -85,18 +95,6 @@ export function GmailShell({
           : "",
     }));
   };
-
-  const ErrorText = ({ children }: { children: string }) => (
-    <div
-      style={{
-        fontSize: 11,
-        color: "#d32f2f",
-        marginTop: -4,
-      }}
-    >
-      {children}
-    </div>
-  );
 
   return (
     <div style={shellStyle}>
