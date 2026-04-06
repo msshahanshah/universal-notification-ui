@@ -20,11 +20,12 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 
 import { useLogs, useLogStatus } from "src/hooks/useLogs";
 import { useDebounce } from "src/hooks/useDebounce";
-import { formatDateForTable, getStatusStyle } from "../../mui/utils";
-import COLORS from "src/utility/colors";
-import { useSnackbar } from "src/provider/snackbar";
-import { getSortLabelStyles, textFieldTheme } from "../../mui/logs-table";
 import { truncateString } from "src/utility/helper";
+import { useSnackbar } from "src/provider/snackbar";
+
+import { formatDateForTable, getStatusStyle } from "../../mui/utils";
+import { getSortLabelStyles, textFieldTheme } from "../../mui/logs-table";
+
 
 interface Log {
   id: number;
