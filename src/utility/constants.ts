@@ -7,3 +7,11 @@ export const passwordRegex = /^[^\s]{8,12}$/;
 export const emailRegex =
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const slackRegex = /^[CGD][A-Z0-9]{8,10}$/;
+
+// Service configuration for notifications
+export const SERVICE_CONFIG = [
+  { key: "sms", label: "SMS" },
+  { key: "email", label: "Email" },
+  { key: "slack", label: "Slack" },
+  { key: "whatsapp", label: "Whatsapp" },
+] as const;
