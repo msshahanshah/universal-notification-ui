@@ -1,11 +1,11 @@
-import { emailRegex } from "./constants";
+import { emailRegex } from './constants';
 
 const validateSingleEmail = (email: string) => emailRegex.test(email.trim());
 
 const validateMultipleEmails = (value: string) => {
   const trimmedValue = value?.trim();
   return trimmedValue
-    .split(",")
+    .split(',')
     .map((e) => e.trim())
     .filter(Boolean)
     .every(validateSingleEmail);
@@ -14,7 +14,7 @@ const validateMultipleEmails = (value: string) => {
 function isBodyEmpty(html: any) {
   if (!html) return true;
 
-  const div = document.createElement("div");
+  const div = document.createElement('div');
   div.innerHTML = html;
 
   // Get text content and trim whitespace
@@ -22,9 +22,9 @@ function isBodyEmpty(html: any) {
 }
 
 const truncateString = (value: string, maxLength: number) => {
-  if (!value) return "";
+  if (!value) return '';
   if (value.length <= maxLength) return value;
-  return value.slice(0, maxLength) + "...";
+  return value.slice(0, maxLength) + '...';
 };
 
 function renameDuplicateFiles(files: File[]): File[] {
@@ -32,17 +32,17 @@ function renameDuplicateFiles(files: File[]): File[] {
 
   return files.map((file) => {
     const originalName = file.name;
-    const dotIndex = originalName.lastIndexOf(".");
+    const dotIndex = originalName.lastIndexOf('.');
 
     const baseName =
       dotIndex !== -1 ? originalName.slice(0, dotIndex) : originalName;
 
-    const extension = dotIndex !== -1 ? originalName.slice(dotIndex) : "";
+    const extension = dotIndex !== -1 ? originalName.slice(dotIndex) : '';
 
     // Initialize counter
     if (!nameCount.has(baseName)) {
       nameCount.set(baseName, 0);
-      return file;
+      return file; // first occurrence stays same
     }
 
     // Increment count
