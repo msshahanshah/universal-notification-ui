@@ -7,6 +7,7 @@ interface SwitchProps {
   disabled?: boolean;
   label?: string;
   title?: string;
+  sx?: React.CSSProperties;
 }
 
 export default function Switch({
@@ -15,6 +16,7 @@ export default function Switch({
   disabled = false,
   label,
   title,
+  sx
 }: SwitchProps) {
   const theme = useTheme();
 
@@ -34,6 +36,7 @@ export default function Switch({
         gap: 8,
         opacity: disabled ? 0.5 : 1,
         cursor: disabled ? "not-allowed" : "pointer",
+        ...sx,
       }}
     >
       <div
@@ -53,7 +56,7 @@ export default function Switch({
       >
         <div className="switch-thumb" />
       </div>
-      {label && <span className="switch-label" style={{color: theme.vars?.palette.text.secondary}}>{label}</span>}
+      {label && <span className="switch-label" style={{ color: theme.vars?.palette.text.secondary }}>{label}</span>}
     </div>
   );
 }

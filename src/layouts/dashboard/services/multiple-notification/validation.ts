@@ -218,9 +218,7 @@ const validateEmailSection = (
 
   if (!section.body?.trim() && !commonMessage.trim()) {
     markInvalid();
-    errors.push(
-      `Email Section ${i}: A body is required when "common message" is not provided`,
-    );
+    errors.push(`Email Section ${i}: A body is required when "common message" is not provided`);
   }
 
   if (

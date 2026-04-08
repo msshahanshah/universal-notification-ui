@@ -13,6 +13,7 @@ import { useToggleWebhook, useDeleteWebhook } from "src/hooks/useWebhook";
 import { useSnackbar } from "src/provider/snackbar";
 import Switch from "src/components/switch";
 import COLORS from "src/utility/colors";
+import { useMediaQuery } from "@mui/material";
 
 interface WebhookListItemProps {
   webhook: {
@@ -40,7 +41,7 @@ export default function WebhookListItem({
   const toggleMutation = useToggleWebhook();
   const deleteMutation = useDeleteWebhook();
   const showSnackbar = useSnackbar();
-
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const getServiceChips = () => {
     if (!webhook.serviceTrigger) return "No services";
 
@@ -76,11 +77,10 @@ export default function WebhookListItem({
                     ? COLORS.SUCCESS_COLOR + "20"
                     : COLORS.ERROR_COLOR + "20",
                 color: COLORS.WHITE,
-                border: `1px solid ${
-                  trigger === "success"
-                    ? COLORS.SUCCESS_COLOR + "40"
-                    : COLORS.ERROR_COLOR + "40"
-                }`,
+                border: `1px solid ${trigger === "success"
+                  ? COLORS.SUCCESS_COLOR + "40"
+                  : COLORS.ERROR_COLOR + "40"
+                  }`,
                 textTransform: "lowercase",
               }}
             >
@@ -186,16 +186,21 @@ export default function WebhookListItem({
     <div
       style={{
         display: "flex",
-        alignItems: "center",
         justifyContent: "space-between",
+        gap: isMobile ? 20 : 0,
         padding: "12px 16px",
         borderRadius: 8,
         border: `1px solid ${theme.vars?.palette.divider}`,
         background: theme.vars?.palette.background.paper,
         marginBottom: 8,
+        overflowX: "auto",
       }}
     >
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={{
+        flexShrink: 0,
+        maxWidth: "70%",
+        overflow: "hidden",
+      }}>
         <div
           style={{
             fontSize: 14,
@@ -223,9 +228,15 @@ export default function WebhookListItem({
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: isMobile ? "center" : "space-between",
           alignItems: "center",
           gap: 12,
           marginLeft: 16,
+
+          minWidth: "max-content",
+          flexShrink: 0,
+          flexWrap: "nowrap",
         }}
       >
         {/* Active Status Toggle */}
@@ -235,6 +246,9 @@ export default function WebhookListItem({
           disabled={isTogglingActive}
           label="Active"
           title="Toggle webhook active status"
+          sx={{
+            transform: isMobile ? "scale(0.8)" : "scale(1)"
+          }}
         />
 
         {/* Retry Enabled Toggle */}
@@ -244,70 +258,82 @@ export default function WebhookListItem({
           disabled={isTogglingRetry}
           label="Retry"
           title="Toggle retry mechanism"
+          sx={{
+            transform: isMobile ? "scale(0.8)" : "scale(1)"
+          }}
         />
 
-        {/* Edit button */}
-        <button
-          onClick={() => {
-            setIsDeleting(false);
-            onEdit(webhook);
-          }}
-          disabled={
-            deleteMutation.isPending || isTogglingActive || isTogglingRetry
-          }
-          style={{
-            padding: "6px 8px",
-            background: "none",
-            borderRadius: 4,
-            color: theme.vars?.palette.text.secondary,
-            cursor:
+        <div style={{ display: 'flex', gap: 12 }}>
+          {/* Edit button */}
+          <button
+            onClick={() => {
+              setIsDeleting(false);
+              onEdit(webhook);
+            }}
+            disabled={
               deleteMutation.isPending || isTogglingActive || isTogglingRetry
-                ? "not-allowed"
-                : "pointer",
-            display: "flex",
-            alignItems: "center",
-            opacity:
-              deleteMutation.isPending || isTogglingActive || isTogglingRetry
-                ? 0.5
-                : 1,
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            boxShadow:
-              "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
-          }}
-        >
-          <Edit2 size={16} />
-        </button>
+            }
+            style={{
+              padding: "8px",
+              background: "rgba(255,255,255,0.03)",
+              borderRadius: 8,
+              color: theme.vars?.palette.text.secondary,
+              cursor:
+                deleteMutation.isPending || isTogglingActive || isTogglingRetry
+                  ? "not-allowed"
+                  : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity:
+                deleteMutation.isPending || isTogglingActive || isTogglingRetry
+                  ? 0.5
+                  : 1,
 
-        {/* Delete button */}
-        <button
-          onClick={handleDelete}
-          disabled={isTogglingActive || isTogglingRetry}
-          style={{
-            padding: "6px 8px",
-            background: isDeleting ? COLORS.ERROR_COLOR : "none",
-            borderRadius: 4,
-            color: isDeleting ? "white" : theme.vars?.palette.text.secondary,
-            cursor:
-              isTogglingActive || isTogglingRetry ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            fontSize: 12,
-            fontWeight: isDeleting ? 500 : 400,
-            opacity: isTogglingActive || isTogglingRetry ? 0.5 : 1,
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            boxShadow:
-              "rgba(0, 0, 0, 0.6) 0px 4px 5px, rgba(255, 255, 255, 0.04) 0px 0px 0px 1px, rgba(0, 210, 255, 0.25) 0px 0px 20px",
-          }}
-        >
-          {isDeleting ? (
-            <>
-              <Trash2 size={16} style={{ marginRight: 4 }} />
-              Confirm
-            </>
-          ) : (
-            <Trash2 size={16} />
-          )}
-        </button>
+              border: "1px solid rgba(255,255,255,0.1)",
+              transition: "0.2s ease",
+
+              minWidth: isMobile ? 32 : 36,
+              height: isMobile ? 32 : 36,
+            }}
+          >
+            <Edit2 size={16} />
+          </button>
+
+          {/* Delete button */}
+          <button
+            onClick={handleDelete}
+            disabled={isTogglingActive || isTogglingRetry}
+            style={{
+              padding: "8px",
+              background: isDeleting ? COLORS.ERROR_COLOR : "rgba(255,255,255,0.03)",
+              borderRadius: 8,
+              color: isDeleting ? "white" : theme.vars?.palette.text.secondary,
+              cursor:
+                isTogglingActive || isTogglingRetry ? "not-allowed" : "pointer",
+
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              opacity: isTogglingActive || isTogglingRetry ? 0.5 : 1,
+
+              border: "1px solid rgba(255,255,255,0.1)",
+              transition: "0.2s ease",
+
+              minWidth: isMobile ? 32 : 36,
+              height: isMobile ? 32 : 36,
+            }}
+          >
+            {isDeleting ? (
+              <>
+                <Trash2 size={16} style={{ marginRight: 4 }} />
+                Confirm
+              </>
+            ) : (
+              <Trash2 size={16} />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Deactivation Confirmation Modal */}
